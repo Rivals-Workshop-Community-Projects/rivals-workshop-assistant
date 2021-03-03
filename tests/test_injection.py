@@ -36,19 +36,28 @@ def test_apply_injection_nothing():
     assert result_scripts == {}
 
 
+PATH_A = Path('a')
+
+
 def test_apply_injection_no_injections():
-    scripts = {Path('a'): 'content'}
+    scripts = {PATH_A: 'content'}
 
     result_scripts = injection.apply_injection(scripts=scripts, injection_library=[])
     assert result_scripts == scripts
 
 
 def test_apply_injection_irrelevant_injection():
-    scripts = {Path('a'): 'content'}
+    scripts = {PATH_A: 'content'}
     define = injection.Define(name='', version=0, docs='', content='')
 
     result_scripts = injection.apply_injection(scripts=scripts, injection_library=[define])
     assert result_scripts == scripts
+
+
+define1 = injection.Define(
+    name='define1', version=0, docs='docs', content='content')
+define2 = injection.Define(
+    name='define2', version=4, docs='docs2\ndocs2', content='content2\ncontent2')
 
 
 @pytest.mark.parametrize(
@@ -57,25 +66,62 @@ def test_apply_injection_irrelevant_injection():
         pytest.param("""\
 content
 define1()""",
-                     injection.Define(
-                         name='define1', version=0, docs='docs', content='content')
-                     ),
+                     define1),
         pytest.param("""\
 content
 define2()""",
-                     injection.Define(
-                         name='define2', version=4, docs='docs2\ndocs2', content='content2\ncontent2')
-
-                     ),
+                     define2),
     ],
 )
 def test_apply_injection_makes_injection(script, define):
-    scripts = {Path('a'): script}
+    scripts = {PATH_A: script}
 
     result_scripts = injection.apply_injection(scripts=scripts, injection_library=[define])
-    assert result_scripts == {Path('a'): f"""\
+    assert result_scripts == {PATH_A: f"""\
 {script}
 
-// vvv LIBRARY DEFINES AND MACROS vvv
+{injection.INJECTION_START_HEADER}
 {define.gml}
-// ^^^ END: LIBRARY DEFINES AND MACROS ^^^"""}
+{injection.INJECTION_END_HEADER}"""}
+
+
+def test_apply_injection_make_multiple_injections():
+    script = """\
+content
+define1()
+content
+define2()
+content"""
+    scripts = {PATH_A: script}
+    library = [define1, define2]
+
+    result_scripts = injection.apply_injection(scripts=scripts, injection_library=library)
+    assert result_scripts == {PATH_A: f"""\
+{script}
+
+{injection.INJECTION_START_HEADER}
+{define1.gml}
+
+{define2.gml}
+{injection.INJECTION_END_HEADER}"""}
+
+
+def test_replace_existing_library_dependencies():
+    script_content = 'define1()'
+
+    script = f"""\
+{script_content}
+{injection.INJECTION_START_HEADER}
+{define2.gml}
+{injection.INJECTION_END_HEADER}
+"""
+    scripts = {PATH_A: script}
+    library = [define1]
+
+    result_scripts = injection.apply_injection(scripts=scripts, injection_library=library)
+    assert result_scripts == {PATH_A: f"""\
+{script_content}
+
+{injection.INJECTION_START_HEADER}
+{define1.gml}
+{injection.INJECTION_END_HEADER}"""}

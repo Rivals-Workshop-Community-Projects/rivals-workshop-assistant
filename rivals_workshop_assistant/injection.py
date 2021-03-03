@@ -87,17 +87,29 @@ def read_injection_library():
     raise NotImplementedError
 
 
+INJECTION_START_HEADER = '// vvv LIBRARY DEFINES AND MACROS vvv'
+INJECTION_END_HEADER = '// ^^^ END: LIBRARY DEFINES AND MACROS ^^^'
+
+
 def apply_injection(scripts: t.Dict[Path, str], injection_library: t.List[GmlDependency]):
     # Logic
     result_scripts = scripts.copy()
     for path, script in scripts.items():
+
+        injection_gmls = []
         for injection in injection_library:
             if re.search(pattern=injection.use_pattern, string=script):
-                result_scripts[path] = f"""\
-{script}
+                injection_gmls.append(injection.gml)
 
-// vvv LIBRARY DEFINES AND MACROS vvv
-{injection.gml}
-// ^^^ END: LIBRARY DEFINES AND MACROS ^^^"""
+        script_content = script.split(INJECTION_START_HEADER)[0].strip()
+
+        if injection_gmls:
+            injection_gml = '\n\n'.join(injection_gmls)
+            result_scripts[path] = f"""\
+{script_content}
+
+{INJECTION_START_HEADER}
+{injection_gml}
+{INJECTION_END_HEADER}"""
 
     return result_scripts
