@@ -1,5 +1,5 @@
 import rivals_workshop_assistant.injection.application as application
-from rivals_workshop_assistant.injection.dependencies import Define
+from rivals_workshop_assistant.injection.dependency_handling import Define
 
 
 def test_define_gml():

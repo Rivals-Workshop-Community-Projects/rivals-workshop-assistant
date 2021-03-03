@@ -1,4 +1,4 @@
-from . import dependencies
+from . import dependency_handling
 
 
 def read_injection_library():
@@ -10,16 +10,17 @@ def read_injection_library():
     # Read text to injection_library: list of dependencies
 
 
-def get_injection_library_from_gml(gml: str) -> dependencies.InjectionLibrary:
-    if '#' in gml:
-        name, content = _get_name_and_content(gml)
-        return [dependencies.Define(name=name, content=content)]
-    else:
-        return []
+def get_injection_library_from_gml(gml: str) -> dependency_handling.InjectionLibrary:
+    dependencies = []
+    dependency_strings = gml.split('#')[1:]
+    for dependency_string in dependency_strings:
+        name, content = _get_name_and_content(dependency_string)
+        dependencies.append(dependency_handling.Define(name=name, content=content))
+    return dependencies
 
 
 def _get_name_and_content(gml: str) -> tuple[str, str]:
-    after_hash_define = gml.split('#define ')[1]
+    after_hash_define = gml.split('define ')[1] #todo, this assumes its define, support macro
     return tuple(after_hash_define.split(maxsplit=1))
 
 

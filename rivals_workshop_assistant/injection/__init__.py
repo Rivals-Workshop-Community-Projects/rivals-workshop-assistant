@@ -1,5 +1,5 @@
 from .application import apply_injection
-from .dependencies import GmlDependency
+from .dependency_handling import GmlDependency
 from .library import read_injection_library
 
 

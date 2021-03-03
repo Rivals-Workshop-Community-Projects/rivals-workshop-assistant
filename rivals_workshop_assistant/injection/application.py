@@ -2,7 +2,7 @@ import re
 import typing as t
 from pathlib import Path
 
-from .dependencies import InjectionLibrary
+from .dependency_handling import InjectionLibrary
 
 INJECTION_START_MARKER = '// vvv LIBRARY DEFINES AND MACROS vvv\n'
 INJECTION_START_WARNING = ('// DANGER File below this point will be overwritten! Generated defines and macros below.'
