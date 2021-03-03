@@ -132,7 +132,7 @@ def test_removes_injection_when_not_needed():
     script = f"""\
 {script_content}
 
-{injection.INJECTION_START_HEADER}
+{injection.INJECTION_START_MARKER}
 
 {define1.gml}
 

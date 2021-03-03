@@ -87,10 +87,13 @@ def read_injection_library():
     raise NotImplementedError
 
 
-INJECTION_START_HEADER = '// vvv DANGER File below this point will be overwritten! Generated defines and macros ' \
-                         'below. vvv'
-INJECTION_END_HEADER = '// DANGER: This space will be overwritten! Write your code ABOVE the LIBRARY DEFINES AND ' \
-                       'MACROS header!'
+INJECTION_START_MARKER = '// vvv LIBRARY DEFINES AND MACROS vvv\n'
+INJECTION_START_WARNING = '// DANGER File below this point will be overwritten! Generated defines and macros below.'
+INJECTION_START_HEADER = (
+    f'{INJECTION_START_MARKER}'
+    f'{INJECTION_START_WARNING}')
+INJECTION_END_HEADER = (
+    '// DANGER: Write your code ABOVE the LIBRARY DEFINES AND MACROS header or it will be overwritten!')
 
 
 def apply_injection(scripts: t.Dict[Path, str], injection_library: t.List[GmlDependency]) -> t.Dict[Path, str]:
@@ -119,7 +122,7 @@ def _get_dependency_gmls_used_in_script(script: str, injection_library: t.List[G
 
 def _inject_dependency_gmls_in_script(script: str, dependency_gmls: t.List[str]) -> str:
     """Returns the script after supplying dependencies."""
-    script_content = script.split(INJECTION_START_HEADER)[0].strip()
+    script_content = script.split(INJECTION_START_MARKER)[0].strip()
     new_script = script_content
     if dependency_gmls:
         injection_gml = '\n\n'.join(dependency_gmls)
