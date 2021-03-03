@@ -142,3 +142,21 @@ def test_removes_injection_when_not_needed():
     scripts = {PATH_A: script}
     result_scripts = injection.apply_injection(scripts, [])
     assert result_scripts == {PATH_A: script_content}
+
+
+def test_toggled_off_makes_changes():
+    script_content = f"""\
+content
+define1()
+// NO-INJECT"""
+
+    script = f"""\
+{script_content}
+{injection.INJECTION_START_HEADER}
+{define2.gml}
+{injection.INJECTION_END_HEADER}
+"""
+
+    scripts = {PATH_A: script}
+    result_scripts = injection.apply_injection(scripts, [define1])
+    assert result_scripts == scripts

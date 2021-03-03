@@ -88,7 +88,8 @@ def read_injection_library():
 
 
 INJECTION_START_MARKER = '// vvv LIBRARY DEFINES AND MACROS vvv\n'
-INJECTION_START_WARNING = '// DANGER File below this point will be overwritten! Generated defines and macros below.'
+INJECTION_START_WARNING = ('// DANGER File below this point will be overwritten! Generated defines and macros below.'
+                           '// Write NO-INJECT in a comment above this area to disable injection.')
 INJECTION_START_HEADER = (
     f'{INJECTION_START_MARKER}'
     f'{INJECTION_START_WARNING}')
@@ -107,8 +108,15 @@ def apply_injection(scripts: t.Dict[Path, str], injection_library: t.List[GmlDep
 
 def _apply_injection_to_script(script: str, injection_library: t.List[GmlDependency]) -> str:
     """Updates the dependencies supplied to the script."""
-    dependency_gmls = _get_dependency_gmls_used_in_script(script, injection_library)
-    return _inject_dependency_gmls_in_script(script, dependency_gmls)
+    if _should_inject(script):
+        dependency_gmls = _get_dependency_gmls_used_in_script(script, injection_library)
+        return _inject_dependency_gmls_in_script(script, dependency_gmls)
+    else:
+        return script
+
+
+def _should_inject(script):
+    return 'NO-INJECT' not in _get_script_contents(script)
 
 
 def _get_dependency_gmls_used_in_script(script: str, injection_library: t.List[GmlDependency]) -> t.List[str]:
@@ -122,7 +130,7 @@ def _get_dependency_gmls_used_in_script(script: str, injection_library: t.List[G
 
 def _inject_dependency_gmls_in_script(script: str, dependency_gmls: t.List[str]) -> str:
     """Returns the script after supplying dependencies."""
-    script_content = script.split(INJECTION_START_MARKER)[0].strip()
+    script_content = _get_script_contents(script)
     new_script = script_content
     if dependency_gmls:
         injection_gml = '\n\n'.join(dependency_gmls)
@@ -133,3 +141,8 @@ def _inject_dependency_gmls_in_script(script: str, dependency_gmls: t.List[str])
 {injection_gml}
 {INJECTION_END_HEADER}"""
     return new_script
+
+
+def _get_script_contents(script: str):
+    """Get the portion of the script above the dependency header."""
+    return script.split(INJECTION_START_MARKER)[0].strip()
