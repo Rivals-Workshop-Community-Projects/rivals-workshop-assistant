@@ -1,6 +1,8 @@
 import abc
+import re
 import textwrap
 import typing as t
+from pathlib import Path
 
 
 class GmlDependency(abc.ABC):
@@ -85,6 +87,17 @@ def read_injection_library():
     raise NotImplementedError
 
 
-def apply_injection(scripts, injection_library):
+def apply_injection(scripts: t.Dict[Path, str], injection_library: t.List[GmlDependency]):
     # Logic
-    raise NotImplementedError
+    result_scripts = scripts.copy()
+    for path, script in scripts.items():
+        for injection in injection_library:
+            if re.search(pattern=injection.use_pattern, string=script):
+                result_scripts[path] = f"""\
+{script}
+
+// vvv LIBRARY DEFINES AND MACROS vvv
+{injection.gml}
+// ^^^ END: LIBRARY DEFINES AND MACROS ^^^"""
+
+    return result_scripts
