@@ -91,25 +91,40 @@ INJECTION_START_HEADER = '// vvv LIBRARY DEFINES AND MACROS vvv'
 INJECTION_END_HEADER = '// ^^^ END: LIBRARY DEFINES AND MACROS ^^^'
 
 
-def apply_injection(scripts: t.Dict[Path, str], injection_library: t.List[GmlDependency]):
-    # Logic
+def apply_injection(scripts: t.Dict[Path, str], injection_library: t.List[GmlDependency]) -> t.Dict[Path, str]:
+    """Creates a new scripts collection where each script has updated supplied dependencies."""
     result_scripts = scripts.copy()
     for path, script in scripts.items():
+        result_scripts[path] = apply_injection_to_script(script, injection_library)
 
-        injection_gmls = []
-        for injection in injection_library:
-            if re.search(pattern=injection.use_pattern, string=script):
-                injection_gmls.append(injection.gml)
+    return result_scripts
 
-        script_content = script.split(INJECTION_START_HEADER)[0].strip()
 
-        if injection_gmls:
-            injection_gml = '\n\n'.join(injection_gmls)
-            result_scripts[path] = f"""\
-{script_content}
+def apply_injection_to_script(script: str, injection_library: t.List[GmlDependency]) -> str:
+    """Updates the dependencies supplied to the script."""
+    dependency_gmls = get_dependency_gmls_used_in_script(script, injection_library)
+    return inject_dependency_gmls_in_script(script, dependency_gmls)
+
+
+def get_dependency_gmls_used_in_script(script: str, injection_library: t.List[GmlDependency]) -> t.List[str]:
+    """Gets the gml content of each dependency used by the script."""
+    dependency_gmls = []
+    for injection in injection_library:
+        if re.search(pattern=injection.use_pattern, string=script):
+            dependency_gmls.append(injection.gml)
+    return dependency_gmls
+
+
+def inject_dependency_gmls_in_script(script: str, dependency_gmls: t.List[str]) -> str:
+    """Returns the script after supplying dependencies."""
+    script_content = script.split(INJECTION_START_HEADER)[0].strip()
+    new_script = script_content
+    if dependency_gmls:
+        injection_gml = '\n\n'.join(dependency_gmls)
+        new_script += f"""\
+
 
 {INJECTION_START_HEADER}
 {injection_gml}
 {INJECTION_END_HEADER}"""
-
-    return result_scripts
+    return new_script
