@@ -19,7 +19,10 @@ class GmlDependency(abc.ABC):
         return self.name
 
     def __eq__(self, other):
-        return self.name == other.name
+        return (self.name == other.name
+                and self.gml == other.gml
+                and self.use_pattern == other.use_pattern
+                and self.give_pattern == other.give_pattern)
 
     def __hash__(self):
         return hash(self.name)
@@ -51,8 +54,8 @@ class Define(GmlDeclaration):
     def __init__(
             self,
             name: str,
-            version: int,
             content: str,
+            version: int = 0,
             docs: str = '',
             params: t.List[str] = None,
     ):
@@ -77,3 +80,6 @@ class Define(GmlDeclaration):
 
 class Macro(GmlDeclaration):  # todo untested
     IDENTIFIER_STRING = '#macro'
+
+
+DEPENDENCY_TYPES = (Define, Macro)
