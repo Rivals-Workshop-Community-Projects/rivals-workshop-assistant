@@ -25,6 +25,9 @@ class GmlDependency(abc.ABC):
         return hash(self.name)
 
 
+InjectionLibrary = t.List[GmlDependency]
+
+
 class GmlDeclaration(GmlDependency, abc.ABC):
     IDENTIFIER_STRING = NotImplemented
 
@@ -49,11 +52,10 @@ class Define(GmlDeclaration):
             self,
             name: str,
             version: int,
-            docs: str,
             content: str,
+            docs: str = '',
             params: t.List[str] = None,
     ):
-
         if params is None:
             params = []
         if params:
@@ -62,10 +64,12 @@ class Define(GmlDeclaration):
             param_string = ''
 
         head = f"{self.IDENTIFIER_STRING} {name}{param_string}"
-        docs = textwrap.indent(textwrap.dedent(docs), '    // ')
+        if docs.strip():
+            docs = textwrap.indent(textwrap.dedent(docs), '    // ') + '\n'
+
         content = textwrap.indent(textwrap.dedent(content), '    ')
 
-        final = f"{head} // Version {version}\n{docs}\n{content}"
+        final = f"{head} // Version {version}\n{docs}{content}"
         gml = textwrap.dedent(final).strip()
 
         super().__init__(name, gml)

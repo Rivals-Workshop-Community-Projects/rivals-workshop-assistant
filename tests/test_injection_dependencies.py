@@ -32,3 +32,9 @@ def test_apply_injection_nothing():
     result_scripts = application.apply_injection(scripts={}, injection_library=[])
     assert result_scripts == {}
 
+
+def test_define_no_docs():
+    sut = Define(name='name', version=12, content='gml', params=['foo', 'bar'])
+    assert sut.gml == """\
+#define name(foo, bar) // Version 12
+    gml"""

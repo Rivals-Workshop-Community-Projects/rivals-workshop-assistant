@@ -2,7 +2,7 @@ import re
 import typing as t
 from pathlib import Path
 
-from .dependencies import GmlDependency
+from .dependencies import InjectionLibrary
 
 INJECTION_START_MARKER = '// vvv LIBRARY DEFINES AND MACROS vvv\n'
 INJECTION_START_WARNING = ('// DANGER File below this point will be overwritten! Generated defines and macros below.'
@@ -14,7 +14,7 @@ INJECTION_END_HEADER = (
     '// DANGER: Write your code ABOVE the LIBRARY DEFINES AND MACROS header or it will be overwritten!')
 
 
-def apply_injection(scripts: t.Dict[Path, str], injection_library: t.List[GmlDependency]) -> t.Dict[Path, str]:
+def apply_injection(scripts: t.Dict[Path, str], injection_library: InjectionLibrary) -> t.Dict[Path, str]:
     """Creates a new scripts collection where each script has updated supplied dependencies."""
     result_scripts = scripts.copy()
     for path, script in scripts.items():
@@ -23,7 +23,7 @@ def apply_injection(scripts: t.Dict[Path, str], injection_library: t.List[GmlDep
     return result_scripts
 
 
-def _apply_injection_to_script(script: str, injection_library: t.List[GmlDependency]) -> str:
+def _apply_injection_to_script(script: str, injection_library: InjectionLibrary) -> str:
     """Updates the dependencies supplied to the script."""
     if _should_inject(script):
         dependency_gmls = _get_dependency_gmls_used_in_script(script, injection_library)
@@ -36,7 +36,7 @@ def _should_inject(script):
     return 'NO-INJECT' not in _get_script_contents(script)
 
 
-def _get_dependency_gmls_used_in_script(script: str, injection_library: t.List[GmlDependency]) -> t.List[str]:
+def _get_dependency_gmls_used_in_script(script: str, injection_library: InjectionLibrary) -> t.List[str]:
     """Gets the gml content of each dependency used by the script."""
     dependency_gmls = []
     for injection in injection_library:
