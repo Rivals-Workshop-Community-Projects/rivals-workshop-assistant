@@ -125,3 +125,20 @@ def test_replace_existing_library_dependencies():
 {injection.INJECTION_START_HEADER}
 {define1.gml}
 {injection.INJECTION_END_HEADER}"""}
+
+
+def test_removes_injection_when_not_needed():
+    script_content = 'content'
+    script = f"""\
+{script_content}
+
+{injection.INJECTION_START_HEADER}
+
+{define1.gml}
+
+
+{injection.INJECTION_END_HEADER}"""
+
+    scripts = {PATH_A: script}
+    result_scripts = injection.apply_injection(scripts, [])
+    assert result_scripts == {PATH_A: script_content}

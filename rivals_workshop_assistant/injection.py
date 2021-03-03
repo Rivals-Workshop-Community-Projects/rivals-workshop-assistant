@@ -87,26 +87,28 @@ def read_injection_library():
     raise NotImplementedError
 
 
-INJECTION_START_HEADER = '// vvv LIBRARY DEFINES AND MACROS vvv'
-INJECTION_END_HEADER = '// ^^^ END: LIBRARY DEFINES AND MACROS ^^^'
+INJECTION_START_HEADER = '// vvv DANGER File below this point will be overwritten! Generated defines and macros ' \
+                         'below. vvv'
+INJECTION_END_HEADER = '// DANGER: This space will be overwritten! Write your code ABOVE the LIBRARY DEFINES AND ' \
+                       'MACROS header!'
 
 
 def apply_injection(scripts: t.Dict[Path, str], injection_library: t.List[GmlDependency]) -> t.Dict[Path, str]:
     """Creates a new scripts collection where each script has updated supplied dependencies."""
     result_scripts = scripts.copy()
     for path, script in scripts.items():
-        result_scripts[path] = apply_injection_to_script(script, injection_library)
+        result_scripts[path] = _apply_injection_to_script(script, injection_library)
 
     return result_scripts
 
 
-def apply_injection_to_script(script: str, injection_library: t.List[GmlDependency]) -> str:
+def _apply_injection_to_script(script: str, injection_library: t.List[GmlDependency]) -> str:
     """Updates the dependencies supplied to the script."""
-    dependency_gmls = get_dependency_gmls_used_in_script(script, injection_library)
-    return inject_dependency_gmls_in_script(script, dependency_gmls)
+    dependency_gmls = _get_dependency_gmls_used_in_script(script, injection_library)
+    return _inject_dependency_gmls_in_script(script, dependency_gmls)
 
 
-def get_dependency_gmls_used_in_script(script: str, injection_library: t.List[GmlDependency]) -> t.List[str]:
+def _get_dependency_gmls_used_in_script(script: str, injection_library: t.List[GmlDependency]) -> t.List[str]:
     """Gets the gml content of each dependency used by the script."""
     dependency_gmls = []
     for injection in injection_library:
@@ -115,7 +117,7 @@ def get_dependency_gmls_used_in_script(script: str, injection_library: t.List[Gm
     return dependency_gmls
 
 
-def inject_dependency_gmls_in_script(script: str, dependency_gmls: t.List[str]) -> str:
+def _inject_dependency_gmls_in_script(script: str, dependency_gmls: t.List[str]) -> str:
     """Returns the script after supplying dependencies."""
     script_content = script.split(INJECTION_START_HEADER)[0].strip()
     new_script = script_content
