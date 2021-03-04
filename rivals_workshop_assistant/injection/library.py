@@ -1,3 +1,5 @@
+import re
+
 from . import dependency_handling
 
 
@@ -15,13 +17,20 @@ def get_injection_library_from_gml(gml: str) -> dependency_handling.InjectionLib
     dependency_strings = gml.split('#')[1:]
     for dependency_string in dependency_strings:
         name, content = _get_name_and_content(dependency_string)
+
+        content = content.strip()
+        if content.startswith('{') != content.endswith('}'):
+            raise ValueError("Mismatched curly braces")
+        content = content.lstrip('{').rstrip('}').strip()
+
         dependencies.append(dependency_handling.Define(name=name, content=content))
     return dependencies
 
 
 def _get_name_and_content(gml: str) -> tuple[str, str]:
-    after_hash_define = gml.split('define ')[1] #todo, this assumes its define, support macro
-    return tuple(after_hash_define.split(maxsplit=1))
+    after_hash_define = gml.split('define ')[1]  # todo, this assumes its define, support macro
+    split = re.split(pattern=r'(\s|{)', string=after_hash_define, maxsplit=1)
+    return split[0], split[1] + split[2]
 
 
 """

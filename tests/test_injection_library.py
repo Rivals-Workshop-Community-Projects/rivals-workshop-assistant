@@ -58,5 +58,49 @@ def test_loads_multiple_dependencies_minimal(content, library):
     assert actual_library == library
 
 
+@pytest.mark.parametrize(
+    "content, define",
+    [
+        pytest.param("""\
+#define name {
+    content}""",
+                     Define(name='name', content='content')),
+        pytest.param("""\
+content
+#define other{
+    different content
 
-#todo support macros
+}
+""",
+                     Define(name='other', content='different content')),
+    ],
+)
+def test_loads_dependency_braces(content, define):
+    actual_library = get_injection_library_from_gml(content)
+
+    assert actual_library == [define]
+
+
+@pytest.mark.parametrize(
+    "content, define",
+    [
+        pytest.param("""\
+#define name {
+    content""",
+                     Define(name='name', content='content')),
+        pytest.param("""\
+content
+#define other
+    different content
+
+}
+""",
+                     Define(name='other', content='different content')),
+    ],
+)
+def test_loads_dependency_mistmatched_braces(content, define):
+    with pytest.raises(ValueError):
+        get_injection_library_from_gml(content)
+
+# todo support dependencies with other dependencies
+# todo support macros
