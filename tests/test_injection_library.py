@@ -48,7 +48,7 @@ def test_loads_dependency_minimal(content, define):
 """,
                      [
                          Define(name='define1', content='content1'),
-                         Define(name='define2', content='content2\n    more content2')
+                         Define(name='define2', content='content2\nmore content2')
                      ]),
     ]
 )
@@ -82,25 +82,74 @@ def test_loads_dependency_braces(content, define):
 
 
 @pytest.mark.parametrize(
-    "content, define",
+    "content",
     [
         pytest.param("""\
 #define name {
-    content""",
-                     Define(name='name', content='content')),
+    content"""),
         pytest.param("""\
 content
 #define other
     different content
 
 }
-""",
-                     Define(name='other', content='different content')),
+"""),
     ],
 )
-def test_loads_dependency_mistmatched_braces(content, define):
+def test_loads_dependency_mismatched_braces(content):
     with pytest.raises(ValueError):
         get_injection_library_from_gml(content)
+
+
+@pytest.mark.parametrize(
+    "content, define",
+    [
+        pytest.param("""\
+#define name 
+    //plenty
+    //of
+    //docs 
+    content""",
+                     Define(name='name', docs='plenty\nof\ndocs', content='content')),
+        pytest.param("""\
+content
+#define other
+//some docs
+    different content
+
+""",
+                     Define(name='other', docs='some docs', content='different content')),
+    ],
+)
+def test_loads_dependency_gets_docs(content, define):
+    actual_library = get_injection_library_from_gml(content)
+
+    assert actual_library[0].docs == define.docs
+
+
+
+@pytest.mark.parametrize(
+    "content, define",
+    [
+        pytest.param("""\
+#define name
+some
+content""",
+                     Define(name='name', content='some\ncontent')),
+        pytest.param("""\
+content
+#define other
+                different
+                content
+""",
+                     Define(name='other', content='different\ncontent')),
+    ],
+)
+def test_loads_dependency_weird_indentation(content, define):
+    actual_library = get_injection_library_from_gml(content)
+
+    assert actual_library == [define]
+
 
 # todo support dependencies with other dependencies
 # todo support macros

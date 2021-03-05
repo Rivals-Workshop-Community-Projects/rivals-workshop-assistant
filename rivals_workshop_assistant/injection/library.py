@@ -1,4 +1,5 @@
 import re
+import textwrap
 
 from . import dependency_handling
 
@@ -18,13 +19,32 @@ def get_injection_library_from_gml(gml: str) -> dependency_handling.InjectionLib
     for dependency_string in dependency_strings:
         name, content = _get_name_and_content(dependency_string)
 
-        content = content.strip()
+        content = textwrap.dedent(content).strip()
         if content.startswith('{') != content.endswith('}'):
             raise ValueError("Mismatched curly braces")
         content = content.lstrip('{').rstrip('}').strip()
+        docs, content = _split_docs_and_gml(content)
 
-        dependencies.append(dependency_handling.Define(name=name, content=content))
+        dependencies.append(dependency_handling.Define(name=name, docs=docs, content=content))
     return dependencies
+
+
+def _split_docs_and_gml(content: str) -> tuple[str, str]:
+    lines = content.split('\n')
+    non_docs_found = False
+
+    doc_lines = []
+    gml_lines = []
+    for line in lines:
+        if not non_docs_found:
+            if line.startswith('//'):
+                doc_lines.append(line.replace('//', '').strip())
+                continue
+            else:
+                non_docs_found = True
+        gml_lines.append(line)
+
+    return '\n'.join(doc_lines), '\n'.join(gml_lines)
 
 
 def _get_name_and_content(gml: str) -> tuple[str, str]:

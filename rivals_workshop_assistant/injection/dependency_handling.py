@@ -66,6 +66,8 @@ class Define(GmlDeclaration):
         else:
             param_string = ''
 
+        self.docs = docs  # I think this might only apply to defines?
+
         head = f"{self.IDENTIFIER_STRING} {name}{param_string}"
         if docs.strip():
             docs = textwrap.indent(textwrap.dedent(docs), '    // ') + '\n'
