@@ -2,7 +2,7 @@ import re
 import typing as t
 from pathlib import Path
 
-from .dependency_handling import InjectionLibrary
+from .dependency_handling import InjectionLibrary, GmlInjection
 
 INJECTION_START_MARKER = '// vvv LIBRARY DEFINES AND MACROS vvv\n'
 INJECTION_START_WARNING = ('// DANGER File below this point will be overwritten! Generated defines and macros below.'
@@ -26,8 +26,8 @@ def apply_injection(scripts: t.Dict[Path, str], injection_library: InjectionLibr
 def _apply_injection_to_script(script: str, injection_library: InjectionLibrary) -> str:
     """Updates the dependencies supplied to the script."""
     if _should_inject(script):
-        dependency_gmls = _get_dependency_gmls_used_in_script(script, injection_library)
-        return _inject_dependency_gmls_in_script(script, dependency_gmls)
+        dependency_gmls = _get_injection_gmls_used_in_script(script, injection_library)
+        return _add_inject_gmls_in_script(script, dependency_gmls)
     else:
         return script
 
@@ -36,16 +36,41 @@ def _should_inject(script):
     return 'NO-INJECT' not in _get_script_contents(script)
 
 
-def _get_dependency_gmls_used_in_script(script: str, injection_library: InjectionLibrary) -> t.List[str]:
-    """Gets the gml content of each dependency used by the script."""
-    dependency_gmls = []
+def _get_injection_gmls_used_in_script(script: str, injection_library: InjectionLibrary) -> t.List[str]:
+    """Gets the gml content of each injection used by the script."""
+    return [injection.gml
+            for injection in _get_injections_used_in_gml(gml=script, injection_library=injection_library)
+            ]
+
+
+def _get_injections_used_in_gml(
+        gml: str,
+        injection_library: InjectionLibrary,
+        existing_injections: InjectionLibrary = None) -> InjectionLibrary:
+    if existing_injections is None:
+        injections = []
+    else:
+        injections = existing_injections
+
     for injection in injection_library:
-        if re.search(pattern=injection.use_pattern, string=script):
-            dependency_gmls.append(injection.gml)
-    return dependency_gmls
+        if (injection not in injections
+                and _injection_is_used_in_script(script=gml, injection=injection)):
+            injections.append(injection)
+            recursive_injections = _get_injections_used_in_gml(
+                gml=injection.gml,
+                injection_library=injection_library,
+                existing_injections=injections
+            )
+            injections += [recursive_injection for recursive_injection in recursive_injections
+                           if recursive_injection not in injections]
+    return injections
 
 
-def _inject_dependency_gmls_in_script(script: str, dependency_gmls: t.List[str]) -> str:
+def _injection_is_used_in_script(script, injection: GmlInjection):
+    return re.search(pattern=injection.use_pattern, string=script)
+
+
+def _add_inject_gmls_in_script(script: str, dependency_gmls: t.List[str]) -> str:
     """Returns the script after supplying dependencies."""
     script_content = _get_script_contents(script)
     new_script = script_content

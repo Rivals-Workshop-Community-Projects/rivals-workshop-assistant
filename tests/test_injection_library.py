@@ -127,7 +127,6 @@ def test_loads_dependency_gets_docs(content, define):
     assert actual_library[0].docs == define.docs
 
 
-
 @pytest.mark.parametrize(
     "content, define",
     [
@@ -150,6 +149,4 @@ def test_loads_dependency_weird_indentation(content, define):
 
     assert actual_library == [define]
 
-
-# todo support dependencies with other dependencies
 # todo support macros

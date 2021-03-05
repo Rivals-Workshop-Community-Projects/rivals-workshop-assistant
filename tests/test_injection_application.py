@@ -129,3 +129,23 @@ define1()
     scripts = {PATH_A: script}
     result_scripts = application.apply_injection(scripts, [define1])
     assert result_scripts == scripts
+
+
+def test_recursive_dependencies():
+    script = f"""\
+define_recursive()"""
+
+    scripts = {PATH_A: script}
+    recursive_define = Define(
+        name='define_recursive', version=0, docs='recursive_docs', content='define1()')
+    library = [recursive_define, define1]
+
+    result_scripts = application.apply_injection(scripts, library)
+    assert result_scripts == {PATH_A: f"""\
+{script}
+
+{application.INJECTION_START_HEADER}
+{recursive_define.gml}
+
+{define1.gml}
+{application.INJECTION_END_HEADER}"""}

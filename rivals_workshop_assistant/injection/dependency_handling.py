@@ -3,7 +3,7 @@ import textwrap
 import typing as t
 
 
-class GmlDependency(abc.ABC):
+class GmlInjection(abc.ABC):
     def __init__(self,
                  name: str,
                  gml: str,
@@ -28,10 +28,10 @@ class GmlDependency(abc.ABC):
         return hash(self.name)
 
 
-InjectionLibrary = t.List[GmlDependency]
+InjectionLibrary = t.List[GmlInjection]
 
 
-class GmlDeclaration(GmlDependency, abc.ABC):
+class GmlDeclaration(GmlInjection, abc.ABC):
     IDENTIFIER_STRING = NotImplemented
 
     def __init__(
