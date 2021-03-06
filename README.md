@@ -7,6 +7,7 @@ Current features:
 
 Todo:
 - Macro support
+- Download resource libraries from cdn 
 - Codegen from seed
 - Mockup asset generation 
 - ATK file processing

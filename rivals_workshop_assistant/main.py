@@ -4,16 +4,15 @@ from pathlib import Path
 from rivals_workshop_assistant.asset_handling import get_required_assets, save_assets
 from rivals_workshop_assistant.codegen import handle_codegen
 from rivals_workshop_assistant.injection import handle_injection
-
-Scripts = dict[Path, str]
+from rivals_workshop_assistant.typing import Scripts
 
 
 def main(root_dir):
     """Runs all processes on scripts in the root_dir"""
     scripts = read_scripts(root_dir)
 
-    scripts = handle_codegen(scripts)
-    scripts = handle_injection(scripts)
+    scripts = handle_codegen(root_dir, scripts)
+    scripts = handle_injection(root_dir, scripts)
 
     save_scripts(root_dir, scripts)
 

@@ -4,7 +4,7 @@ from pathlib import Path
 
 from . import dependency_handling
 
-INJECT_FOLDER = 'inject'
+INJECT_FOLDER = 'library/inject'
 
 
 def read_injection_library(root_path: Path) -> dependency_handling.InjectionLibrary:
