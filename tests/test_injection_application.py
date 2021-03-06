@@ -11,7 +11,8 @@ PATH_A = Path('a')
 def test_apply_injection_no_injections():
     scripts = {PATH_A: 'content'}
 
-    result_scripts = application.apply_injection(scripts=scripts, injection_library=[])
+    result_scripts = application.apply_injection(scripts=scripts,
+                                                 injection_library=[])
     assert result_scripts == scripts
 
 
@@ -19,14 +20,16 @@ def test_apply_injection_irrelevant_injection():
     scripts = {PATH_A: 'content'}
     define = Define(name='', version=0, docs='', content='')
 
-    result_scripts = application.apply_injection(scripts=scripts, injection_library=[define])
+    result_scripts = application.apply_injection(scripts=scripts,
+                                                 injection_library=[define])
     assert result_scripts == scripts
 
 
 define1 = Define(
     name='define1', version=0, docs='docs', content='content')
 define2 = Define(
-    name='define2', version=4, docs='docs2\ndocs2', content='content2\ncontent2')
+    name='define2', version=4, docs='docs2\ndocs2',
+    content='content2\ncontent2')
 
 
 @pytest.mark.parametrize(
@@ -45,7 +48,8 @@ define2()""",
 def test_apply_injection_makes_injection(script, define):
     scripts = {PATH_A: script}
 
-    result_scripts = application.apply_injection(scripts=scripts, injection_library=[define])
+    result_scripts = application.apply_injection(scripts=scripts,
+                                                 injection_library=[define])
     assert result_scripts == {PATH_A: f"""\
 {script}
 
@@ -64,7 +68,8 @@ content"""
     scripts = {PATH_A: script}
     library = [define1, define2]
 
-    result_scripts = application.apply_injection(scripts=scripts, injection_library=library)
+    result_scripts = application.apply_injection(scripts=scripts,
+                                                 injection_library=library)
     assert result_scripts == {PATH_A: f"""\
 {script}
 
@@ -87,7 +92,8 @@ def test_replace_existing_library_dependencies():
     scripts = {PATH_A: script}
     library = [define1]
 
-    result_scripts = application.apply_injection(scripts=scripts, injection_library=library)
+    result_scripts = application.apply_injection(scripts=scripts,
+                                                 injection_library=library)
     assert result_scripts == {PATH_A: f"""\
 {script_content}
 
@@ -137,7 +143,8 @@ define_recursive()"""
 
     scripts = {PATH_A: script}
     recursive_define = Define(
-        name='define_recursive', version=0, docs='recursive_docs', content='define1()')
+        name='define_recursive', version=0, docs='recursive_docs',
+        content='define1()')
     library = [recursive_define, define1]
 
     result_scripts = application.apply_injection(scripts, library)
