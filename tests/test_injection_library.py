@@ -73,6 +73,15 @@ content
 }
 """,
                      Define(name='other', content='different content')),
+        pytest.param("""\
+#define func {
+    // some docs
+    //some more docs
+    func content
+
+}
+""",
+                     Define(name='func', docs='some docs\nsome more docs', content='func content')),
     ],
 )
 def test_loads_dependency_braces(content, define):
@@ -142,6 +151,16 @@ content
                 content
 """,
                      Define(name='other', content='different\ncontent')),
+        pytest.param("""\
+content
+#define hard
+    several
+    different   
+        indentations
+    to
+handle
+""",
+                     Define(name='hard', content='    several\n    different\n        indentations\n    to\nhandle')),
     ],
 )
 def test_loads_dependency_weird_indentation(content, define):
@@ -149,4 +168,16 @@ def test_loads_dependency_weird_indentation(content, define):
 
     assert actual_library == [define]
 
+
 # todo support macros
+
+"""
+'#define hard // Version 0
+        several
+        different
+            indentations
+        to
+    handle'
+
+
+"""

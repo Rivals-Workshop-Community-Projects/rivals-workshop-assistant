@@ -9,6 +9,7 @@ Scripts = dict[Path, str]
 
 
 def main(root_dir):
+    """Runs all processes on scripts in the root_dir"""
     scripts = read_scripts(root_dir)
 
     scripts = handle_codegen(scripts)
@@ -20,7 +21,9 @@ def main(root_dir):
     save_assets(root_dir, assets)
 
 
-def get_root_dir():
+def get_root_dir() -> Path:
+    """Return the absolute path to the character's root directory, containing their config file.
+    Currently assumes that that path is passed as the first argument"""
     # Todo, if config is not in current file, keep searching parent directory
     return Path(sys.argv[0])
 
@@ -32,7 +35,8 @@ def read_scripts(root_dir: Path) -> Scripts:
 
     return scripts
 
-def save_scripts(root_dir, scripts):
+
+def save_scripts(root_dir: Path, scripts: Scripts):
     raise NotImplementedError
 
 

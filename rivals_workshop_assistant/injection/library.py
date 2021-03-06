@@ -1,16 +1,18 @@
 import re
 import textwrap
+from pathlib import Path
 
 from . import dependency_handling
 
+INJECT_FOLDER = 'inject'
 
-def read_injection_library():
-    raise NotImplementedError
-    # Get library path
-    # If not exists, create and populate from a cdn I'll have to make.
-    # Read files to text
 
-    # Read text to injection_library: list of dependencies
+def read_injection_library(root_path: Path) -> dependency_handling.InjectionLibrary:
+    # todo if not exist, populate from a cdn I'll have to make.
+    inject_gml_paths = (root_path / INJECT_FOLDER).rglob('*.gml')
+    inject_gmls = [gml_path.read_text() for gml_path in inject_gml_paths]
+    full_inject_gml = '\n\n'.join(inject_gmls)
+    return get_injection_library_from_gml(full_inject_gml)
 
 
 def get_injection_library_from_gml(gml: str) -> dependency_handling.InjectionLibrary:
@@ -19,10 +21,15 @@ def get_injection_library_from_gml(gml: str) -> dependency_handling.InjectionLib
     for dependency_string in dependency_strings:
         name, content = _get_name_and_content(dependency_string)
 
-        content = textwrap.dedent(content).strip()
-        if content.startswith('{') != content.endswith('}'):
+        has_start_bracket = content.strip().startswith('{')
+        has_end_bracket = content.strip().endswith('}')
+        if has_start_bracket != has_end_bracket:
             raise ValueError("Mismatched curly braces")
-        content = content.lstrip('{').rstrip('}').strip()
+        if has_start_bracket and has_end_bracket:
+            content = content.strip().lstrip('{').rstrip('}').strip('\n')
+
+        content = textwrap.dedent(content).strip('\n')
+
         docs, content = _split_docs_and_gml(content)
 
         dependencies.append(dependency_handling.Define(name=name, docs=docs, content=content))
@@ -37,12 +44,15 @@ def _split_docs_and_gml(content: str) -> tuple[str, str]:
     gml_lines = []
     for line in lines:
         if not non_docs_found:
-            if line.startswith('//'):
-                doc_lines.append(line.replace('//', '').strip())
+            if line.lstrip().startswith('//'):
+                line = line.split('//')[1].rstrip()
+                if line[0] == ' ':  # Remove padding from '// ' format
+                    line = line[1:]
+                doc_lines.append(line)
                 continue
             else:
                 non_docs_found = True
-        gml_lines.append(line)
+        gml_lines.append(line.rstrip())
 
     return '\n'.join(doc_lines), '\n'.join(gml_lines)
 
@@ -54,6 +64,16 @@ def _get_name_and_content(gml: str) -> tuple[str, str]:
 
 
 """
+
+'    several
+    different   
+        indentations
+    to
+handle'
+
+
+
+
 name_params_version, content = gml.split('\n', 1)
     name, params, version = _extract_name_params_version(name_params_version)
 
