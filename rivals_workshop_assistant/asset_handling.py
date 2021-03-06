@@ -3,5 +3,5 @@ def get_required_assets(scripts):
     raise NotImplementedError
 
 
-def save_assets(assets):
+def save_assets(root_dir, assets):
     raise NotImplementedError
