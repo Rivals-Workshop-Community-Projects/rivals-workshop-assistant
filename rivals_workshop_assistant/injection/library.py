@@ -21,12 +21,7 @@ def get_injection_library_from_gml(gml: str) -> dependency_handling.InjectionLib
     for dependency_string in dependency_strings:
         name, content = _get_name_and_content(dependency_string)
 
-        has_start_bracket = content.strip().startswith('{')
-        has_end_bracket = content.strip().endswith('}')
-        if has_start_bracket != has_end_bracket:
-            raise ValueError("Mismatched curly braces")
-        if has_start_bracket and has_end_bracket:
-            content = content.strip().lstrip('{').rstrip('}').strip('\n')
+        content = _remove_brackets(content)
 
         content = textwrap.dedent(content).strip('\n')
 
@@ -34,6 +29,16 @@ def get_injection_library_from_gml(gml: str) -> dependency_handling.InjectionLib
 
         dependencies.append(dependency_handling.Define(name=name, docs=docs, content=content))
     return dependencies
+
+
+def _remove_brackets(content):
+    has_start_bracket = content.strip().startswith('{')
+    has_end_bracket = content.strip().endswith('}')
+    if has_start_bracket != has_end_bracket:
+        raise ValueError("Mismatched curly braces")
+    if has_start_bracket and has_end_bracket:
+        content = content.strip().lstrip('{').rstrip('}').strip('\n')
+    return content
 
 
 def _split_docs_and_gml(content: str) -> tuple[str, str]:
