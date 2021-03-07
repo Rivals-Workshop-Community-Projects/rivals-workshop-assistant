@@ -7,8 +7,8 @@ class GmlInjection(abc.ABC):
     def __init__(self,
                  name: str,
                  gml: str,
-                 use_pattern: str = None,
-                 give_pattern: str = None
+                 use_pattern: str,
+                 give_pattern: str
                  ):
         self.name = name
         self.gml = gml
@@ -38,13 +38,14 @@ class GmlDeclaration(GmlInjection, abc.ABC):
             self,
             name: str,
             gml: str,
+            use_pattern: str
     ):
         """Serialize the gml elements into the final gml structure."""
         super().__init__(
             name=name,
             gml=gml,
-            use_pattern=fr"(^|\W){name}\(",
             give_pattern=fr'#{self.IDENTIFIER_STRING}(\s)*{name}(\W|$)',
+            use_pattern=use_pattern
         )
 
     @classmethod
@@ -82,7 +83,7 @@ class Define(GmlDeclaration):
         final = f"{head} // Version {version}\n{docs}{content}"
         gml = textwrap.dedent(final).strip()
 
-        super().__init__(name, gml)
+        super().__init__(name, gml, use_pattern=fr"(^|\W){name}\(", )
 
     @classmethod
     def from_gml(cls, name: str, content: str):
@@ -128,7 +129,7 @@ class Macro(GmlDeclaration):  # todo untested
 
     def __init__(self, name: str, value: str):
         gml = f'#macro {name} {value}'
-        super().__init__(name, gml)
+        super().__init__(name, gml, use_pattern=fr"(^|\W){name}($|\W)", )
 
     @classmethod
     def from_gml(cls, name: str, content: str):

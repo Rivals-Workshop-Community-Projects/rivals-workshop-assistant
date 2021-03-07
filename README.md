@@ -2,11 +2,10 @@
 An all-in-one tool for automating Rivals of Aether modding tasks
 
 Current features:
-- Load defines from source files 
-- Inject needed defines
+- Load defines and macros from source files 
+- Inject needed defines and macros
 
 Todo:
-- Macro support
 - Download resource libraries from cdn 
 - Codegen from seed
 - Mockup asset generation 

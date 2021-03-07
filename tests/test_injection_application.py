@@ -3,7 +3,8 @@ from pathlib import Path
 import pytest
 
 import rivals_workshop_assistant.injection.application as application
-from rivals_workshop_assistant.injection.dependency_handling import Define
+from rivals_workshop_assistant.injection.dependency_handling import Define, \
+    Macro
 
 PATH_A = Path('a')
 
@@ -155,4 +156,23 @@ define_recursive()"""
 {recursive_define.gml}
 
 {define1.gml}
+{application.INJECTION_END_HEADER}"""}
+
+
+def test_macro():
+    script = f"""\
+some_macro
+
+blah"""
+
+    scripts = {PATH_A: script}
+    some_macro = Macro(name='some_macro', value='value')
+    library = [some_macro]
+
+    result_scripts = application.apply_injection(scripts, library)
+    assert result_scripts == {PATH_A: f"""\
+{script}
+
+{application.INJECTION_START_HEADER}
+{some_macro.gml}
 {application.INJECTION_END_HEADER}"""}
