@@ -6,7 +6,7 @@ from testfixtures import TempDirectory
 from rivals_workshop_assistant.injection import apply_injection
 from rivals_workshop_assistant.injection.library import INJECT_FOLDER
 from rivals_workshop_assistant.injection.dependency_handling import Define
-from rivals_workshop_assistant.main import read_scripts
+from rivals_workshop_assistant.main import read_scripts, save_scripts
 from rivals_workshop_assistant import injection
 
 
@@ -111,8 +111,7 @@ def test_full_injection():
         result_scripts = apply_injection(scripts=scripts,
                                          injection_library=library)
 
-        assert result_scripts == {
-            script_1.absolute_path(tmp): f"""\
+        expected_script_1 = f"""\
 {script_1.content}
 
 {injection.application.INJECTION_START_HEADER}
@@ -121,10 +120,24 @@ def test_full_injection():
 {needs_other.gml}
 
 {other.gml}
-{injection.application.INJECTION_END_HEADER}""",
-            script_subfolder.absolute_path(tmp): f"""\
+{injection.application.INJECTION_END_HEADER}"""
+
+        expected_subfolder = f"""\
 {script_subfolder.content}
 
 {injection.application.INJECTION_START_HEADER}
 {func.gml}
-{injection.application.INJECTION_END_HEADER}"""}
+{injection.application.INJECTION_END_HEADER}"""
+
+        assert result_scripts == {
+            script_1.absolute_path(tmp): expected_script_1,
+            script_subfolder.absolute_path(tmp): expected_subfolder}
+
+        save_scripts(root_dir=Path(tmp.path), scripts=result_scripts)
+
+        actual_script_1 = tmp.read(script_1.path.as_posix(), encoding='utf8')
+        assert actual_script_1 == expected_script_1
+
+        actual_script_subfolder = tmp.read(script_subfolder.path.as_posix(),
+                                           encoding='utf8')
+        assert actual_script_subfolder == expected_subfolder

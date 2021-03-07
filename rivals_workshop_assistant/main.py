@@ -37,7 +37,9 @@ def read_scripts(root_dir: Path) -> Scripts:
 
 
 def save_scripts(root_dir: Path, scripts: Scripts):
-    raise NotImplementedError
+    for path, content in scripts.items():
+        with open((root_dir / path), 'w', newline='\n') as f:
+            f.write(content)
 
 
 if __name__ == '__main__':
