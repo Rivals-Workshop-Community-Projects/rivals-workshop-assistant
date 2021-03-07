@@ -1,7 +1,9 @@
 import pytest
 
-from rivals_workshop_assistant.injection.dependency_handling import Define
-from rivals_workshop_assistant.injection.library import get_injection_library_from_gml
+from rivals_workshop_assistant.injection.dependency_handling import Define, \
+    Macro
+from rivals_workshop_assistant.injection.library import \
+    get_injection_library_from_gml
 
 
 def test_empty():
@@ -48,7 +50,8 @@ def test_loads_dependency_minimal(content, define):
 """,
                      [
                          Define(name='define1', content='content1'),
-                         Define(name='define2', content='content2\nmore content2')
+                         Define(name='define2',
+                                content='content2\nmore content2')
                      ]),
     ]
 )
@@ -81,7 +84,8 @@ content
 
 }
 """,
-                     Define(name='func', docs='some docs\nsome more docs', content='func content')),
+                     Define(name='func', docs='some docs\nsome more docs',
+                            content='func content')),
     ],
 )
 def test_loads_dependency_braces(content, define):
@@ -119,7 +123,8 @@ def test_loads_dependency_mismatched_braces(content):
     //of
     //docs 
     content""",
-                     Define(name='name', docs='plenty\nof\ndocs', content='content')),
+                     Define(name='name', docs='plenty\nof\ndocs',
+                            content='content')),
         pytest.param("""\
 content
 #define other
@@ -127,7 +132,8 @@ content
     different content
 
 """,
-                     Define(name='other', docs='some docs', content='different content')),
+                     Define(name='other', docs='some docs',
+                            content='different content')),
     ],
 )
 def test_loads_dependency_gets_docs(content, define):
@@ -160,7 +166,8 @@ content
     to
 handle
 """,
-                     Define(name='hard', content='    several\n    different\n        indentations\n    to\nhandle')),
+                     Define(name='hard',
+                            content='    several\n    different\n        indentations\n    to\nhandle')),
     ],
 )
 def test_loads_dependency_weird_indentation(content, define):
@@ -168,3 +175,31 @@ def test_loads_dependency_weird_indentation(content, define):
 
     assert actual_library == [define]
 
+
+@pytest.mark.parametrize(
+    "content, library",
+    [
+        pytest.param("""\
+#define define1
+    content1
+    
+#macro multi some
+    content       
+""",
+                     [
+                         Define(name='define1', content='content1'),
+                         Macro(name='multi', value='some\n    content')
+                     ]),
+    ]
+)
+def test_loads_with_macro(content, library):
+    actual_library = get_injection_library_from_gml(content)
+
+    assert actual_library == library
+
+"""
+' some
+    content       
+'
+
+"""

@@ -21,16 +21,29 @@ def get_injection_library_from_gml(
     dependencies = []
     dependency_strings = gml.split('#')[1:]
     for dependency_string in dependency_strings:
-        name, content = _get_name_and_content(dependency_string)
+        inject_type, name, content = _get_name_and_content(dependency_string)
 
-        content = _remove_brackets(content)
+        # Todo make polymorphic
 
-        content = textwrap.dedent(content).strip('\n')
+        if inject_type == dependency_handling.Define.IDENTIFIER_STRING:
+            content = _remove_brackets(content)
+            content = textwrap.dedent(content).strip('\n')
+            docs, content = _split_docs_and_gml(content)
+            dependencies.append(
+                dependency_handling.Define(name=name, docs=docs,
+                                           content=content))
+        elif inject_type == dependency_handling.Macro.IDENTIFIER_STRING:
+            if content[0] == ' ':
+                content = content[1:]  # remove leading space
 
-        docs, content = _split_docs_and_gml(content)
+            content = textwrap.dedent(content).strip('\n')
+            content = '\n'.join(line.rstrip() for line in content.split('\n'))
 
-        dependencies.append(
-            dependency_handling.Define(name=name, docs=docs, content=content))
+            dependencies.append(
+                dependency_handling.Macro(name=name, value=content))
+        else:
+            print(f"WARNING: unknown inject type {inject_type}")
+
     return dependencies
 
 
@@ -65,8 +78,7 @@ def _split_docs_and_gml(content: str) -> tuple[str, str]:
     return '\n'.join(doc_lines), '\n'.join(gml_lines)
 
 
-def _get_name_and_content(gml: str) -> tuple[str, str]:
-    after_hash_define = gml.split('define ')[
-        1]  # todo, this assumes its define, support macro
+def _get_name_and_content(gml: str) -> tuple[str, str, str]:
+    inject_type, after_hash_define = gml.split(' ', maxsplit=1)
     split = re.split(pattern=r'(\s|{)', string=after_hash_define, maxsplit=1)
-    return split[0], split[1] + split[2]
+    return inject_type, split[0], split[1] + split[2]

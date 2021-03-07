@@ -44,12 +44,12 @@ class GmlDeclaration(GmlInjection, abc.ABC):
             name=name,
             gml=gml,
             use_pattern=fr"(^|\W){name}\(",
-            give_pattern=fr'{self.IDENTIFIER_STRING}(\s)*{name}(\W|$)',
+            give_pattern=fr'#{self.IDENTIFIER_STRING}(\s)*{name}(\W|$)',
         )
 
 
 class Define(GmlDeclaration):
-    IDENTIFIER_STRING = '#define'
+    IDENTIFIER_STRING = 'define'
 
     def __init__(
             self,
@@ -68,7 +68,7 @@ class Define(GmlDeclaration):
 
         self.docs = docs  # I think this might only apply to defines?
 
-        head = f"{self.IDENTIFIER_STRING} {name}{param_string}"
+        head = f"#{self.IDENTIFIER_STRING} {name}{param_string}"
         if docs.strip():
             docs = textwrap.indent(textwrap.dedent(docs), '    // ') + '\n'
 
@@ -81,11 +81,11 @@ class Define(GmlDeclaration):
 
 
 class Macro(GmlDeclaration):  # todo untested
-    IDENTIFIER_STRING = '#macro'
+    IDENTIFIER_STRING = 'macro'
 
     def __init__(self, name: str, value: str):
         gml = f'#macro {name} {value}'
         super().__init__(name, gml)
 
 
-DEPENDENCY_TYPES = (Define, Macro)
+INJECT_TYPES = (Define, Macro)
