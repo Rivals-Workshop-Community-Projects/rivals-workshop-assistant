@@ -1,5 +1,4 @@
 import re
-import textwrap
 from pathlib import Path
 
 from . import dependency_handling
@@ -23,59 +22,17 @@ def get_injection_library_from_gml(
     for dependency_string in dependency_strings:
         inject_type, name, content = _get_name_and_content(dependency_string)
 
-        # Todo make polymorphic
-
-        if inject_type == dependency_handling.Define.IDENTIFIER_STRING:
-            content = _remove_brackets(content)
-            content = textwrap.dedent(content).strip('\n')
-            docs, content = _split_docs_and_gml(content)
-            dependencies.append(
-                dependency_handling.Define(name=name, docs=docs,
-                                           content=content))
-        elif inject_type == dependency_handling.Macro.IDENTIFIER_STRING:
-            if content[0] == ' ':
-                content = content[1:]  # remove leading space
-
-            content = textwrap.dedent(content).strip('\n')
-            content = '\n'.join(line.rstrip() for line in content.split('\n'))
-
-            dependencies.append(
-                dependency_handling.Macro(name=name, value=content))
+        for possible_inject_type in dependency_handling.INJECT_TYPES:
+            if inject_type == possible_inject_type.IDENTIFIER_STRING:
+                injection = possible_inject_type.from_gml(
+                    name, content
+                )
+                break
         else:
-            print(f"WARNING: unknown inject type {inject_type}")
+            raise ValueError(f'unknown inject type {inject_type}')
+        dependencies.append(injection)
 
     return dependencies
-
-
-def _remove_brackets(content):
-    has_start_bracket = content.strip().startswith('{')
-    has_end_bracket = content.strip().endswith('}')
-    if has_start_bracket != has_end_bracket:
-        raise ValueError("Mismatched curly braces")
-    if has_start_bracket and has_end_bracket:
-        content = content.strip().lstrip('{').rstrip('}').strip('\n')
-    return content
-
-
-def _split_docs_and_gml(content: str) -> tuple[str, str]:
-    lines = content.split('\n')
-    non_docs_found = False
-
-    doc_lines = []
-    gml_lines = []
-    for line in lines:
-        if not non_docs_found:
-            if line.lstrip().startswith('//'):
-                line = line.split('//')[1].rstrip()
-                if line[0] == ' ':  # Remove padding from '// ' format
-                    line = line[1:]
-                doc_lines.append(line)
-                continue
-            else:
-                non_docs_found = True
-        gml_lines.append(line.rstrip())
-
-    return '\n'.join(doc_lines), '\n'.join(gml_lines)
 
 
 def _get_name_and_content(gml: str) -> tuple[str, str, str]:

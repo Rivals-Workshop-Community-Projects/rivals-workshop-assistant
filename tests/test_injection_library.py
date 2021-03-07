@@ -196,10 +196,3 @@ def test_loads_with_macro(content, library):
     actual_library = get_injection_library_from_gml(content)
 
     assert actual_library == library
-
-"""
-' some
-    content       
-'
-
-"""

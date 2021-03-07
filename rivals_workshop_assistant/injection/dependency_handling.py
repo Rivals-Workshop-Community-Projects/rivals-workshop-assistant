@@ -47,6 +47,11 @@ class GmlDeclaration(GmlInjection, abc.ABC):
             give_pattern=fr'#{self.IDENTIFIER_STRING}(\s)*{name}(\W|$)',
         )
 
+    @classmethod
+    @abc.abstractmethod
+    def from_gml(cls, name: str, content: str):
+        raise NotImplementedError
+
 
 class Define(GmlDeclaration):
     IDENTIFIER_STRING = 'define'
@@ -79,6 +84,44 @@ class Define(GmlDeclaration):
 
         super().__init__(name, gml)
 
+    @classmethod
+    def from_gml(cls, name: str, content: str):
+        content = _remove_brackets(content)
+        content = textwrap.dedent(content).strip('\n')
+        docs, content = _split_docs_and_gml(content)
+        return cls(name=name, docs=docs, content=content)
+
+
+def _remove_brackets(content):
+    has_start_bracket = content.strip().startswith('{')
+    has_end_bracket = content.strip().endswith('}')
+    if has_start_bracket != has_end_bracket:
+        raise ValueError("Mismatched curly braces")
+    if has_start_bracket and has_end_bracket:
+        content = content.strip().lstrip('{').rstrip('}').strip('\n')
+    return content
+
+
+def _split_docs_and_gml(content: str) -> tuple[str, str]:
+    lines = content.split('\n')
+    non_docs_found = False
+
+    doc_lines = []
+    gml_lines = []
+    for line in lines:
+        if not non_docs_found:
+            if line.lstrip().startswith('//'):
+                line = line.split('//')[1].rstrip()
+                if line[0] == ' ':  # Remove padding from '// ' format
+                    line = line[1:]
+                doc_lines.append(line)
+                continue
+            else:
+                non_docs_found = True
+        gml_lines.append(line.rstrip())
+
+    return '\n'.join(doc_lines), '\n'.join(gml_lines)
+
 
 class Macro(GmlDeclaration):  # todo untested
     IDENTIFIER_STRING = 'macro'
@@ -86,6 +129,16 @@ class Macro(GmlDeclaration):  # todo untested
     def __init__(self, name: str, value: str):
         gml = f'#macro {name} {value}'
         super().__init__(name, gml)
+
+    @classmethod
+    def from_gml(cls, name: str, content: str):
+        if content[0] == ' ':
+            content = content[1:]  # remove leading space
+
+        content = textwrap.dedent(content).strip('\n')
+        content = '\n'.join(line.rstrip() for line in content.split('\n'))
+
+        return cls(name=name, value=content)
 
 
 INJECT_TYPES = (Define, Macro)
