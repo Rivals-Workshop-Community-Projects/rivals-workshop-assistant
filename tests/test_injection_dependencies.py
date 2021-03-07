@@ -1,5 +1,6 @@
 import rivals_workshop_assistant.injection.application as application
-from rivals_workshop_assistant.injection.dependency_handling import Define
+from rivals_workshop_assistant.injection.dependency_handling import Define, \
+    Macro
 
 
 def test_define_gml():
@@ -21,7 +22,8 @@ def test_define_gml_multiple_lines():
 
 
 def test_define_gml_parameters():
-    sut = Define(name='name', version=12, docs='docs', content='gml', params=['foo', 'bar'])
+    sut = Define(name='name', version=12, docs='docs', content='gml',
+                 params=['foo', 'bar'])
     assert sut.gml == """\
 #define name(foo, bar) // Version 12
     // docs
@@ -29,7 +31,8 @@ def test_define_gml_parameters():
 
 
 def test_apply_injection_nothing():
-    result_scripts = application.apply_injection(scripts={}, injection_library=[])
+    result_scripts = application.apply_injection(scripts={},
+                                                 injection_library=[])
     assert result_scripts == {}
 
 
@@ -38,3 +41,20 @@ def test_define_no_docs():
     assert sut.gml == """\
 #define name(foo, bar) // Version 12
     gml"""
+
+
+def test_macro():
+    sut = Macro(name='name', value='gml')
+    assert sut.gml == """\
+#macro name gml"""
+
+
+def test_macro_multiline():
+    sut = Macro(name='multi', value="""\
+line
+    indented
+more""")
+    assert sut.gml == """\
+#macro multi line
+    indented
+more"""

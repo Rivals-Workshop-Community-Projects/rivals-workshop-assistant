@@ -168,16 +168,3 @@ def test_loads_dependency_weird_indentation(content, define):
 
     assert actual_library == [define]
 
-
-# todo support macros
-
-"""
-'#define hard // Version 0
-        several
-        different
-            indentations
-        to
-    handle'
-
-
-"""

@@ -83,5 +83,9 @@ class Define(GmlDeclaration):
 class Macro(GmlDeclaration):  # todo untested
     IDENTIFIER_STRING = '#macro'
 
+    def __init__(self, name: str, value: str):
+        gml = f'#macro {name} {value}'
+        super().__init__(name, gml)
+
 
 DEPENDENCY_TYPES = (Define, Macro)
