@@ -1,12 +1,10 @@
 # rivals-workshop-assistant
+
 An all-in-one tool for automating Rivals of Aether modding tasks
 
 Current features:
-- Load defines and macros from source files 
+
+- Load defines and macros from source files
 - Inject needed defines and macros
 
-Todo:
-- Download resource libraries from cdn 
-- Codegen from seed
-- Mockup asset generation 
-- ATK file processing
+[Roadmap](https://github.com/Rivals-Workshop-Community-Projects/rivals-workshop-assistant/issues)

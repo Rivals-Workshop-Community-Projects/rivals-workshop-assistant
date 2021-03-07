@@ -176,3 +176,35 @@ blah"""
 {application.INJECTION_START_HEADER}
 {some_macro.gml}
 {application.INJECTION_END_HEADER}"""}
+
+
+def test_doesnt_provide_user_supplied_define():
+    script = f"""\
+my_define()
+
+#define my_define 
+    my define content
+
+"""
+
+    scripts = {PATH_A: script}
+    my_define_library_version = Define(name='my_define',
+                                       content='library version')
+    library = [my_define_library_version]
+
+    result_scripts = application.apply_injection(scripts, library)
+    assert result_scripts == {PATH_A: script.rstrip()}
+
+
+def test_doesnt_provide_user_supplied_macro():
+    script = f"""\
+print(my_macro)
+
+#macro my_macro 2"""
+
+    scripts = {PATH_A: script}
+    my_macro_library_version = Macro(name='my_macro', value='3')
+    library = [my_macro_library_version]
+
+    result_scripts = application.apply_injection(scripts, library)
+    assert result_scripts == {PATH_A: script.rstrip()}

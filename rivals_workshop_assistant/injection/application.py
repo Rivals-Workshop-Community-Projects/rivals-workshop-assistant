@@ -33,9 +33,9 @@ def _apply_injection_to_script(script: str,
                                injection_library: InjectionLibrary) -> str:
     """Updates the dependencies supplied to the script."""
     if _should_inject(script):
-        dependency_gmls = _get_injection_gmls_used_in_script(script,
-                                                             injection_library)
-        return _add_inject_gmls_in_script(script, dependency_gmls)
+        needed_gmls = _get_inject_gmls_needed_in_gml(script,
+                                                     injection_library)
+        return _add_inject_gmls_in_script(script, needed_gmls)
     else:
         return script
 
@@ -44,17 +44,21 @@ def _should_inject(script):
     return 'NO-INJECT' not in _get_script_contents(script)
 
 
-def _get_injection_gmls_used_in_script(
-        script: str, injection_library: InjectionLibrary) -> list[str]:
-    """Gets the gml content of each injection used by the script."""
-    return [injection.gml
-            for injection in
-            _get_injections_used_in_gml(gml=script,
-                                        injection_library=injection_library)
-            ]
+def _get_inject_gmls_needed_in_gml(gml: str,
+                                   injection_library: InjectionLibrary
+                                   ) -> list[str]:
+    needed_injects = _get_injects_needed_in_gml(gml, injection_library)
+    return [injection.gml for injection in needed_injects]
 
 
-def _get_injections_used_in_gml(
+def _get_injects_needed_in_gml(gml: str, injection_library: InjectionLibrary):
+    used_injects = _get_injects_used_in_gml(gml, injection_library)
+    needed_injects = [inject for inject in used_injects
+                      if not _gml_supplies_inject(gml, inject)]
+    return needed_injects
+
+
+def _get_injects_used_in_gml(
         gml: str,
         injection_library: InjectionLibrary,
         existing_injections: InjectionLibrary = None) -> InjectionLibrary:
@@ -65,10 +69,10 @@ def _get_injections_used_in_gml(
 
     for injection in injection_library:
         if (injection not in injections
-                and _injection_is_used_in_script(script=gml,
-                                                 injection=injection)):
+                and _gml_uses_inject(gml=gml,
+                                     injection=injection)):
             injections.append(injection)
-            recursive_injections = _get_injections_used_in_gml(
+            recursive_injections = _get_injects_used_in_gml(
                 gml=injection.gml,
                 injection_library=injection_library,
                 existing_injections=injections
@@ -79,8 +83,12 @@ def _get_injections_used_in_gml(
     return injections
 
 
-def _injection_is_used_in_script(script, injection: GmlInjection):
-    return re.search(pattern=injection.use_pattern, string=script)
+def _gml_uses_inject(gml: str, injection: GmlInjection):
+    return re.search(pattern=injection.use_pattern, string=gml)
+
+
+def _gml_supplies_inject(gml: str, inject: GmlInjection):
+    return re.search(pattern=inject.give_pattern, string=gml)
 
 
 def _add_inject_gmls_in_script(script: str, dependency_gmls: list[str]) -> str:
@@ -100,4 +108,4 @@ def _add_inject_gmls_in_script(script: str, dependency_gmls: list[str]) -> str:
 
 def _get_script_contents(script: str):
     """Get the portion of the script above the dependency header."""
-    return script.split(INJECTION_START_MARKER)[0].strip()
+    return script.split(INJECTION_START_MARKER)[0].rstrip()
