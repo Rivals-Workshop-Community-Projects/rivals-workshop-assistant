@@ -1,31 +1,36 @@
 import sys
 from pathlib import Path
 
-from rivals_workshop_assistant.asset_handling import get_required_assets, \
-    save_assets
-from rivals_workshop_assistant.codegen import handle_codegen
+# from rivals_workshop_assistant.asset_handling import get_required_assets, \
+#     save_assets
+# from rivals_workshop_assistant.codegen import handle_codegen
 from rivals_workshop_assistant.injection import handle_injection
-from rivals_workshop_assistant.typing import Scripts
+from rivals_workshop_assistant.scripts_type import Scripts
 
 
-def main(root_dir):
+def main(given_dir: Path):
     """Runs all processes on scripts in the root_dir"""
+    root_dir = get_root_dir(given_dir)
     scripts = read_scripts(root_dir)
 
-    scripts = handle_codegen(root_dir, scripts)
+    # scripts = handle_codegen(scripts)
     scripts = handle_injection(root_dir, scripts)
 
     save_scripts(root_dir, scripts)
 
-    assets = get_required_assets(scripts)
-    save_assets(root_dir, assets)
+    # assets = get_required_assets(scripts)
+    # save_assets(root_dir, assets)
 
 
-def get_root_dir() -> Path:
+def get_root_dir(given_dir: Path) -> Path:
     """Return the absolute path to the character's root directory, containing their config file.
     Currently assumes that that path is passed as the first argument"""
-    # Todo, if config is not in current file, keep searching parent directory
-    return Path(sys.argv[0])
+    if 'config.ini' in [path.name for path in given_dir.glob('*')]:
+        return given_dir
+    else:
+        raise ValueError("Given folder does not contain config.ini. Aborting.")
+        # Todo,
+        #  if config is not in current file, keep searching parent directory
 
 
 def read_scripts(root_dir: Path) -> Scripts:
@@ -43,5 +48,5 @@ def save_scripts(root_dir: Path, scripts: Scripts):
 
 
 if __name__ == '__main__':
-    root_dir = get_root_dir()
+    root_dir = Path(sys.argv[1])
     main(root_dir)

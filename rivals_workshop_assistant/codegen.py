@@ -1,10 +1,9 @@
-from pathlib import Path
-
-from rivals_workshop_assistant.typing import Scripts
+from rivals_workshop_assistant.scripts_type import Scripts
 
 
-def handle_codegen(root_dir: Path, scripts: Scripts):
-    codegen_library = read_codegen_library()
+def handle_codegen(scripts: Scripts):
+    codegen_library = read_codegen_library()  # Hardcode this stuff in python,
+    # not fs
     result_scripts = apply_codegen(scripts, codegen_library)
     return result_scripts
 
