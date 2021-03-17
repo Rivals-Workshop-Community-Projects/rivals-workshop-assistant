@@ -7,7 +7,7 @@ from github3api import GitHubAPI
 
 from rivals_workshop_assistant.injection import library
 
-yaml = YAML(typ='safe')
+yaml_reader = YAML(typ='safe')
 github = GitHubAPI()
 
 ALLOW_MAJOR_UPDATES_NAME = 'allow_major_update'
@@ -77,7 +77,7 @@ def _read_config(root_dir: Path) -> str:
 
 
 def _make_update_config(config_text: str) -> UpdateConfig:
-    config_yaml: typing.Optional[dict] = yaml.load(config_text)
+    config_yaml: typing.Optional[dict] = yaml_reader.load(config_text)
     if not config_yaml:
         return UpdateConfig()
     return UpdateConfig(
@@ -114,7 +114,16 @@ def _get_current_release(root_dir: Path) -> Version:
 
 
 def get_current_release_from_dotfile(dotfile: str) -> typing.Optional[Version]:
-    return None
+    dotfile_yaml = yaml_reader.load(dotfile)
+    if dotfile_yaml is None:
+        return None
+
+    version_string: str = dotfile_yaml.get('version', None)
+    if version_string is None:
+        return None
+
+    major, minor, patch = (int(val) for val in version_string.split('.'))
+    return Version(major=major, minor=minor, patch=patch)
 
 
 def install_release(root_dir: Path, release: Version):

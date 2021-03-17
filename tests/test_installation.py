@@ -55,3 +55,9 @@ def test__get_current_release_from_empty_dotfile():
     dotfile = ""
     result = src.get_current_release_from_dotfile(dotfile)
     assert result is None
+
+
+def test__get_current_release_from_dotfile():
+    dotfile = "version: 3.2.1"
+    result = src.get_current_release_from_dotfile(dotfile)
+    assert result == src.Version(major=3, minor=2, patch=1)
