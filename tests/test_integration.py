@@ -1,5 +1,4 @@
 from pathlib import Path
-from dataclasses import dataclass
 
 import pytest
 from testfixtures import TempDirectory
@@ -9,18 +8,9 @@ from rivals_workshop_assistant.injection.library import INJECT_FOLDER
 from rivals_workshop_assistant.injection.dependency_handling import Define
 from rivals_workshop_assistant.main import read_scripts, save_scripts
 from rivals_workshop_assistant import injection
+from tests.testing_helpers import make_script, ScriptWithPath
 
 pytestmark = pytest.mark.slow
-
-
-@dataclass
-class ScriptWithPath:
-    path: Path
-    content: str
-
-    def absolute_path(self, tmp: TempDirectory):
-        return Path(tmp.path) / self.path
-
 
 script_1 = ScriptWithPath(
     path=Path('scripts/script_1.gml'),
@@ -74,11 +64,6 @@ func = Define(name='func', docs='some docs\nsome more docs',
 another_func = Define(name='another_func', content='another func\ncontent')
 needs_other = Define(name='needs_other', content='other()')
 other = Define(name='other', content='other content')
-
-
-def make_script(tmp: TempDirectory, script_with_path: ScriptWithPath):
-    tmp.write(script_with_path.path.as_posix(),
-              script_with_path.content.encode())
 
 
 def test_read_scripts():

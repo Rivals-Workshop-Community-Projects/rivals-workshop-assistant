@@ -4,11 +4,15 @@ from pathlib import Path
 
 from ruamel.yaml import YAML
 
+from rivals_workshop_assistant.injection import library
+
 yaml = YAML(typ='safe')
 
 ALLOW_MAJOR_UPDATES_NAME = 'allow_major_update'
 ALLOW_MINOR_UPDATES_NAME = 'allow_minor_update'
 ALLOW_PATCH_UPDATES_NAME = 'allow_patch_update'
+
+INJECT_CONFIG_NAME = 'inject_config.ini'
 
 
 @dataclasses.dataclass
@@ -35,23 +39,25 @@ def update_injection_library(root_dir: Path):
 
 def get_release_to_install(root_dir: Path) -> Version:
     """Controller"""
-    update_config = _get_update_config(root_dir)
+    update_config = get_update_config(root_dir)
     releases = _get_releases()
     release_to_install = _get_release_to_install_from_config_and_releases(
         update_config, releases)
     return release_to_install
 
 
-def _get_update_config(root_dir: Path) -> UpdateConfig:
+def get_update_config(root_dir: Path) -> UpdateConfig:
     """Controller"""
     config_text = _read_config(root_dir)
     update_config = _make_update_config(config_text)
-    raise NotImplementedError
+    return update_config
 
 
 def _read_config(root_dir: Path) -> str:
     """Controller"""
-    raise NotImplementedError
+    config_path = root_dir / library.INJECT_FOLDER / INJECT_CONFIG_NAME
+    config_text = config_path.read_text()
+    return config_text
 
 
 def _make_update_config(config_text: str) -> UpdateConfig:

@@ -4,7 +4,9 @@ from pathlib import Path
 from . import dependency_handling
 from .installation import update_injection_library
 
-INJECT_FOLDER = 'library/inject'
+LIBRARY_FOLDER = Path('library')
+
+INJECT_FOLDER = LIBRARY_FOLDER / Path('inject')
 
 
 def read_injection_library(
