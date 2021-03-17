@@ -3,10 +3,12 @@ import typing
 from pathlib import Path
 
 from ruamel.yaml import YAML
+from github3api import GitHubAPI
 
 from rivals_workshop_assistant.injection import library
 
 yaml = YAML(typ='safe')
+github = GitHubAPI()
 
 ALLOW_MAJOR_UPDATES_NAME = 'allow_major_update'
 ALLOW_MINOR_UPDATES_NAME = 'allow_minor_update'
@@ -29,6 +31,20 @@ class Version:
     patch: int = 0
 
 
+@dataclasses.dataclass
+class Release:
+    version: Version
+    download_url: str
+
+    @classmethod
+    def from_github_response(cls, response_dict):
+        major, minor, patch = (response_dict['tag_name']
+                               .split('-')[0]
+                               .split('.'))
+        return cls(version=Version(major=major, minor=minor, patch=patch),
+                   download_url=response_dict['zipball_url'])
+
+
 def update_injection_library(root_dir: Path):
     """Controller"""
     release_to_install = get_release_to_install(root_dir)
@@ -40,7 +56,7 @@ def update_injection_library(root_dir: Path):
 def get_release_to_install(root_dir: Path) -> Version:
     """Controller"""
     update_config = get_update_config(root_dir)
-    releases = _get_releases()
+    releases = get_releases()
     release_to_install = _get_release_to_install_from_config_and_releases(
         update_config, releases)
     return release_to_install
@@ -70,13 +86,19 @@ def _make_update_config(config_text: str) -> UpdateConfig:
         allow_patch_update=config_yaml.get('allow_patch_update', True))
 
 
-def _get_releases() -> list[Version]:
+def get_releases() -> list[Release]:
     """Controller"""
-    raise NotImplementedError
+
+    release_dicts = github.get(
+        f"/repos/{library.REPO_OWNER}/{library.REPO_NAME}/releases")
+    releases = [Release.from_github_response(release_dict)
+                for release_dict in release_dicts
+                if not release_dict['prerelease']]
+    return releases
 
 
 def _get_release_to_install_from_config_and_releases(
-        update_config: UpdateConfig, releases: list[Version]) -> Version:
+        update_config: UpdateConfig, releases: list[dict]) -> Version:
     raise NotImplementedError
 
 

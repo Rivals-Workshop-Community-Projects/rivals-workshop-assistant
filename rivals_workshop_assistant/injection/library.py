@@ -7,6 +7,8 @@ from .installation import update_injection_library
 LIBRARY_FOLDER = Path('library')
 
 INJECT_FOLDER = LIBRARY_FOLDER / Path('inject')
+REPO_OWNER = 'Rivals-Workshop-Community-Projects'
+REPO_NAME = 'injector-library'
 
 
 def read_injection_library(

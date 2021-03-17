@@ -27,3 +27,13 @@ def test__get_update_config():
         assert result == src.UpdateConfig(allow_major_update=False,
                                           allow_minor_update=True,
                                           allow_patch_update=True)
+
+
+def test__get_releases():
+    result = src.get_releases()
+
+    assert len(result) > 0 and type(result[0]) == src.Release
+    # Not going to mock it out, just make sure we get
+    #   something
+
+# def _get_release_to_install_from_config_and_releases
