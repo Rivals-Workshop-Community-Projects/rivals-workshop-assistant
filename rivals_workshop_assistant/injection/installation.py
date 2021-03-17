@@ -47,18 +47,18 @@ class Release:
 
 def update_injection_library(root_dir: Path):
     """Controller"""
-    release_to_install = get_release_to_install(root_dir)
     current_release = _get_current_release(root_dir)
+    release_to_install = get_release_to_install(root_dir, current_release)
     if current_release != release_to_install:
         install_release(root_dir, release_to_install)
 
 
-def get_release_to_install(root_dir: Path) -> Version:
+def get_release_to_install(root_dir: Path, current_release: Version) -> Version:
     """Controller"""
     update_config = get_update_config(root_dir)
     releases = get_releases()
     release_to_install = _get_release_to_install_from_config_and_releases(
-        update_config, releases)
+        update_config, releases, current_release)
     return release_to_install
 
 
@@ -86,6 +86,11 @@ def _make_update_config(config_text: str) -> UpdateConfig:
         allow_patch_update=config_yaml.get('allow_patch_update', True))
 
 
+def get_current_version(root_dir: Path) -> typing.Optional[Version]:
+    """Controller"""
+    dotfile_text = read_dotfile(root_dir)
+
+
 def get_releases() -> list[Release]:
     """Controller"""
 
@@ -105,11 +110,11 @@ def _get_release_to_install_from_config_and_releases(
 def _get_current_release(root_dir: Path) -> Version:
     """Controller"""
     dotfile = read_dotfile(root_dir)
-    return _get_current_release_from_dotfile(dotfile)
+    return get_current_release_from_dotfile(dotfile)
 
 
-def _get_current_release_from_dotfile(dotfile: str) -> Version:
-    raise NotImplementedError
+def get_current_release_from_dotfile(dotfile: str) -> typing.Optional[Version]:
+    return None
 
 
 def install_release(root_dir: Path, release: Version):

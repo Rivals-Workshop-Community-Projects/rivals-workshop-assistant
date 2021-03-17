@@ -49,3 +49,9 @@ def test__make_update_config_disallow_patch():
     assert result == src.UpdateConfig(allow_major_update=False,
                                       allow_minor_update=False,
                                       allow_patch_update=False)
+
+
+def test__get_current_release_from_empty_dotfile():
+    dotfile = ""
+    result = src.get_current_release_from_dotfile(dotfile)
+    assert result is None

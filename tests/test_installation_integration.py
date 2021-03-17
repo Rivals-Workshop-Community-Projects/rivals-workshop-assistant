@@ -36,4 +36,3 @@ def test__get_releases():
     # Not going to mock it out, just make sure we get
     #   something
 
-# def _get_release_to_install_from_config_and_releases
