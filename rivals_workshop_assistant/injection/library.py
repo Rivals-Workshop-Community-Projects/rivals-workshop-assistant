@@ -2,14 +2,16 @@ import re
 from pathlib import Path
 
 from . import dependency_handling
+from .installation import update_injection_library
 
 INJECT_FOLDER = 'library/inject'
 
 
 def read_injection_library(
-        root_path: Path) -> dependency_handling.InjectionLibrary:
-    # todo if not exist, populate from a cdn I'll have to make.
-    inject_gml_paths = (root_path / INJECT_FOLDER).rglob('*.gml')
+        root_dir: Path) -> dependency_handling.InjectionLibrary:
+    """Controller"""
+    update_injection_library(root_dir)
+    inject_gml_paths = (root_dir / INJECT_FOLDER).rglob('*.gml')
     inject_gmls = [gml_path.read_text() for gml_path in inject_gml_paths]
     full_inject_gml = '\n\n'.join(inject_gmls)
     return get_injection_library_from_gml(full_inject_gml)
