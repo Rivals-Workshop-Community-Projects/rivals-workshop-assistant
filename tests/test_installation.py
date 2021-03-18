@@ -38,13 +38,13 @@ def test__make_update_config_major_level(config_value, expected):
 
 def test__get_current_release_from_empty_dotfile():
     dotfile = ""
-    result = src.get_current_release_from_dotfile(dotfile)
+    result = src.get_current_version_from_dotfile(dotfile)
     assert result is None
 
 
 def test__get_current_release_from_dotfile():
     dotfile = "version: 3.2.1"
-    result = src.get_current_release_from_dotfile(dotfile)
+    result = src.get_current_version_from_dotfile(dotfile)
     assert result == make_version('3.2.1')
 
 
@@ -94,6 +94,12 @@ version: 10.11.12
                      [make_release('3.0.3', 'urlb')],
                      make_release('3.0.4', 'urlc')
                      ),
+        pytest.param(src.UpdateConfig.MINOR,
+                     None,
+                     [make_release('3.0.3', 'urlb'),
+                      make_release('3.0.4', 'urlc')],
+                     make_release('3.0.5', 'urld'),
+                     ),
         pytest.param(src.UpdateConfig.PATCH,
                      make_version('3.0.2'),
                      [make_release('4.1.3', 'urlb'),
@@ -105,18 +111,25 @@ version: 10.11.12
                       make_release('3.0.4', 'urlc')],
                      None,
                      ),
+        pytest.param(src.UpdateConfig.NONE,
+                     None,
+                     [make_release('3.0.3', 'urlb'),
+                      make_release('3.0.4', 'urlc')],
+                     make_release('3.0.5', 'urld'),
+                     ),
     ]
 )
 def test__get_release_to_install_from_config_and_releases(
         update_config, current_version, other_releases, expected_release
 ):
-    releases = ([src.Release(version=current_version, download_url='urla')]
-                + other_releases
-                )
+    releases = other_releases
+
+    if current_version is not None:
+        releases += [src.Release(version=current_version, download_url='urla')]
     if expected_release is not None:
         releases += [expected_release]
 
-    result = src._get_release_to_install_from_config_and_releases(
+    result = src._get_legal_release_to_install(
         update_config=update_config,
         releases=releases,
         current_version=current_version

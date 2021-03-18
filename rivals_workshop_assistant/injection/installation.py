@@ -59,17 +59,18 @@ class Release:
 
 def update_injection_library(root_dir: Path):
     """Controller"""
-    current_release = _get_current_release(root_dir)
-    release_to_install = get_release_to_install(root_dir, current_release)
-    if current_release != release_to_install:
+    current_version = _get_current_version(root_dir)
+    release_to_install = get_release_to_install(root_dir, current_version)
+    if (release_to_install is not None
+            and current_version != release_to_install.version):
         install_release(root_dir, release_to_install)
 
 
-def get_release_to_install(root_dir: Path, current_version: Version) -> Version:
+def get_release_to_install(root_dir: Path, current_version: Version) -> Release:
     """Controller"""
     update_config = get_update_config(root_dir)
     releases = get_releases()
-    release_to_install = _get_release_to_install_from_config_and_releases(
+    release_to_install = _get_legal_release_to_install(
         update_config, releases, current_version)
     return release_to_install
 
@@ -84,8 +85,11 @@ def get_update_config(root_dir: Path) -> UpdateConfig:
 def _read_config(root_dir: Path) -> str:
     """Controller"""
     config_path = root_dir / library.INJECT_FOLDER / INJECT_CONFIG_NAME
-    config_text = config_path.read_text()
-    return config_text
+    try:
+        config_text = config_path.read_text()
+        return config_text
+    except FileNotFoundError:
+        return ''
 
 
 def _make_update_config(config_text: str) -> UpdateConfig:
@@ -111,12 +115,31 @@ def get_releases() -> list[Release]:
     return releases
 
 
-def _get_release_to_install_from_config_and_releases(
+def _get_legal_release_to_install(
         update_config: UpdateConfig,
         releases: list[Release],
-        current_version: Version) -> typing.Optional[Release]:
-    if update_config == UpdateConfig.NONE:
+        current_version: typing.Optional[Version]) -> typing.Optional[Release]:
+    if current_version is None:
+        candidates = releases.copy()
+    else:
+        candidates = _get_legal_releases(update_config=update_config,
+                                         releases=releases,
+                                         current_version=current_version)
+    if candidates:
+        newest_version = max(candidates)
+        return newest_version
+    else:
         return None
+
+
+def _get_legal_releases(
+        update_config: UpdateConfig,
+        releases: list[Release],
+        current_version: Version
+) -> list[Release]:
+    """Releases are constrained based on config and current version."""
+    if update_config == UpdateConfig.NONE:
+        return []
 
     candidates = releases.copy()
 
@@ -130,20 +153,16 @@ def _get_release_to_install_from_config_and_releases(
                       if candidate.version.major == current_version.major
                       and candidate.version.minor == current_version.minor
                       and candidate.version > current_version]
-    if candidates:
-        newest_version = max(candidates)
-        return newest_version
-    else:
-        return None
+    return candidates
 
 
-def _get_current_release(root_dir: Path) -> Version:
+def _get_current_version(root_dir: Path) -> Version:
     """Controller"""
     dotfile = read_dotfile(root_dir)
-    return get_current_release_from_dotfile(dotfile)
+    return get_current_version_from_dotfile(dotfile)
 
 
-def get_current_release_from_dotfile(dotfile: str) -> typing.Optional[Version]:
+def get_current_version_from_dotfile(dotfile: str) -> typing.Optional[Version]:
     dotfile_yaml = yaml_handler.load(dotfile)
     if dotfile_yaml is None:
         return None
@@ -156,11 +175,11 @@ def get_current_release_from_dotfile(dotfile: str) -> typing.Optional[Version]:
     return Version(major=major, minor=minor, patch=patch)
 
 
-def install_release(root_dir: Path, release: Version):
+def install_release(root_dir: Path, release: Release):
     """Controller"""
     _delete_old_release(root_dir)
     _download_and_unzip_release(root_dir)
-    _update_dotfile_with_new_release(root_dir, release)
+    _update_dotfile_with_new_version(root_dir, release.version)
 
 
 def _delete_old_release(root_dir: Path):
@@ -173,10 +192,10 @@ def _download_and_unzip_release(root_dir: Path):
     raise NotImplementedError
 
 
-def _update_dotfile_with_new_release(root_dir: Path, release: Version):
+def _update_dotfile_with_new_version(root_dir: Path, version: Version):
     """Controller"""
     old_dotfile = read_dotfile(root_dir)
-    new_dotfile = _get_dotfile_with_new_version(release, old_dotfile)
+    new_dotfile = _get_dotfile_with_new_version(version, old_dotfile)
     save_dotfile(root_dir, new_dotfile)
 
 

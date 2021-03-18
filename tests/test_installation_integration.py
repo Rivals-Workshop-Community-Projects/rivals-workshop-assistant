@@ -17,17 +17,12 @@ def test__get_update_config():
             path=INJECT_FOLDER / Path(src.INJECT_CONFIG_NAME),
             content=f"""\
 
-{src.ALLOW_MINOR_UPDATES_NAME}: true
-
-
-{src.ALLOW_PATCH_UPDATES_NAME}: true
+{src.UPDATE_LEVEL_NAME}: minor
 
 """))
 
         result = src.get_update_config(Path(tmp.path))
-        assert result == src.UpdateConfig(allow_major_update=False,
-                                          allow_minor_update=True,
-                                          allow_patch_update=True)
+        assert result == src.UpdateConfig.MINOR
 
 
 def test__get_releases():
@@ -45,8 +40,8 @@ def test__update_dotfile_with_new_release():
             content="other_content: 42"
         ))
 
-        src._update_dotfile_with_new_release(root_dir=Path(tmp.path),
-                                             release=src.Version(major=4,
+        src._update_dotfile_with_new_version(root_dir=Path(tmp.path),
+                                             version=src.Version(major=4,
                                                                  minor=5,
                                                                  patch=6))
         result = tmp.read(DOTFILE_PATH.as_posix(), encoding='utf8')
@@ -59,8 +54,8 @@ version: 4.5.6
 
 def test__update_dotfile_with_new_release_when_missing_dotfile():
     with TempDirectory() as tmp:
-        src._update_dotfile_with_new_release(root_dir=Path(tmp.path),
-                                             release=src.Version(major=4,
+        src._update_dotfile_with_new_version(root_dir=Path(tmp.path),
+                                             version=src.Version(major=4,
                                                                  minor=5,
                                                                  patch=6))
         result = tmp.read(DOTFILE_PATH.as_posix(), encoding='utf8')
