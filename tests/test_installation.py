@@ -1,54 +1,39 @@
+import pytest
+
 from rivals_workshop_assistant.injection import installation as src
+
+
+def make_version(version_str: str) -> src.Version:
+    major, minor, patch = (int(char) for char in version_str.split('.'))
+    return src.Version(major=major, minor=minor, patch=patch)
+
+
+def make_release(version_str: str, url: str) -> src.Release:
+    version = make_version(version_str)
+    return src.Release(version=version, download_url=url)
 
 
 def test__make_update_config_empty():
     config_text = ""
 
     result = src._make_update_config(config_text)
-    assert result == src.UpdateConfig(allow_major_update=False,
-                                      allow_minor_update=False,
-                                      allow_patch_update=True)
+    assert result == src.UpdateConfig.PATCH
 
 
-def test__make_update_config_allow_major():
+@pytest.mark.parametrize(
+    "config_value, expected", [
+        pytest.param("major", src.UpdateConfig.MAJOR),
+        pytest.param("minor", src.UpdateConfig.MINOR),
+        pytest.param("patch", src.UpdateConfig.PATCH),
+        pytest.param("none", src.UpdateConfig.NONE)
+    ]
+)
+def test__make_update_config_major_level(config_value, expected):
     config_text = f"""\
-{src.ALLOW_MAJOR_UPDATES_NAME}: true"""
+{src.UPDATE_LEVEL_NAME}: {config_value}"""
 
     result = src._make_update_config(config_text)
-    assert result == src.UpdateConfig(allow_major_update=True,
-                                      allow_minor_update=False,
-                                      allow_patch_update=True)
-
-
-def test__make_update_config_disallow_major():
-    config_text = f"""\
-{src.ALLOW_MAJOR_UPDATES_NAME}: false"""
-
-    result = src._make_update_config(config_text)
-    assert result == src.UpdateConfig(allow_major_update=False,
-                                      allow_minor_update=False,
-                                      allow_patch_update=True)
-
-
-def test__make_update_config_allow_minor_and_major():
-    config_text = f"""\
-{src.ALLOW_MAJOR_UPDATES_NAME}: true
-{src.ALLOW_MINOR_UPDATES_NAME}: true"""
-
-    result = src._make_update_config(config_text)
-    assert result == src.UpdateConfig(allow_major_update=True,
-                                      allow_minor_update=True,
-                                      allow_patch_update=True)
-
-
-def test__make_update_config_disallow_patch():
-    config_text = f"""\
-{src.ALLOW_PATCH_UPDATES_NAME}: false"""
-
-    result = src._make_update_config(config_text)
-    assert result == src.UpdateConfig(allow_major_update=False,
-                                      allow_minor_update=False,
-                                      allow_patch_update=False)
+    assert result == expected
 
 
 def test__get_current_release_from_empty_dotfile():
@@ -60,25 +45,25 @@ def test__get_current_release_from_empty_dotfile():
 def test__get_current_release_from_dotfile():
     dotfile = "version: 3.2.1"
     result = src.get_current_release_from_dotfile(dotfile)
-    assert result == src.Version(major=3, minor=2, patch=1)
+    assert result == make_version('3.2.1')
 
 
 def test__get_dotfile_with_new_release():
-    release = src.Version(major=10, minor=11, patch=12)
+    version = src.Version(major=10, minor=11, patch=12)
     old_dotfile = "version: 3.2.1"
 
-    result = src._get_dotfile_with_new_release(release=release,
+    result = src._get_dotfile_with_new_version(version=version,
                                                old_dotfile=old_dotfile)
     assert result == "version: 10.11.12\n"
 
 
 def test__get_dotfile_with_new_release_with_other_data():
-    release = src.Version(major=10, minor=11, patch=12)
+    release = make_version('10.11.12')
     old_dotfile = """\
 something_else: version
 version: 3.2.1"""
 
-    result = src._get_dotfile_with_new_release(release=release,
+    result = src._get_dotfile_with_new_version(version=release,
                                                old_dotfile=old_dotfile)
     assert result == """\
 something_else: version

@@ -1,4 +1,5 @@
 import dataclasses
+import enum
 import typing
 from pathlib import Path
 
@@ -10,18 +11,16 @@ from rivals_workshop_assistant.injection import library
 yaml_handler = YAML()
 github = GitHubAPI()
 
-ALLOW_MAJOR_UPDATES_NAME = 'allow_major_update'
-ALLOW_MINOR_UPDATES_NAME = 'allow_minor_update'
-ALLOW_PATCH_UPDATES_NAME = 'allow_patch_update'
+UPDATE_LEVEL_NAME = 'update_level'
 
 INJECT_CONFIG_NAME = 'inject_config.ini'
 
 
-@dataclasses.dataclass
-class UpdateConfig:
-    allow_major_update: bool = False
-    allow_minor_update: bool = False
-    allow_patch_update: bool = True
+class UpdateConfig(enum.Enum):
+    MAJOR = "major"
+    MINOR = "minor"
+    PATCH = "patch"
+    NONE = "none"
 
 
 @dataclasses.dataclass
@@ -82,11 +81,8 @@ def _read_config(root_dir: Path) -> str:
 def _make_update_config(config_text: str) -> UpdateConfig:
     config_yaml: typing.Optional[dict] = yaml_handler.load(config_text)
     if not config_yaml:
-        return UpdateConfig()
-    return UpdateConfig(
-        allow_major_update=config_yaml.get('allow_major_update', False),
-        allow_minor_update=config_yaml.get('allow_minor_update', False),
-        allow_patch_update=config_yaml.get('allow_patch_update', True))
+        return UpdateConfig.PATCH
+    return UpdateConfig(config_yaml.get('update_level', UpdateConfig.PATCH))
 
 
 def get_current_version(root_dir: Path) -> typing.Optional[Version]:
