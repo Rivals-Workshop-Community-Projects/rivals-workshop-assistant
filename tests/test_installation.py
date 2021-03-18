@@ -71,4 +71,54 @@ version: 10.11.12
 """
 
 
+@pytest.mark.parametrize(
+    "update_config, current_version, other_releases, expected_release", [
+        pytest.param(src.UpdateConfig.MAJOR,
+                     make_version('1.2.3'),
+                     [make_release('2.3.4', 'urlb')],
+                     make_release('5.0.1', 'urlc')
+                     ),
+        pytest.param(src.UpdateConfig.MAJOR,
+                     make_version('3.0.2'),
+                     [make_release('3.0.3', 'urlb')],
+                     make_release('3.0.4', 'urlnew'),
+                     ),
+        pytest.param(src.UpdateConfig.MINOR,
+                     make_version('3.0.2'),
+                     [make_release('4.0.3', 'urlb'),
+                      make_release('4.0.4', 'urlc')],
+                     None,
+                     ),
+        pytest.param(src.UpdateConfig.MINOR,
+                     make_version('3.0.2'),
+                     [make_release('3.0.3', 'urlb')],
+                     make_release('3.0.4', 'urlc')
+                     ),
+        pytest.param(src.UpdateConfig.PATCH,
+                     make_version('3.0.2'),
+                     [make_release('4.1.3', 'urlb'),
+                      make_release('3.2.3', 'urlc')],
+                     make_release('3.0.8', 'urld')),
+        pytest.param(src.UpdateConfig.NONE,
+                     make_version('3.0.2'),
+                     [make_release('3.0.3', 'urlb'),
+                      make_release('3.0.4', 'urlc')],
+                     None,
+                     ),
+    ]
+)
+def test__get_release_to_install_from_config_and_releases(
+        update_config, current_version, other_releases, expected_release
+):
+    releases = ([src.Release(version=current_version, download_url='urla')]
+                + other_releases
+                )
+    if expected_release is not None:
+        releases += [expected_release]
 
+    result = src._get_release_to_install_from_config_and_releases(
+        update_config=update_config,
+        releases=releases,
+        current_version=current_version
+    )
+    assert result == expected_release
