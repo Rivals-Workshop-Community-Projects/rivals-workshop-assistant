@@ -61,3 +61,29 @@ def test__get_current_release_from_dotfile():
     dotfile = "version: 3.2.1"
     result = src.get_current_release_from_dotfile(dotfile)
     assert result == src.Version(major=3, minor=2, patch=1)
+
+
+def test__get_dotfile_with_new_release():
+    release = src.Version(major=10, minor=11, patch=12)
+    old_dotfile = "version: 3.2.1"
+
+    result = src._get_dotfile_with_new_release(release=release,
+                                               old_dotfile=old_dotfile)
+    assert result == "version: 10.11.12\n"
+
+
+def test__get_dotfile_with_new_release_with_other_data():
+    release = src.Version(major=10, minor=11, patch=12)
+    old_dotfile = """\
+something_else: version
+version: 3.2.1"""
+
+    result = src._get_dotfile_with_new_release(release=release,
+                                               old_dotfile=old_dotfile)
+    assert result == """\
+something_else: version
+version: 10.11.12
+"""
+
+
+

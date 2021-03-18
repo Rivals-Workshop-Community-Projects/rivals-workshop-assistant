@@ -2,12 +2,12 @@ import dataclasses
 import typing
 from pathlib import Path
 
-from ruamel.yaml import YAML
+from ruamel.yaml import YAML, StringIO
 from github3api import GitHubAPI
 
 from rivals_workshop_assistant.injection import library
 
-yaml_reader = YAML(typ='safe')
+yaml_handler = YAML()
 github = GitHubAPI()
 
 ALLOW_MAJOR_UPDATES_NAME = 'allow_major_update'
@@ -29,6 +29,9 @@ class Version:
     major: int = 0
     minor: int = 0
     patch: int = 0
+
+    def __str__(self):
+        return f'{self.major}.{self.minor}.{self.patch}'
 
 
 @dataclasses.dataclass
@@ -77,7 +80,7 @@ def _read_config(root_dir: Path) -> str:
 
 
 def _make_update_config(config_text: str) -> UpdateConfig:
-    config_yaml: typing.Optional[dict] = yaml_reader.load(config_text)
+    config_yaml: typing.Optional[dict] = yaml_handler.load(config_text)
     if not config_yaml:
         return UpdateConfig()
     return UpdateConfig(
@@ -114,7 +117,7 @@ def _get_current_release(root_dir: Path) -> Version:
 
 
 def get_current_release_from_dotfile(dotfile: str) -> typing.Optional[Version]:
-    dotfile_yaml = yaml_reader.load(dotfile)
+    dotfile_yaml = yaml_handler.load(dotfile)
     if dotfile_yaml is None:
         return None
 
@@ -152,14 +155,34 @@ def _update_dotfile_with_new_release(root_dir: Path, release: Version):
 
 def read_dotfile(root_dir: Path):
     """Controller"""
-    raise NotImplementedError
+    dotfile_path = root_dir / library.DOTFILE_PATH
+    try:
+        return dotfile_path.read_text()
+    except FileNotFoundError:
+        return ''
 
 
 def _get_dotfile_with_new_release(
         release: Version, old_dotfile: str) -> str:
-    raise NotImplementedError
+    dotfile_yaml = yaml_handler.load(old_dotfile)
+
+    if dotfile_yaml is None:
+        dotfile_yaml = {}
+
+    dotfile_yaml['version'] = str(release)
+    return _yaml_dumps(dotfile_yaml)
 
 
 def save_dotfile(root_dir: Path, dotfile: str):
     """Controller"""
-    raise NotImplementedError
+    dotfile_path = root_dir / library.DOTFILE_PATH
+    dotfile_path.parent.mkdir(exist_ok=True)
+    with open(dotfile_path, 'w+', newline='\n') as f:
+        f.write(dotfile)
+
+
+def _yaml_dumps(obj) -> str:
+    with StringIO() as string_stream:
+        yaml_handler.dump(obj, string_stream)
+        output_str = string_stream.getvalue()
+    return output_str

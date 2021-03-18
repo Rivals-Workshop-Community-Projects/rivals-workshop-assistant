@@ -2,11 +2,14 @@ import re
 from pathlib import Path
 
 from . import dependency_handling
-from .installation import update_injection_library
 
 LIBRARY_FOLDER = Path('library')
 
 INJECT_FOLDER = LIBRARY_FOLDER / Path('inject')
+
+DOTFILE_NAME = '.assistant'
+DOTFILE_PATH = LIBRARY_FOLDER / DOTFILE_NAME
+
 REPO_OWNER = 'Rivals-Workshop-Community-Projects'
 REPO_NAME = 'injector-library'
 
@@ -14,7 +17,6 @@ REPO_NAME = 'injector-library'
 def read_injection_library(
         root_dir: Path) -> dependency_handling.InjectionLibrary:
     """Controller"""
-    update_injection_library(root_dir)
     inject_gml_paths = (root_dir / INJECT_FOLDER).rglob('*.gml')
     inject_gmls = [gml_path.read_text() for gml_path in inject_gml_paths]
     full_inject_gml = '\n\n'.join(inject_gmls)
