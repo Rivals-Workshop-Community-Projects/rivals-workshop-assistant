@@ -31,3 +31,9 @@ def make_release(version_str: str, url: str) -> src.Release:
 
 
 test_date_string = '2019-12-04'
+
+
+def assert_script(tmp, script: ScriptWithPath):
+    actual_content = tmp.read(filepath=script.path.as_posix(),
+                              encoding='utf8')
+    assert actual_content == script.content

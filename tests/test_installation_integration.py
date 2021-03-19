@@ -6,12 +6,12 @@ from testfixtures import TempDirectory
 
 import rivals_workshop_assistant.injection.library
 from rivals_workshop_assistant.injection.library import INJECT_FOLDER, \
-    DOTFILE_PATH, INJECT_CONFIG_PATH
+    DOTFILE_PATH, INJECT_CONFIG_PATH, USER_INJECT_FOLDER
 from rivals_workshop_assistant.injection import installation as src
 from tests.testing_helpers import make_script, \
     ScriptWithPath, \
     make_release, \
-    make_version, test_date_string
+    make_version, test_date_string, assert_script
 
 pytestmark = pytest.mark.slow
 
@@ -182,8 +182,14 @@ def test__install_release():
                         path=INJECT_FOLDER / 'test.gml',
                         content='test content'),
                     )
+        existing_user_inject = ScriptWithPath(
+            path=USER_INJECT_FOLDER / 'users.gml',
+            content='whatever')
+        make_script(tmp,
+                    existing_user_inject)
 
         src.install_release(root_dir=Path(tmp.path),
                             release=TEST_RELEASE)
 
         assert_test_release_installed(tmp)
+        assert_script(tmp, existing_user_inject)
