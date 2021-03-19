@@ -199,8 +199,8 @@ def _download_and_unzip_release(root_dir: Path, release: Release):
         zipped_release.extractall(path=tmp)
 
         release_root = list(Path(tmp).glob('*'))[0]  # gets the subfolder
-        shutil.move(src=release_root,
-                    dst=root_dir / library.LIBRARY_FOLDER)
+        shutil.move(src=release_root / 'inject',
+                    dst=root_dir / library.LIBRARY_FOLDER / 'inject')
 
 
 def _update_dotfile_with_new_version(root_dir: Path, version: Version):

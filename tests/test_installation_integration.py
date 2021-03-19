@@ -132,6 +132,7 @@ def test__update_dotfile__no_dotfile():
                                    encoding='utf8')
         assert dotpath_content == 'version: 4.5.6\n'
 
+
 def test__update_dotfile():
     with TempDirectory() as tmp:
         make_script(tmp, ScriptWithPath(
@@ -140,13 +141,25 @@ def test__update_dotfile():
             root_dir=Path(tmp.path), version=make_version('4.5.6'))
 
         dotfile = tmp.read(filepath=DOTFILE_PATH.as_posix(),
-                                   encoding='utf8')
+                           encoding='utf8')
         assert dotfile == 'version: 4.5.6\n'
 
-    # def test__install_release():
-#     with TempDirectory() as tmp:
-#         src.install_release(root_dir=Path(tmp.path),
-#                             release=test_release)
+
+def test__install_release():
+    with TempDirectory() as tmp:
+        make_script(tmp,
+                    ScriptWithPath(
+                        path=INJECT_FOLDER / 'test.gml',
+                        content='test content'),
+                    )
+
+        src.install_release(root_dir=Path(tmp.path),
+                            release=TEST_RELEASE)
+
+        assert_test_release_installed(tmp)
+        dotfile = tmp.read(filepath=DOTFILE_PATH.as_posix(),
+                           encoding='utf8')
+        assert dotfile == 'version: 0.0.0\n'
 
 # def test__update_injection_library__on_empty():
 #     with TempDirectory() as tmp:
