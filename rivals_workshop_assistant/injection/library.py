@@ -5,7 +5,7 @@ from . import dependency_handling
 
 ASSISTANT_FOLDER = Path('assistant')
 
-INJECT_FOLDER = ASSISTANT_FOLDER / Path('inject')
+INJECT_FOLDER = ASSISTANT_FOLDER / Path('.inject')
 
 DOTFILE_NAME = '.assistant'
 DOTFILE_PATH = ASSISTANT_FOLDER / DOTFILE_NAME

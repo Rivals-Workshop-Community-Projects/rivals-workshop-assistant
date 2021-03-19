@@ -2,6 +2,7 @@ import dataclasses
 import datetime
 import enum
 import io
+import os
 import shutil
 import tempfile
 import typing
@@ -237,8 +238,10 @@ def _download_and_unzip_release(root_dir: Path, release: Release):
         zipped_release.extractall(path=tmp)
 
         release_root = list(Path(tmp).glob('*'))[0]  # gets the subfolder
-        shutil.move(src=release_root / 'inject',
-                    dst=root_dir / library.ASSISTANT_FOLDER / 'inject')
+
+        os.rename(release_root / 'inject', release_root / '.inject')
+        shutil.move(src=release_root / '.inject',
+                    dst=root_dir / library.INJECT_FOLDER)
 
 
 def _update_dotfile_for_install(

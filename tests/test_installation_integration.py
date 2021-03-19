@@ -124,14 +124,6 @@ def test__download_and_unzip_release():
         assert_test_release_scripts_installed(tmp)
 
 
-def test__download_and_unzip_release__directory_already_present():
-    with TempDirectory() as tmp:
-        tmp.makedir('inject')
-        src._download_and_unzip_release(
-            root_dir=Path(tmp.path), release=TEST_RELEASE)
-        assert_test_release_scripts_installed(tmp)
-
-
 def test__update_dotfile__no_dotfile():
     with TempDirectory() as tmp:
         src._update_dotfile_for_install(root_dir=Path(tmp.path),
