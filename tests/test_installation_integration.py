@@ -4,9 +4,7 @@ from pathlib import Path
 import pytest
 from testfixtures import TempDirectory
 
-import rivals_workshop_assistant.injection.library
-from rivals_workshop_assistant.injection.paths import INJECT_FOLDER, \
-    USER_INJECT_FOLDER, DOTFILE_PATH, INJECT_CONFIG_PATH
+import rivals_workshop_assistant.injection.paths as paths
 from rivals_workshop_assistant.injection import installation as src
 from tests.testing_helpers import make_script, \
     ScriptWithPath, \
@@ -19,7 +17,7 @@ pytestmark = pytest.mark.slow
 def test__get_update_config():
     with TempDirectory() as tmp:
         make_script(tmp, ScriptWithPath(
-            path=INJECT_CONFIG_PATH,
+            path=paths.INJECT_CONFIG_PATH,
             content=f"""\
 
 {src.UPDATE_LEVEL_NAME}: minor
@@ -33,7 +31,7 @@ def test__get_update_config():
 def test__get_releases():
     result = src.get_releases()
 
-    assert len(result) > 0 and type(result[0]) == src.Release
+    assert len(result) > 0 and isinstance(result[0], src.Release)
     # Not going to mock it out, just make sure we get
     #   something
 
@@ -41,7 +39,7 @@ def test__get_releases():
 def test__update_dotfile_with_new_release():
     with TempDirectory() as tmp:
         make_script(tmp, ScriptWithPath(
-            path=DOTFILE_PATH,
+            path=paths.DOTFILE_PATH,
             content="other_content: 42"
         ))
 
@@ -51,7 +49,7 @@ def test__update_dotfile_with_new_release():
                                 minor=5,
                                 patch=6),
             last_updated=datetime.date.fromisoformat(test_date_string))
-        result = tmp.read(DOTFILE_PATH.as_posix(), encoding='utf8')
+        result = tmp.read(paths.DOTFILE_PATH.as_posix(), encoding='utf8')
 
         assert result == f"""\
 other_content: 42
@@ -68,7 +66,7 @@ def test__update_dotfile_with_new_release_when_missing_dotfile():
                                                             patch=6),
                                         last_updated=datetime.date.fromisoformat(
                                             '2019-12-04'))
-        result = tmp.read(DOTFILE_PATH.as_posix(), encoding='utf8')
+        result = tmp.read(paths.DOTFILE_PATH.as_posix(), encoding='utf8')
 
         assert result == f"""\
 version: 4.5.6
@@ -86,24 +84,24 @@ def test__delete_old_release():
     with TempDirectory() as tmp:
         make_script(tmp,
                     ScriptWithPath(
-                        path=INJECT_FOLDER / 'test.gml',
+                        path=paths.INJECT_FOLDER / 'test.gml',
                         content='test content'),
                     )
 
         src._delete_old_release(Path(tmp.path))
 
-        tmp.compare(path=INJECT_FOLDER.as_posix(), expected=())
+        tmp.compare(path=paths.INJECT_FOLDER.as_posix(), expected=())
 
 
 def test__delete_old_release__none_exists():
     with TempDirectory() as tmp:
         src._delete_old_release(Path(tmp.path))
 
-        tmp.compare(path=INJECT_FOLDER.as_posix(), expected=())
+        tmp.compare(path=paths.INJECT_FOLDER.as_posix(), expected=())
 
 
 def assert_test_release_scripts_installed(tmp):
-    file_contents = tmp.read((INJECT_FOLDER / 'logging.gml').as_posix(),
+    file_contents = tmp.read((paths.INJECT_FOLDER / 'logging.gml').as_posix(),
                              encoding='utf8')
     assert file_contents == """\
 #define prints()
@@ -130,7 +128,7 @@ def test__update_dotfile__no_dotfile():
                                         last_updated=datetime.date.fromisoformat(
                                             '2019-12-04'))
 
-        dotpath_content = tmp.read(filepath=DOTFILE_PATH.as_posix(),
+        dotpath_content = tmp.read(filepath=paths.DOTFILE_PATH.as_posix(),
                                    encoding='utf8')
         assert dotpath_content == f"""\
 version: 4.5.6
@@ -141,13 +139,13 @@ last_updated: {test_date_string}
 def test__update_dotfile():
     with TempDirectory() as tmp:
         make_script(tmp, ScriptWithPath(
-            path=DOTFILE_PATH, content='version: 3.4.5\n'))
+            path=paths.DOTFILE_PATH, content='version: 3.4.5\n'))
         src._update_dotfile_for_install(root_dir=Path(tmp.path),
                                         version=make_version('4.5.6'),
                                         last_updated=datetime.date.fromisoformat(
                                             '2019-12-04'))
 
-        dotfile = tmp.read(filepath=DOTFILE_PATH.as_posix(),
+        dotfile = tmp.read(filepath=paths.DOTFILE_PATH.as_posix(),
                            encoding='utf8')
         assert dotfile == f"""\
 version: 4.5.6
@@ -157,7 +155,7 @@ last_updated: {test_date_string}
 
 def assert_test_release_installed(tmp):
     assert_test_release_scripts_installed(tmp)
-    dotfile = tmp.read(filepath=DOTFILE_PATH.as_posix(),
+    dotfile = tmp.read(filepath=paths.DOTFILE_PATH.as_posix(),
                        encoding='utf8')
     assert 'version: 0.0.0\n' in dotfile
     assert 'last_updated: ' in dotfile  # not checking exact date because
@@ -168,21 +166,21 @@ def test__install_release():
     with TempDirectory() as tmp:
         make_script(tmp,
                     ScriptWithPath(
-                        path=DOTFILE_PATH,
+                        path=paths.DOTFILE_PATH,
                         content="version: 0.0.0"
                     ))
         make_script(tmp,
                     ScriptWithPath(
-                        path=INJECT_CONFIG_PATH,
+                        path=paths.INJECT_CONFIG_PATH,
                         content="update_level: none"
                     ))
         make_script(tmp,
                     ScriptWithPath(
-                        path=INJECT_FOLDER / 'test.gml',
+                        path=paths.INJECT_FOLDER / 'test.gml',
                         content='test content'),
                     )
         existing_user_inject = ScriptWithPath(
-            path=USER_INJECT_FOLDER / 'users.gml',
+            path=paths.USER_INJECT_FOLDER / 'users.gml',
             content='whatever')
         make_script(tmp,
                     existing_user_inject)
