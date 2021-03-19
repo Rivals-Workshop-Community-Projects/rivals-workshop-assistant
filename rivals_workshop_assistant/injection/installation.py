@@ -1,8 +1,13 @@
 import dataclasses
 import enum
+import io
+import shutil
+import tempfile
 import typing
 from pathlib import Path
+import zipfile
 
+import requests
 from ruamel.yaml import YAML, StringIO
 from github3api import GitHubAPI
 
@@ -99,11 +104,6 @@ def _make_update_config(config_text: str) -> UpdateConfig:
     return UpdateConfig(config_yaml.get('update_level', UpdateConfig.PATCH))
 
 
-def get_current_version(root_dir: Path) -> typing.Optional[Version]:
-    """Controller"""
-    dotfile_text = read_dotfile(root_dir)
-
-
 def get_releases() -> list[Release]:
     """Controller"""
 
@@ -178,18 +178,29 @@ def get_current_version_from_dotfile(dotfile: str) -> typing.Optional[Version]:
 def install_release(root_dir: Path, release: Release):
     """Controller"""
     _delete_old_release(root_dir)
-    _download_and_unzip_release(root_dir)
+    _download_and_unzip_release(root_dir, release)
     _update_dotfile_with_new_version(root_dir, release.version)
 
 
 def _delete_old_release(root_dir: Path):
     """Controller"""
-    raise NotImplementedError
+    inject_path = (root_dir / library.INJECT_FOLDER)
+    try:
+        shutil.rmtree(inject_path)
+    except FileNotFoundError:
+        pass  # Nothing to delete
 
 
-def _download_and_unzip_release(root_dir: Path):
+def _download_and_unzip_release(root_dir: Path, release: Release):
     """Controller"""
-    raise NotImplementedError
+    with tempfile.TemporaryDirectory() as tmp:
+        response = requests.get(release.download_url)
+        zipped_release = zipfile.ZipFile(io.BytesIO(response.content))
+        zipped_release.extractall(path=tmp)
+
+        release_root = list(Path(tmp).glob('*'))[0]  # gets the subfolder
+        shutil.move(src=release_root,
+                    dst=root_dir / library.LIBRARY_FOLDER)
 
 
 def _update_dotfile_with_new_version(root_dir: Path, version: Version):

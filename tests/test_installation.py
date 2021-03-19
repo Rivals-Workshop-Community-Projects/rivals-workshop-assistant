@@ -1,16 +1,7 @@
 import pytest
 
 from rivals_workshop_assistant.injection import installation as src
-
-
-def make_version(version_str: str) -> src.Version:
-    major, minor, patch = (int(char) for char in version_str.split('.'))
-    return src.Version(major=major, minor=minor, patch=patch)
-
-
-def make_release(version_str: str, url: str) -> src.Release:
-    version = make_version(version_str)
-    return src.Release(version=version, download_url=url)
+from tests.testing_helpers import make_version, make_release
 
 
 def test__make_update_config_empty():
