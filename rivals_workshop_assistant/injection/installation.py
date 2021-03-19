@@ -13,7 +13,7 @@ import requests
 from ruamel.yaml import YAML, StringIO
 from github3api import GitHubAPI
 
-from rivals_workshop_assistant.injection import library
+from . import paths
 
 yaml_handler = YAML()
 github = GitHubAPI()
@@ -89,10 +89,10 @@ def update_injection_library(root_dir: Path):
 
 
 def make_basic_folder_structure(root_dir: Path):
-    (root_dir / library.USER_INJECT_FOLDER).mkdir(
+    (root_dir / paths.USER_INJECT_FOLDER).mkdir(
         parents=True, exist_ok=True)
 
-    create_file(path=(root_dir / library.INJECT_CONFIG_PATH),
+    create_file(path=(root_dir / paths.INJECT_CONFIG_PATH),
                 content=DEFAULT_CONFIG)
 
 
@@ -135,7 +135,7 @@ def get_update_config(root_dir: Path) -> UpdateConfig:
 def _read_config(root_dir: Path) -> str:
     """Controller"""
     try:
-        config_text = (root_dir / library.INJECT_CONFIG_PATH).read_text()
+        config_text = (root_dir / paths.INJECT_CONFIG_PATH).read_text()
         return config_text
     except FileNotFoundError:
         return ''
@@ -152,7 +152,7 @@ def get_releases() -> list[Release]:
     """Controller"""
 
     release_dicts = github.get(
-        f"/repos/{library.REPO_OWNER}/{library.REPO_NAME}/releases")
+        f"/repos/{paths.REPO_OWNER}/{paths.REPO_NAME}/releases")
     releases = [Release.from_github_response(release_dict)
                 for release_dict in release_dicts
                 if not release_dict['prerelease']]
@@ -229,7 +229,7 @@ def install_release(root_dir: Path, release: Release):
 
 def _delete_old_release(root_dir: Path):
     """Controller"""
-    inject_path = (root_dir / library.INJECT_FOLDER)
+    inject_path = (root_dir / paths.INJECT_FOLDER)
     try:
         shutil.rmtree(inject_path)
     except FileNotFoundError:
@@ -247,7 +247,7 @@ def _download_and_unzip_release(root_dir: Path, release: Release):
 
         os.rename(release_root / 'inject', release_root / '.inject')
         shutil.move(src=release_root / '.inject',
-                    dst=root_dir / library.INJECT_FOLDER)
+                    dst=root_dir / paths.INJECT_FOLDER)
 
 
 def _update_dotfile_for_install(
@@ -263,7 +263,7 @@ def _update_dotfile_for_install(
 
 def read_dotfile(root_dir: Path):
     """Controller"""
-    dotfile_path = root_dir / library.DOTFILE_PATH
+    dotfile_path = root_dir / paths.DOTFILE_PATH
     try:
         return dotfile_path.read_text()
     except FileNotFoundError:
@@ -284,7 +284,7 @@ def _get_dotfile_with_new_version_and_last_updated(
 
 def save_dotfile(root_dir: Path, dotfile: str):
     """Controller"""
-    dotfile_path = root_dir / library.DOTFILE_PATH
+    dotfile_path = root_dir / paths.DOTFILE_PATH
     create_file(path=dotfile_path, content=dotfile)
 
 

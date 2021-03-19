@@ -4,7 +4,7 @@ import pytest
 from testfixtures import TempDirectory
 
 from rivals_workshop_assistant.injection import apply_injection
-from rivals_workshop_assistant.injection.library import INJECT_FOLDER, \
+from rivals_workshop_assistant.injection.paths import INJECT_FOLDER, \
     USER_INJECT_FOLDER
 from rivals_workshop_assistant.injection.dependency_handling import Define
 from rivals_workshop_assistant.main import read_scripts, save_scripts

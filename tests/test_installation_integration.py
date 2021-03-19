@@ -5,8 +5,8 @@ import pytest
 from testfixtures import TempDirectory
 
 import rivals_workshop_assistant.injection.library
-from rivals_workshop_assistant.injection.library import INJECT_FOLDER, \
-    DOTFILE_PATH, INJECT_CONFIG_PATH, USER_INJECT_FOLDER
+from rivals_workshop_assistant.injection.paths import INJECT_FOLDER, \
+    USER_INJECT_FOLDER, DOTFILE_PATH, INJECT_CONFIG_PATH
 from rivals_workshop_assistant.injection import installation as src
 from tests.testing_helpers import make_script, \
     ScriptWithPath, \
