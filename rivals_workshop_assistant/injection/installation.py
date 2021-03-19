@@ -28,6 +28,21 @@ class UpdateConfig(enum.Enum):
     NONE = "none"
 
 
+UPDATE_LEVEL_DEFAULT = UpdateConfig.PATCH
+
+DEFAULT_CONFIG = f"""\
+{UPDATE_LEVEL_NAME}: {UPDATE_LEVEL_DEFAULT}
+    # What kind of library updates to allow. 
+    # {UpdateConfig.MAJOR} = All updates are allowed, even if they may break 
+    #   existing code.
+    # {UpdateConfig.MINOR} = Don't allow breaking changes to existing 
+    #   functions, but do allow new functions. Could cause name collisions.
+    # {UpdateConfig.PATCH} = Only allow changes to existing functions that 
+    #    fix bugs or can't break current functionality.
+    # {UpdateConfig.NONE} = No updates.
+"""
+
+
 @dataclasses.dataclass
 class Version:
     major: int = 0
@@ -115,6 +130,7 @@ def _read_config(root_dir: Path) -> str:
         config_text = config_path.read_text()
         return config_text
     except FileNotFoundError:
+        create_file(config_path, DEFAULT_CONFIG)
         return ''
 
 
@@ -260,9 +276,7 @@ def _get_dotfile_with_new_version_and_last_updated(
 def save_dotfile(root_dir: Path, dotfile: str):
     """Controller"""
     dotfile_path = root_dir / library.DOTFILE_PATH
-    dotfile_path.parent.mkdir(exist_ok=True)
-    with open(dotfile_path, 'w+', newline='\n') as f:
-        f.write(dotfile)
+    create_file(path=dotfile_path, content=dotfile)
 
 
 def _yaml_dumps(obj) -> str:
@@ -270,3 +284,10 @@ def _yaml_dumps(obj) -> str:
         yaml_handler.dump(obj, string_stream)
         output_str = string_stream.getvalue()
     return output_str
+
+
+def create_file(path: Path, content: str):
+    """Creates or overwrites the file with the given content"""
+    path.parent.mkdir(exist_ok=True)
+    with open(path, 'w+', newline='\n') as f:
+        f.write(content)

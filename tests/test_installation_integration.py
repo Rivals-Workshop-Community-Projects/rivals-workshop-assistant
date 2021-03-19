@@ -163,6 +163,7 @@ version: 4.5.6
 last_updated: {test_date_string}
 """
 
+
 def assert_test_release_installed(tmp):
     assert_test_release_scripts_installed(tmp)
     dotfile = tmp.read(filepath=DOTFILE_PATH.as_posix(),
