@@ -3,15 +3,15 @@ from pathlib import Path
 
 from . import dependency_handling
 
-LIBRARY_FOLDER = Path('library')
+ASSISTANT_FOLDER = Path('assistant')
 
-INJECT_FOLDER = LIBRARY_FOLDER / Path('inject')
+INJECT_FOLDER = ASSISTANT_FOLDER / Path('inject')
 
 DOTFILE_NAME = '.assistant'
-DOTFILE_PATH = LIBRARY_FOLDER / DOTFILE_NAME
+DOTFILE_PATH = ASSISTANT_FOLDER / DOTFILE_NAME
 
 INJECT_CONFIG_NAME = 'inject_config.ini'
-INJECT_CONFIG_PATH = LIBRARY_FOLDER / INJECT_CONFIG_NAME
+INJECT_CONFIG_PATH = ASSISTANT_FOLDER / INJECT_CONFIG_NAME
 
 REPO_OWNER = 'Rivals-Workshop-Community-Projects'
 REPO_NAME = 'injector-library'

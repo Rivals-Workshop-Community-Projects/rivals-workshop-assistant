@@ -238,7 +238,7 @@ def _download_and_unzip_release(root_dir: Path, release: Release):
 
         release_root = list(Path(tmp).glob('*'))[0]  # gets the subfolder
         shutil.move(src=release_root / 'inject',
-                    dst=root_dir / library.LIBRARY_FOLDER / 'inject')
+                    dst=root_dir / library.ASSISTANT_FOLDER / 'inject')
 
 
 def _update_dotfile_for_install(
