@@ -6,7 +6,10 @@ from testfixtures import TempDirectory
 from rivals_workshop_assistant.injection.library import INJECT_FOLDER, \
     DOTFILE_PATH
 from rivals_workshop_assistant.injection import installation as src
-from tests.testing_helpers import make_script, ScriptWithPath, make_release
+from tests.testing_helpers import make_script, \
+    ScriptWithPath, \
+    make_release, \
+    make_version
 
 pytestmark = pytest.mark.slow
 
@@ -118,6 +121,27 @@ def test__download_and_unzip_release__directory_already_present():
         src._download_and_unzip_release(
             root_dir=Path(tmp.path), release=TEST_RELEASE)
         assert_test_release_installed(tmp)
+
+
+def test__update_dotfile__no_dotfile():
+    with TempDirectory() as tmp:
+        src._update_dotfile_with_new_version(
+            root_dir=Path(tmp.path), version=make_version('4.5.6'))
+
+        dotpath_content = tmp.read(filepath=DOTFILE_PATH.as_posix(),
+                                   encoding='utf8')
+        assert dotpath_content == 'version: 4.5.6\n'
+
+def test__update_dotfile():
+    with TempDirectory() as tmp:
+        make_script(tmp, ScriptWithPath(
+            path=DOTFILE_PATH, content='version: 3.4.5\n'))
+        src._update_dotfile_with_new_version(
+            root_dir=Path(tmp.path), version=make_version('4.5.6'))
+
+        dotfile = tmp.read(filepath=DOTFILE_PATH.as_posix(),
+                                   encoding='utf8')
+        assert dotfile == 'version: 4.5.6\n'
 
     # def test__install_release():
 #     with TempDirectory() as tmp:
