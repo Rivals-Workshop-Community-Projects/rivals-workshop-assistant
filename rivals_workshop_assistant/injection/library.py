@@ -21,7 +21,9 @@ REPO_NAME = 'injector-library'
 def read_injection_library(
         root_dir: Path) -> dependency_handling.InjectionLibrary:
     """Controller"""
-    inject_gml_paths = (root_dir / INJECT_FOLDER).rglob('*.gml')
+    inject_gml_paths = (list((root_dir / INJECT_FOLDER).rglob('*.gml'))
+                        + list((root_dir / USER_INJECT_FOLDER).rglob('*.gml'))
+                        )
     inject_gmls = [gml_path.read_text() for gml_path in inject_gml_paths]
     full_inject_gml = '\n\n'.join(inject_gmls)
     return get_injection_library_from_gml(full_inject_gml)

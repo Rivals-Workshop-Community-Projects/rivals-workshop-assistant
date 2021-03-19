@@ -4,7 +4,8 @@ import pytest
 from testfixtures import TempDirectory
 
 from rivals_workshop_assistant.injection import apply_injection
-from rivals_workshop_assistant.injection.library import INJECT_FOLDER
+from rivals_workshop_assistant.injection.library import INJECT_FOLDER, \
+    USER_INJECT_FOLDER
 from rivals_workshop_assistant.injection.dependency_handling import Define
 from rivals_workshop_assistant.main import read_scripts, save_scripts
 from rivals_workshop_assistant import injection
@@ -47,7 +48,7 @@ injection_at_root = ScriptWithPath(
 """)
 
 injection_in_subfolder = ScriptWithPath(
-    path=INJECT_FOLDER / Path('subfolder/in_subfolder.gml'),
+    path=USER_INJECT_FOLDER / Path('subfolder/in_subfolder.gml'),
     content="""\
 #define needs_other {
     other()
