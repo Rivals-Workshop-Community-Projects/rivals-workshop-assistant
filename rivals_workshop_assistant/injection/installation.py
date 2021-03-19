@@ -14,7 +14,6 @@ from ruamel.yaml import YAML, StringIO
 from github3api import GitHubAPI
 
 from rivals_workshop_assistant.injection import library
-from rivals_workshop_assistant.injection.library import INJECT_CONFIG_NAME
 
 yaml_handler = YAML()
 github = GitHubAPI()
@@ -80,12 +79,21 @@ class Release:
 
 def update_injection_library(root_dir: Path):
     """Controller"""
+    make_basic_folder_structure(root_dir)
     if should_update(root_dir):
         current_version = _get_current_version(root_dir)
         release_to_install = get_release_to_install(root_dir, current_version)
         if (release_to_install is not None
                 and current_version != release_to_install.version):
             install_release(root_dir, release_to_install)
+
+
+def make_basic_folder_structure(root_dir: Path):
+    (root_dir / library.USER_INJECT_FOLDER).mkdir(
+        parents=True, exist_ok=True)
+
+    create_file(path=(root_dir / library.INJECT_CONFIG_PATH),
+                content=DEFAULT_CONFIG)
 
 
 def should_update(root_dir: Path) -> bool:
@@ -126,12 +134,10 @@ def get_update_config(root_dir: Path) -> UpdateConfig:
 
 def _read_config(root_dir: Path) -> str:
     """Controller"""
-    config_path = root_dir / library.INJECT_FOLDER / INJECT_CONFIG_NAME
     try:
-        config_text = config_path.read_text()
+        config_text = (root_dir / library.INJECT_CONFIG_PATH).read_text()
         return config_text
     except FileNotFoundError:
-        create_file(config_path, DEFAULT_CONFIG)
         return ''
 
 
@@ -219,7 +225,6 @@ def install_release(root_dir: Path, release: Release):
     _download_and_unzip_release(root_dir, release)
     _update_dotfile_for_install(root_dir, release.version,
                                 datetime.date.today())
-    _create_user_inject_if_missing(root_dir)
 
 
 def _delete_old_release(root_dir: Path):
@@ -295,8 +300,3 @@ def create_file(path: Path, content: str):
     path.parent.mkdir(exist_ok=True)
     with open(path, 'w+', newline='\n') as f:
         f.write(content)
-
-
-def _create_user_inject_if_missing(root_dir: Path):
-    Path(root_dir / library.USER_INJECT_FOLDER).mkdir(
-        parents=True, exist_ok=True)

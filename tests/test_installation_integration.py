@@ -19,8 +19,7 @@ pytestmark = pytest.mark.slow
 def test__get_update_config():
     with TempDirectory() as tmp:
         make_script(tmp, ScriptWithPath(
-            path=INJECT_FOLDER / Path(
-                rivals_workshop_assistant.injection.library.INJECT_CONFIG_NAME),
+            path=INJECT_CONFIG_PATH,
             content=f"""\
 
 {src.UPDATE_LEVEL_NAME}: minor
