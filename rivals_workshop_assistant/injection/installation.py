@@ -219,6 +219,7 @@ def install_release(root_dir: Path, release: Release):
     _download_and_unzip_release(root_dir, release)
     _update_dotfile_for_install(root_dir, release.version,
                                 datetime.date.today())
+    _create_user_inject_if_missing(root_dir)
 
 
 def _delete_old_release(root_dir: Path):
@@ -294,3 +295,8 @@ def create_file(path: Path, content: str):
     path.parent.mkdir(exist_ok=True)
     with open(path, 'w+', newline='\n') as f:
         f.write(content)
+
+
+def _create_user_inject_if_missing(root_dir: Path):
+    Path(root_dir / library.USER_INJECT_FOLDER).mkdir(
+        parents=True, exist_ok=True)
