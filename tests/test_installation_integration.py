@@ -94,7 +94,7 @@ def test__delete_old_release__none_exists():
         tmp.compare(path=INJECT_FOLDER.as_posix(), expected=())
 
 
-def assert_test_release_installed(tmp):
+def assert_test_release_scripts_installed(tmp):
     file_contents = tmp.read((INJECT_FOLDER / 'logging.gml').as_posix(),
                              encoding='utf8')
     assert file_contents == """\
@@ -112,7 +112,7 @@ def test__download_and_unzip_release():
     with TempDirectory() as tmp:
         src._download_and_unzip_release(
             root_dir=Path(tmp.path), release=TEST_RELEASE)
-        assert_test_release_installed(tmp)
+        assert_test_release_scripts_installed(tmp)
 
 
 def test__download_and_unzip_release__directory_already_present():
@@ -120,7 +120,7 @@ def test__download_and_unzip_release__directory_already_present():
         tmp.makedir('inject')
         src._download_and_unzip_release(
             root_dir=Path(tmp.path), release=TEST_RELEASE)
-        assert_test_release_installed(tmp)
+        assert_test_release_scripts_installed(tmp)
 
 
 def test__update_dotfile__no_dotfile():
@@ -145,6 +145,13 @@ def test__update_dotfile():
         assert dotfile == 'version: 4.5.6\n'
 
 
+def assert_test_release_installed(tmp):
+    assert_test_release_scripts_installed(tmp)
+    dotfile = tmp.read(filepath=DOTFILE_PATH.as_posix(),
+                       encoding='utf8')
+    assert dotfile == 'version: 0.0.0\n'
+
+
 def test__install_release():
     with TempDirectory() as tmp:
         make_script(tmp,
@@ -157,12 +164,10 @@ def test__install_release():
                             release=TEST_RELEASE)
 
         assert_test_release_installed(tmp)
-        dotfile = tmp.read(filepath=DOTFILE_PATH.as_posix(),
-                           encoding='utf8')
-        assert dotfile == 'version: 0.0.0\n'
 
-# def test__update_injection_library__on_empty():
-#     with TempDirectory() as tmp:
-#         src.update_injection_library(root_dir=Path(tmp.path))
-#
-#         assert False
+
+def test__update_injection_library__on_empty():
+    with TempDirectory() as tmp:
+        src.update_injection_library(root_dir=Path(tmp.path))
+
+        assert_test_release_installed(tmp)
