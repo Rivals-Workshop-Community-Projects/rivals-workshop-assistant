@@ -10,6 +10,9 @@ INJECT_FOLDER = LIBRARY_FOLDER / Path('inject')
 DOTFILE_NAME = '.assistant'
 DOTFILE_PATH = LIBRARY_FOLDER / DOTFILE_NAME
 
+INJECT_CONFIG_NAME = 'inject_config.ini'
+INJECT_CONFIG_PATH = LIBRARY_FOLDER / INJECT_CONFIG_NAME
+
 REPO_OWNER = 'Rivals-Workshop-Community-Projects'
 REPO_NAME = 'injector-library'
 

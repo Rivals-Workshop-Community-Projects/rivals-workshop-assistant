@@ -28,3 +28,6 @@ def make_version(version_str: str) -> src.Version:
 def make_release(version_str: str, url: str) -> src.Release:
     version = make_version(version_str)
     return src.Release(version=version, download_url=url)
+
+
+test_date_string = '2019-12-04'

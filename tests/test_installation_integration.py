@@ -1,15 +1,17 @@
+import datetime
 from pathlib import Path
 
 import pytest
 from testfixtures import TempDirectory
 
+import rivals_workshop_assistant.injection.library
 from rivals_workshop_assistant.injection.library import INJECT_FOLDER, \
-    DOTFILE_PATH
+    DOTFILE_PATH, INJECT_CONFIG_PATH
 from rivals_workshop_assistant.injection import installation as src
 from tests.testing_helpers import make_script, \
     ScriptWithPath, \
     make_release, \
-    make_version
+    make_version, test_date_string
 
 pytestmark = pytest.mark.slow
 
@@ -17,7 +19,8 @@ pytestmark = pytest.mark.slow
 def test__get_update_config():
     with TempDirectory() as tmp:
         make_script(tmp, ScriptWithPath(
-            path=INJECT_FOLDER / Path(src.INJECT_CONFIG_NAME),
+            path=INJECT_FOLDER / Path(
+                rivals_workshop_assistant.injection.library.INJECT_CONFIG_NAME),
             content=f"""\
 
 {src.UPDATE_LEVEL_NAME}: minor
@@ -43,28 +46,34 @@ def test__update_dotfile_with_new_release():
             content="other_content: 42"
         ))
 
-        src._update_dotfile_with_new_version(root_dir=Path(tmp.path),
-                                             version=src.Version(major=4,
-                                                                 minor=5,
-                                                                 patch=6))
+        src._update_dotfile_for_install(
+            root_dir=Path(tmp.path),
+            version=src.Version(major=4,
+                                minor=5,
+                                patch=6),
+            last_updated=datetime.date.fromisoformat(test_date_string))
         result = tmp.read(DOTFILE_PATH.as_posix(), encoding='utf8')
 
-        assert result == """\
+        assert result == f"""\
 other_content: 42
 version: 4.5.6
+last_updated: {test_date_string}
 """
 
 
 def test__update_dotfile_with_new_release_when_missing_dotfile():
     with TempDirectory() as tmp:
-        src._update_dotfile_with_new_version(root_dir=Path(tmp.path),
-                                             version=src.Version(major=4,
-                                                                 minor=5,
-                                                                 patch=6))
+        src._update_dotfile_for_install(root_dir=Path(tmp.path),
+                                        version=src.Version(major=4,
+                                                            minor=5,
+                                                            patch=6),
+                                        last_updated=datetime.date.fromisoformat(
+                                            '2019-12-04'))
         result = tmp.read(DOTFILE_PATH.as_posix(), encoding='utf8')
 
-        assert result == """\
+        assert result == f"""\
 version: 4.5.6
+last_updated: {test_date_string}
 """
 
 
@@ -125,35 +134,56 @@ def test__download_and_unzip_release__directory_already_present():
 
 def test__update_dotfile__no_dotfile():
     with TempDirectory() as tmp:
-        src._update_dotfile_with_new_version(
-            root_dir=Path(tmp.path), version=make_version('4.5.6'))
+        src._update_dotfile_for_install(root_dir=Path(tmp.path),
+                                        version=make_version('4.5.6'),
+                                        last_updated=datetime.date.fromisoformat(
+                                            '2019-12-04'))
 
         dotpath_content = tmp.read(filepath=DOTFILE_PATH.as_posix(),
                                    encoding='utf8')
-        assert dotpath_content == 'version: 4.5.6\n'
+        assert dotpath_content == f"""\
+version: 4.5.6
+last_updated: {test_date_string}
+"""
 
 
 def test__update_dotfile():
     with TempDirectory() as tmp:
         make_script(tmp, ScriptWithPath(
             path=DOTFILE_PATH, content='version: 3.4.5\n'))
-        src._update_dotfile_with_new_version(
-            root_dir=Path(tmp.path), version=make_version('4.5.6'))
+        src._update_dotfile_for_install(root_dir=Path(tmp.path),
+                                        version=make_version('4.5.6'),
+                                        last_updated=datetime.date.fromisoformat(
+                                            '2019-12-04'))
 
         dotfile = tmp.read(filepath=DOTFILE_PATH.as_posix(),
                            encoding='utf8')
-        assert dotfile == 'version: 4.5.6\n'
-
+        assert dotfile == f"""\
+version: 4.5.6
+last_updated: {test_date_string}
+"""
 
 def assert_test_release_installed(tmp):
     assert_test_release_scripts_installed(tmp)
     dotfile = tmp.read(filepath=DOTFILE_PATH.as_posix(),
                        encoding='utf8')
-    assert dotfile == 'version: 0.0.0\n'
+    assert 'version: 0.0.0\n' in dotfile
+    assert 'last_updated: ' in dotfile  # not checking exact date because
+    # datetime isnt mocked
 
 
 def test__install_release():
     with TempDirectory() as tmp:
+        make_script(tmp,
+                    ScriptWithPath(
+                        path=DOTFILE_PATH,
+                        content="version: 0.0.0"
+                    ))
+        make_script(tmp,
+                    ScriptWithPath(
+                        path=INJECT_CONFIG_PATH,
+                        content="update_level: none"
+                    ))
         make_script(tmp,
                     ScriptWithPath(
                         path=INJECT_FOLDER / 'test.gml',
@@ -162,12 +192,5 @@ def test__install_release():
 
         src.install_release(root_dir=Path(tmp.path),
                             release=TEST_RELEASE)
-
-        assert_test_release_installed(tmp)
-
-
-def test__update_injection_library__on_empty():
-    with TempDirectory() as tmp:
-        src.update_injection_library(root_dir=Path(tmp.path))
 
         assert_test_release_installed(tmp)

@@ -1,4 +1,5 @@
 import dataclasses
+import datetime
 import enum
 import io
 import shutil
@@ -12,13 +13,12 @@ from ruamel.yaml import YAML, StringIO
 from github3api import GitHubAPI
 
 from rivals_workshop_assistant.injection import library
+from rivals_workshop_assistant.injection.library import INJECT_CONFIG_NAME
 
 yaml_handler = YAML()
 github = GitHubAPI()
 
 UPDATE_LEVEL_NAME = 'update_level'
-
-INJECT_CONFIG_NAME = 'inject_config.ini'
 
 
 class UpdateConfig(enum.Enum):
@@ -64,11 +64,32 @@ class Release:
 
 def update_injection_library(root_dir: Path):
     """Controller"""
-    current_version = _get_current_version(root_dir)
-    release_to_install = get_release_to_install(root_dir, current_version)
-    if (release_to_install is not None
-            and current_version != release_to_install.version):
-        install_release(root_dir, release_to_install)
+    if should_update(root_dir):
+        current_version = _get_current_version(root_dir)
+        release_to_install = get_release_to_install(root_dir, current_version)
+        if (release_to_install is not None
+                and current_version != release_to_install.version):
+            install_release(root_dir, release_to_install)
+
+
+def should_update(root_dir: Path) -> bool:
+    dotfile = read_dotfile(root_dir)
+    today = datetime.date.today()
+    return _get_should_update_from_dotfile_and_date(dotfile, today)
+
+
+def _get_should_update_from_dotfile_and_date(
+        dotfile: str, today: datetime.date) -> bool:
+    default_date = datetime.date.fromisoformat('1996-01-01')
+
+    dotfile_yaml = yaml_handler.load(dotfile)
+    if dotfile_yaml is None:
+        last_update_day = default_date
+    else:
+        last_update_day = dotfile_yaml.get('last_updated', default_date)
+
+    days_passed = (today - last_update_day).days
+    return days_passed > 0
 
 
 def get_release_to_install(root_dir: Path, current_version: Version) -> Release:
@@ -179,7 +200,8 @@ def install_release(root_dir: Path, release: Release):
     """Controller"""
     _delete_old_release(root_dir)
     _download_and_unzip_release(root_dir, release)
-    _update_dotfile_with_new_version(root_dir, release.version)
+    _update_dotfile_for_install(root_dir, release.version,
+                                datetime.date.today())
 
 
 def _delete_old_release(root_dir: Path):
@@ -203,10 +225,14 @@ def _download_and_unzip_release(root_dir: Path, release: Release):
                     dst=root_dir / library.LIBRARY_FOLDER / 'inject')
 
 
-def _update_dotfile_with_new_version(root_dir: Path, version: Version):
+def _update_dotfile_for_install(
+        root_dir: Path, version: Version, last_updated: datetime.date):
     """Controller"""
     old_dotfile = read_dotfile(root_dir)
-    new_dotfile = _get_dotfile_with_new_version(version, old_dotfile)
+    new_dotfile = _get_dotfile_with_new_version_and_last_updated(
+        version=version,
+        last_updated=last_updated,
+        old_dotfile=old_dotfile)
     save_dotfile(root_dir, new_dotfile)
 
 
@@ -219,14 +245,15 @@ def read_dotfile(root_dir: Path):
         return ''
 
 
-def _get_dotfile_with_new_version(
-        version: Version, old_dotfile: str) -> str:
+def _get_dotfile_with_new_version_and_last_updated(
+        version: Version, last_updated: datetime.date, old_dotfile: str) -> str:
     dotfile_yaml = yaml_handler.load(old_dotfile)
 
     if dotfile_yaml is None:
         dotfile_yaml = {}
 
     dotfile_yaml['version'] = str(version)
+    dotfile_yaml['last_updated'] = last_updated
     return _yaml_dumps(dotfile_yaml)
 
 

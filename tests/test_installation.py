@@ -1,7 +1,9 @@
+import datetime
+
 import pytest
 
 from rivals_workshop_assistant.injection import installation as src
-from tests.testing_helpers import make_version, make_release
+from tests.testing_helpers import make_version, make_release, test_date_string
 
 
 def test__make_update_config_empty():
@@ -43,9 +45,11 @@ def test__get_dotfile_with_new_release():
     version = src.Version(major=10, minor=11, patch=12)
     old_dotfile = "version: 3.2.1"
 
-    result = src._get_dotfile_with_new_version(version=version,
-                                               old_dotfile=old_dotfile)
-    assert result == "version: 10.11.12\n"
+    result = src._get_dotfile_with_new_version_and_last_updated(
+        version=version,
+        last_updated=datetime.date.fromisoformat(test_date_string),
+        old_dotfile=old_dotfile)
+    assert result == f"version: 10.11.12\nlast_updated: {test_date_string}\n"
 
 
 def test__get_dotfile_with_new_release_with_other_data():
@@ -54,11 +58,14 @@ def test__get_dotfile_with_new_release_with_other_data():
 something_else: version
 version: 3.2.1"""
 
-    result = src._get_dotfile_with_new_version(version=release,
-                                               old_dotfile=old_dotfile)
-    assert result == """\
+    result = src._get_dotfile_with_new_version_and_last_updated(
+        version=release,
+        last_updated=datetime.date.fromisoformat(test_date_string),
+        old_dotfile=old_dotfile)
+    assert result == f"""\
 something_else: version
 version: 10.11.12
+last_updated: {test_date_string}
 """
 
 
@@ -126,3 +133,26 @@ def test__get_release_to_install_from_config_and_releases(
         current_version=current_version
     )
     assert result == expected_release
+
+
+@pytest.mark.parametrize(
+    "last_updated_string, today_string, expected", [
+        pytest.param("2019-12-04",
+                     "2019-12-05",
+                     True),
+        pytest.param("2019-12-04",
+                     "2019-12-04",
+                     False),
+    ]
+)
+def test__get_last_updated_from_dotfile(
+        last_updated_string, today_string, expected
+):
+    dotfile = f"""\
+other: blah
+last_updated: {last_updated_string}"""
+
+    should_update = src._get_should_update_from_dotfile_and_date(
+        dotfile=dotfile, today=datetime.date.fromisoformat(today_string))
+
+    assert should_update == expected
