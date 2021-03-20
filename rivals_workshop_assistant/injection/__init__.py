@@ -7,6 +7,7 @@ from ..scripts_type import Scripts
 
 
 def handle_injection(root_dir: Path, scripts: Scripts):
+    """Controller"""
     update_injection_library(root_dir)
     injection_library = read_injection_library(root_dir)
     result_scripts = apply_injection(scripts, injection_library)

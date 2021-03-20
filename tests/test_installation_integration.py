@@ -4,7 +4,8 @@ from pathlib import Path
 import pytest
 from testfixtures import TempDirectory
 
-import rivals_workshop_assistant.injection.paths as paths
+import rivals_workshop_assistant.injection.paths as inject_paths
+import rivals_workshop_assistant.paths as paths
 from rivals_workshop_assistant.injection import installation as src
 from tests.testing_helpers import make_script, \
     ScriptWithPath, \
@@ -17,7 +18,7 @@ pytestmark = pytest.mark.slow
 def test__get_update_config():
     with TempDirectory() as tmp:
         make_script(tmp, ScriptWithPath(
-            path=paths.INJECT_CONFIG_PATH,
+            path=paths.ASSISTANT_CONFIG_PATH,
             content=f"""\
 
 {src.UPDATE_LEVEL_NAME}: minor
@@ -45,11 +46,10 @@ def test__update_dotfile_with_new_release():
 
         src._update_dotfile_for_install(
             root_dir=Path(tmp.path),
-            version=src.Version(major=4,
-                                minor=5,
-                                patch=6),
+            version=make_version('4.5.6'),
             last_updated=datetime.date.fromisoformat(test_date_string))
-        result = tmp.read(paths.DOTFILE_PATH.as_posix(), encoding='utf8')
+        result = tmp.read(
+            paths.DOTFILE_PATH.as_posix(), encoding='utf8')
 
         assert result == f"""\
 other_content: 42
@@ -66,7 +66,8 @@ def test__update_dotfile_with_new_release_when_missing_dotfile():
                                                             patch=6),
                                         last_updated=datetime.date.fromisoformat(
                                             '2019-12-04'))
-        result = tmp.read(paths.DOTFILE_PATH.as_posix(), encoding='utf8')
+        result = tmp.read(
+            paths.DOTFILE_PATH.as_posix(), encoding='utf8')
 
         assert result == f"""\
 version: 4.5.6
@@ -84,24 +85,24 @@ def test__delete_old_release():
     with TempDirectory() as tmp:
         make_script(tmp,
                     ScriptWithPath(
-                        path=paths.INJECT_FOLDER / 'test.gml',
+                        path=inject_paths.INJECT_FOLDER / 'test.gml',
                         content='test content'),
                     )
 
         src._delete_old_release(Path(tmp.path))
 
-        tmp.compare(path=paths.INJECT_FOLDER.as_posix(), expected=())
+        tmp.compare(path=inject_paths.INJECT_FOLDER.as_posix(), expected=())
 
 
 def test__delete_old_release__none_exists():
     with TempDirectory() as tmp:
         src._delete_old_release(Path(tmp.path))
 
-        tmp.compare(path=paths.INJECT_FOLDER.as_posix(), expected=())
+        tmp.compare(path=inject_paths.INJECT_FOLDER.as_posix(), expected=())
 
 
 def assert_test_release_scripts_installed(tmp):
-    file_contents = tmp.read((paths.INJECT_FOLDER / 'logging.gml').as_posix(),
+    file_contents = tmp.read((inject_paths.INJECT_FOLDER / 'logging.gml').as_posix(),
                              encoding='utf8')
     assert file_contents == """\
 #define prints()
@@ -171,16 +172,16 @@ def test__install_release():
                     ))
         make_script(tmp,
                     ScriptWithPath(
-                        path=paths.INJECT_CONFIG_PATH,
+                        path=paths.ASSISTANT_CONFIG_PATH,
                         content="update_level: none"
                     ))
         make_script(tmp,
                     ScriptWithPath(
-                        path=paths.INJECT_FOLDER / 'test.gml',
+                        path=inject_paths.INJECT_FOLDER / 'test.gml',
                         content='test content'),
                     )
         existing_user_inject = ScriptWithPath(
-            path=paths.USER_INJECT_FOLDER / 'users.gml',
+            path=inject_paths.USER_INJECT_FOLDER / 'users.gml',
             content='whatever')
         make_script(tmp,
                     existing_user_inject)

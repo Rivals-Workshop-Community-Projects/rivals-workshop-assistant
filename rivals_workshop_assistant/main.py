@@ -1,9 +1,10 @@
 import sys
 from pathlib import Path
 
-# from rivals_workshop_assistant.asset_handling import get_required_assets, \
-#     save_assets
+from rivals_workshop_assistant.asset_handling import get_required_assets, \
+    save_assets
 # from rivals_workshop_assistant.codegen import handle_codegen
+from rivals_workshop_assistant.setup import make_basic_folder_structure
 from rivals_workshop_assistant.injection import handle_injection
 from rivals_workshop_assistant.scripts_type import Scripts
 
@@ -11,6 +12,8 @@ from rivals_workshop_assistant.scripts_type import Scripts
 def main(given_dir: Path):
     """Runs all processes on scripts in the root_dir"""
     root_dir = get_root_dir(given_dir)
+    make_basic_folder_structure(root_dir)
+
     scripts = read_scripts(root_dir)
 
     # scripts = handle_codegen(scripts)
@@ -18,8 +21,8 @@ def main(given_dir: Path):
 
     save_scripts(root_dir, scripts)
 
-    # assets = get_required_assets(scripts)
-    # save_assets(root_dir, assets)
+    assets = get_required_assets(scripts)
+    save_assets(root_dir, assets)
 
 
 def get_root_dir(given_dir: Path) -> Path:
