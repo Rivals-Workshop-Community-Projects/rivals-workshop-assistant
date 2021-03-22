@@ -2,6 +2,7 @@ import textwrap
 import typing
 
 import parse
+from inflector import English
 
 from rivals_workshop_assistant.paths import Scripts
 
@@ -51,7 +52,7 @@ def handle_foreach_codegen(seed) -> typing.Optional[str]:
     except TypeError:
         return None
 
-    item_name = collection_name + '_item'
+    item_name = singularize(collection_name)
     iterator_name = item_name + '_i'
 
     code = f'''\
@@ -63,3 +64,15 @@ for (var {iterator_name} = 0; {iterator_name}++; {iterator_name} < array_length(
 
 def get_line_before_comment(line: str) -> str:
     return line.split(r'//')[0]
+
+
+_inflector_singularize = English().singularize
+
+
+def singularize(string: str):
+    string = string.lower()
+    inflector_attempt = _inflector_singularize(string)
+    if inflector_attempt == string:
+        return f"{string}_item"
+    else:
+        return inflector_attempt
