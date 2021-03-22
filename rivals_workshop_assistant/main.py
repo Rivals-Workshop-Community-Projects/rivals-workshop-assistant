@@ -6,6 +6,7 @@ from rivals_workshop_assistant.asset_handling import get_required_assets, \
 # from rivals_workshop_assistant.codegen import handle_codegen
 from rivals_workshop_assistant.setup import make_basic_folder_structure
 from rivals_workshop_assistant.injection import handle_injection
+from rivals_workshop_assistant.code_generation import handle_codegen
 from rivals_workshop_assistant.paths import Scripts
 
 
@@ -16,7 +17,7 @@ def main(given_dir: Path):
 
     scripts = read_scripts(root_dir)
 
-    # scripts = handle_codegen(scripts)
+    scripts = handle_codegen(scripts)
     scripts = handle_injection(root_dir, scripts)
 
     save_scripts(root_dir, scripts)
@@ -26,12 +27,14 @@ def main(given_dir: Path):
 
 
 def get_root_dir(given_dir: Path) -> Path:
-    """Return the absolute path to the character's root directory, containing their config file.
+    """Return the absolute path to the character's root directory, containing
+    their config file.
     Currently assumes that that path is passed as the first argument"""
     if 'config.ini' in [path.name for path in given_dir.glob('*')]:
         return given_dir
     else:
-        raise ValueError("Given folder does not contain config.ini. Aborting.")
+        raise FileNotFoundError(
+            "Given folder does not contain config.ini. Aborting.")
         # Todo,
         #  if config is not in current file, keep searching parent directory
 
