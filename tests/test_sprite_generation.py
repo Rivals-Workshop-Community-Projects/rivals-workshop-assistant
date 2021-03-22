@@ -141,6 +141,7 @@ def test__generate_sprite_for_file_name__rect_colored(color, width, height):
                                        outline="black")
     assert_images_equal(result, expected)
 
+
 @pytest.mark.parametrize(
     'file_name',
     [
@@ -150,11 +151,15 @@ def test__generate_sprite_for_file_name__rect_colored(color, width, height):
         pytest.param('ellipse_30'),
         pytest.param('red_blue_rect_30_30'),
         pytest.param('blue_rect_30_30_30'),
+        pytest.param('rect_30_30_30'),
+        pytest.param('rect_blue_30_30'),
     ]
 )
 def test__generate_sprite_for_file_name__unrelated_file_names(file_name):
     result = src.generate_sprite_for_file_name(file_name)
     assert result is None
+
+
 """
 "rect_34_36.png"
 "orange_rect_3_5.png"

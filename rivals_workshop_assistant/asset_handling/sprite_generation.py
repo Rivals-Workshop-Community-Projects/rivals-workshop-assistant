@@ -10,39 +10,25 @@ def make_sprite_for_file_name(path: Path, file_name: str):
 
 
 def generate_sprite_for_file_name(file_name: str) -> ImageDraw:
-    # colored_circle_pattern = "{:l}_circle_{:d}.png"
-    # r = parse(, "The knights who say Ni!")
-
     file_name_parts = file_name.rstrip('.png').split('_')
 
     try:
         possible_name_locations = file_name_parts[:2]
         if 'circle' in possible_name_locations:
             *color, name, diameter = file_name_parts
-            color = _get_color(color)
-            height = diameter
-            width = diameter
-
+            width, height = diameter, diameter
         elif ('ellipse' in possible_name_locations
               or 'rect' in possible_name_locations):
             *color, name, width, height = file_name_parts
-            color = _get_color(color)
         else:
             return None
 
+        color = _get_color(color)
         width = int(width)
         height = int(height)
-        sprite = make_canvas(int(width), int(height))
 
-        if 'rect' in file_name_parts:
-            get_drawable(sprite).rectangle((0, 0, width - 1, height - 1),
-                                           fill=color,
-                                           outline="black")
-        else:
-            get_drawable(sprite).ellipse((0, 0, width - 1, height - 1),
-                                         fill=color,
-                                         outline="black")
-
+        sprite = make_canvas(width, height)
+        _draw_sprite(sprite, name, width, height, color)
         return sprite
     except ValueError:
         return None
@@ -55,6 +41,17 @@ def _get_color(color_items: list) -> typing.Optional[str]:
         return color_items[0]
     else:
         raise ValueError
+
+
+def _draw_sprite(
+        sprite: Image, name: str, width: int, height: int, color: str = None):
+    drawable = get_drawable(sprite)
+    if name == 'rect':
+        draw_method = drawable.__getattribute__('rectangle')
+
+    else:
+        draw_method = drawable.__getattribute__('ellipse')
+    draw_method((0, 0, width - 1, height - 1), fill=color, outline="black")
 
 
 def make_canvas(width, height):
