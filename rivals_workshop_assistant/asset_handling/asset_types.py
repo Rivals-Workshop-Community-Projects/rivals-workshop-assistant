@@ -3,7 +3,7 @@ from pathlib import Path
 import abc
 
 from rivals_workshop_assistant import paths
-from .sprite_generation import make_sprite_for_file_name
+from .sprite_generation import generate_sprite_for_file_name
 
 
 class Asset(abc.ABC):
@@ -14,7 +14,7 @@ class Asset(abc.ABC):
     def get_from_text(cls, text) -> set['Asset']:
         raise NotImplementedError
 
-    def supply(self, path: Path) -> None:
+    def supply(self, root_dir: Path) -> None:
         raise NotImplementedError
 
     def __eq__(self, other):
@@ -32,10 +32,13 @@ class Sprite(Asset):
         asset_strings = set(re.findall(pattern=cls._pattern, string=text))
         return set(Sprite(string) for string in asset_strings)
 
-    def supply(self, path: Path):
-        sprite_path = path / paths.SPRITES_FOLDER
-        make_sprite_for_file_name(
-            sprite_path=sprite_path, file_name=self.asset_string)
+    def supply(self, root_dir: Path):
+        file_name = self.asset_string
+        path = root_dir / paths.SPRITES_FOLDER / file_name
+        if not path.exists():
+            sprite = generate_sprite_for_file_name(file_name)
+            path.parent.mkdir(parents=True, exist_ok=True)
+            sprite.save(path)
 
 
 ASSET_TYPES = [Sprite]

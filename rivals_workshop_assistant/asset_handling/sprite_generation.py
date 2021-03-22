@@ -1,15 +1,18 @@
 import typing
-from pathlib import Path
 
 from PIL import Image, ImageDraw
 
 
-def make_sprite_for_file_name(path: Path, file_name: str):
-    """Controller"""
-    raise NotImplementedError
-
-
 def generate_sprite_for_file_name(file_name: str) -> ImageDraw:
+    """Returns an image in memory based on the file name's format.
+    Example legal names, in format `[<color>_?]shape_width_height.png`
+    "ellipse_30_30.png"
+    "red_ellipse_30_30.png
+    "circle_22.png"
+    "blue_circle_30.png"
+    "rect_34_36.png"
+    "orange_rect_3_5.png"
+    """
     file_name_parts = file_name.rstrip('.png').split('_')
 
     try:
@@ -45,7 +48,7 @@ def _get_color(color_items: list) -> typing.Optional[str]:
 
 def _draw_sprite(
         sprite: Image, name: str, width: int, height: int, color: str = None):
-    drawable = get_drawable(sprite)
+    drawable = ImageDraw.Draw(sprite)
     if name == 'rect':
         draw_method = drawable.__getattribute__('rectangle')
 
@@ -56,7 +59,3 @@ def _draw_sprite(
 
 def make_canvas(width, height):
     return Image.new('RGBA', (width, height))
-
-
-def get_drawable(image):
-    return ImageDraw.Draw(image)

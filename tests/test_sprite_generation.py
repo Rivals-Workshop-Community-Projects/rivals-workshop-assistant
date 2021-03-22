@@ -1,11 +1,8 @@
 import pytest
-from PIL import Image, ImageDraw, ImageChops
+from PIL import Image, ImageDraw
 
 import rivals_workshop_assistant.asset_handling.sprite_generation as src
-
-
-def make_canvas(width, height):
-    return Image.new('RGBA', (width, height))
+from tests.testing_helpers import make_canvas, assert_images_equal
 
 
 def show_delta(img1, img2):
@@ -24,11 +21,6 @@ def show_delta(img1, img2):
     img1.show()
     img2.show()
     diff.show()
-
-
-def assert_images_equal(img1, img2):
-    assert not ImageChops.difference(img1,
-                                     img2).getbbox()
 
 
 @pytest.mark.parametrize(

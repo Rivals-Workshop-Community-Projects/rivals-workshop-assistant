@@ -5,6 +5,9 @@ from .asset_types import Asset, ASSET_TYPES
 
 
 def get_required_assets(scripts: paths.Scripts) -> set[Asset]:
+    """Gets all assets the scripts use, including things that aren't the
+    assistant's responsibility.
+    Those assets are filtered out in the supply step, after this."""
     required_assets_for_scripts = set()
     for script in scripts.values():
         required_assets_for_scripts.update(
