@@ -32,15 +32,15 @@ class UpdateConfig(enum.Enum):
 UPDATE_LEVEL_DEFAULT = UpdateConfig.PATCH
 
 DEFAULT_CONFIG = f"""\
-{UPDATE_LEVEL_NAME}: {UPDATE_LEVEL_DEFAULT}
+{UPDATE_LEVEL_NAME}: {UPDATE_LEVEL_DEFAULT.value}
     # What kind of library updates to allow. 
-    # {UpdateConfig.MAJOR} = All updates are allowed, even if they may break 
-    #   existing code.
-    # {UpdateConfig.MINOR} = Don't allow breaking changes to existing 
+    # {UpdateConfig.MAJOR.value} = All updates are allowed, even if they may 
+    #   break existing code.
+    # {UpdateConfig.MINOR.value} = Don't allow breaking changes to existing 
     #   functions, but do allow new functions. Could cause name collisions.
-    # {UpdateConfig.PATCH} = Only allow changes to existing functions that 
-    #    fix bugs or can't break current functionality.
-    # {UpdateConfig.NONE} = No updates.
+    # {UpdateConfig.PATCH.value} = Only allow changes to existing functions 
+    #   that fix bugs or can't break current functionality.
+    # {UpdateConfig.NONE.value} = No updates.
 """
 
 
@@ -277,7 +277,7 @@ def _get_dotfile_with_new_version_and_last_updated(
 def save_dotfile(root_dir: Path, dotfile: str):
     """Controller"""
     dotfile_path = root_dir / paths.DOTFILE_PATH
-    create_file(path=dotfile_path, content=dotfile)
+    create_file(path=dotfile_path, content=dotfile, overwrite=True)
 
 
 def _yaml_dumps(obj) -> str:
@@ -287,8 +287,11 @@ def _yaml_dumps(obj) -> str:
     return output_str
 
 
-def create_file(path: Path, content: str):
+def create_file(path: Path, content: str, overwrite=False):
     """Creates or overwrites the file with the given content"""
     path.parent.mkdir(exist_ok=True)
+    if not overwrite and path.exists():
+        return
+
     with open(path, 'w+', newline='\n') as f:
         f.write(content)

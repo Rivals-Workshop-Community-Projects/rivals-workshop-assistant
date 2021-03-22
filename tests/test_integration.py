@@ -3,12 +3,13 @@ from pathlib import Path
 import pytest
 from testfixtures import TempDirectory
 
-from rivals_workshop_assistant.injection import apply_injection
+from rivals_workshop_assistant import paths, injection
+from rivals_workshop_assistant.setup import make_basic_folder_structure
+from rivals_workshop_assistant.injection import apply_injection, installation
 from rivals_workshop_assistant.injection.paths import INJECT_FOLDER, \
     USER_INJECT_FOLDER
 from rivals_workshop_assistant.injection.dependency_handling import Define
 from rivals_workshop_assistant.main import read_scripts, save_scripts
-from rivals_workshop_assistant import injection
 from tests.testing_helpers import make_script, ScriptWithPath
 
 pytestmark = pytest.mark.slow
@@ -130,3 +131,22 @@ def test_full_injection():
         actual_script_subfolder = tmp.read(script_subfolder.path.as_posix(),
                                            encoding='utf8')
         assert actual_script_subfolder == expected_subfolder
+
+
+def test__make_basic_folder_structure__make_missing_config():
+    with TempDirectory() as tmp:
+        make_basic_folder_structure(Path(tmp.path))
+
+        actual = (Path(tmp.path) / paths.ASSISTANT_CONFIG_PATH).read_text()
+        assert actual == installation.DEFAULT_CONFIG
+
+
+def test__make_basic_folder_structure__config_present():
+    with TempDirectory() as tmp:
+        config_path = (Path(tmp.path) / paths.ASSISTANT_CONFIG_PATH)
+        make_script(tmp, ScriptWithPath(path=config_path, content='a'))
+
+        make_basic_folder_structure(Path(tmp.path))
+
+        actual = config_path.read_text()
+        assert actual == 'a'

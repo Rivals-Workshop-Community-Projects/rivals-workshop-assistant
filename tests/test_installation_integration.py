@@ -48,9 +48,9 @@ def test__update_dotfile_with_new_release():
             root_dir=Path(tmp.path),
             version=make_version('4.5.6'),
             last_updated=datetime.date.fromisoformat(test_date_string))
+
         result = tmp.read(
             paths.DOTFILE_PATH.as_posix(), encoding='utf8')
-
         assert result == f"""\
 other_content: 42
 version: 4.5.6
