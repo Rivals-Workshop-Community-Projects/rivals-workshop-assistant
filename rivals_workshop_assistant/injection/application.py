@@ -1,7 +1,7 @@
 import re
 
 from .dependency_handling import InjectionLibrary, GmlInjection
-from ..scripts_type import Scripts
+from ..paths import Scripts
 
 INJECTION_START_MARKER = '// vvv LIBRARY DEFINES AND MACROS vvv\n'
 INJECTION_START_WARNING = (

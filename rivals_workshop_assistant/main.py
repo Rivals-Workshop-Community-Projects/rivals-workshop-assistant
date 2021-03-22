@@ -6,7 +6,7 @@ from rivals_workshop_assistant.asset_handling import get_required_assets, \
 # from rivals_workshop_assistant.codegen import handle_codegen
 from rivals_workshop_assistant.setup import make_basic_folder_structure
 from rivals_workshop_assistant.injection import handle_injection
-from rivals_workshop_assistant.scripts_type import Scripts
+from rivals_workshop_assistant.paths import Scripts
 
 
 def main(given_dir: Path):

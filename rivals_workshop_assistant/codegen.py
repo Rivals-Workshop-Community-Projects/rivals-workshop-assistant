@@ -1,4 +1,4 @@
-from rivals_workshop_assistant.scripts_type import Scripts
+from rivals_workshop_assistant.paths import Scripts
 
 
 def handle_codegen(scripts: Scripts):
