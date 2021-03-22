@@ -28,6 +28,10 @@ for (var blah_item_i = 0; blah_item_i++; blah_item_i < array_length(blah) {
     for (var blah_item_i = 0; blah_item_i++; blah_item_i < array_length(blah) {
         var blah_item = blah[blah_item_i]
     }'''),
+        pytest.param('  a  $foreach blah$', '''\
+  a  for (var blah_item_i = 0; blah_item_i++; blah_item_i < array_length(blah) {
+    var blah_item = blah[blah_item_i]
+}'''),
         pytest.param('$foreach things$', '''\
 for (var thing_i = 0; thing_i++; thing_i < array_length(things) {
     var thing = things[thing_i]
