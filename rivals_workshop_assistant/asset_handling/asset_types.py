@@ -34,12 +34,14 @@ class Sprite(Asset):
 
     def supply(self, root_dir: Path):
         file_name = self.asset_string
+        if not file_name.endswith('.png'):
+            file_name = file_name + '.png'
         path = root_dir / paths.SPRITES_FOLDER / file_name
         if not path.exists():
             sprite = generate_sprite_for_file_name(file_name)
             if sprite:
                 path.parent.mkdir(parents=True, exist_ok=True)
-                sprite.save(path)
+                sprite.save(path.as_posix())
 
 
 ASSET_TYPES = [Sprite]

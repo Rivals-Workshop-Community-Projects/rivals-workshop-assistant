@@ -29,13 +29,13 @@ def test_sprite_supply():
         color = 'red'
         width = 3
         height = 4
-        file_name = f'{color}_rect_{width}_{height}.png'
+        file_name = f'{color}_rect_{width}_{height}'
         sprite = src.Sprite(file_name)
         root_dir = Path(tmp.path)
 
         sprite.supply(root_dir)
 
-        img = Image.open(root_dir / paths.SPRITES_FOLDER / file_name)
+        img = Image.open(root_dir / paths.SPRITES_FOLDER / (file_name + '.png'))
         expected = make_canvas(width, height)
         ImageDraw.Draw(expected).rectangle((0, 0, width - 1, height - 1),
                                            fill=color,
