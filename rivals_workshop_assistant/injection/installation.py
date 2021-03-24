@@ -83,6 +83,12 @@ def update_injection_library(root_dir: Path):
     if should_update(root_dir):
         current_version = _get_current_version(root_dir)
         release_to_install = get_release_to_install(root_dir, current_version)
+
+        _update_dotfile_for_install(
+            root_dir,
+            release_to_install.version if release_to_install else current_version,
+            datetime.date.today())
+
         if (release_to_install is not None
                 and current_version != release_to_install.version):
             install_release(root_dir, release_to_install)
@@ -215,8 +221,6 @@ def install_release(root_dir: Path, release: Release):
     """Controller"""
     _delete_old_release(root_dir)
     _download_and_unzip_release(root_dir, release)
-    _update_dotfile_for_install(root_dir, release.version,
-                                datetime.date.today())
 
 
 def _delete_old_release(root_dir: Path):
