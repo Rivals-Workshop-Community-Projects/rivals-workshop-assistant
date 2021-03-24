@@ -11,13 +11,11 @@ import zipfile
 
 import requests
 from ruamel.yaml import YAML, StringIO
-from github3api import GitHubAPI
 
 import rivals_workshop_assistant.paths as paths
 from . import paths as inject_paths
 
 yaml_handler = YAML()
-github = GitHubAPI()
 
 UPDATE_LEVEL_NAME = 'update_level'
 
@@ -148,9 +146,10 @@ def _make_update_config(config_text: str) -> UpdateConfig:
 
 def get_releases() -> list[Release]:
     """Controller"""
-
-    release_dicts = github.get(
-        f"/repos/{inject_paths.REPO_OWNER}/{inject_paths.REPO_NAME}/releases")
+    release_dicts = requests.get(
+        f'https://api.github.com/repos'
+        f'/{inject_paths.REPO_OWNER}/{inject_paths.REPO_NAME}/releases'
+    ).json()
     releases = [Release.from_github_response(release_dict)
                 for release_dict in release_dicts
                 if not release_dict['prerelease']]
