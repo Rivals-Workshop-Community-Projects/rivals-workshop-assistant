@@ -96,8 +96,9 @@ class Define(GmlDeclaration):
 def _remove_brackets(content):
     has_start_bracket = content.strip().startswith('{')
     has_end_bracket = content.strip().endswith('}')
-    if has_start_bracket != has_end_bracket:
-        raise ValueError("Mismatched curly braces")
+    if ((has_start_bracket and not has_end_bracket)
+            or (content.count('{') != content.count('}'))):
+        raise ValueError(f"Mismatched curly braces at:\n{content}\n\n---\n")
     if has_start_bracket and has_end_bracket:
         content = content.strip().lstrip('{').rstrip('}').strip('\n')
     return content

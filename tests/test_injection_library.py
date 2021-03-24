@@ -107,11 +107,29 @@ content
 
 }
 """),
+        pytest.param("""\
+content
+#define other {
+    if {
+    }
+"""),
     ],
 )
 def test_loads_dependency_mismatched_braces(content):
     with pytest.raises(ValueError):
         get_injection_library_from_gml(content)
+
+
+def test_loads_dependency_matched_braces_that_look_mismatched():
+    actual_library = get_injection_library_from_gml("""\
+#define define1
+    blah
+    if thing {
+    } 
+""")
+    assert actual_library == [
+        Define(name='define1', content='blah\nif thing {\n}')
+    ]
 
 
 @pytest.mark.parametrize(
