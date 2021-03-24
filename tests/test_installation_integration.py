@@ -154,15 +154,6 @@ last_updated: {test_date_string}
 """
 
 
-def assert_test_release_installed(tmp):
-    assert_test_release_scripts_installed(tmp)
-    dotfile = tmp.read(filepath=paths.DOTFILE_PATH.as_posix(),
-                       encoding='utf8')
-    assert 'version: 0.0.0\n' in dotfile
-    assert 'last_updated: ' in dotfile  # not checking exact date because
-    # datetime isnt mocked
-
-
 def test__install_release():
     with TempDirectory() as tmp:
         make_script(tmp,
@@ -188,6 +179,5 @@ def test__install_release():
 
         src.install_release(root_dir=Path(tmp.path),
                             release=TEST_RELEASE)
-
-        assert_test_release_installed(tmp)
+        assert_test_release_scripts_installed(tmp)
         assert_script(tmp, existing_user_inject)
