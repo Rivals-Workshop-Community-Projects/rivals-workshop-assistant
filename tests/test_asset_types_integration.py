@@ -11,6 +11,19 @@ from testing_helpers import make_canvas, assert_images_equal
 pytestmark = pytest.mark.slow
 
 
+def test_sprite_supply_nothing_needed():
+    with TempDirectory() as tmp:
+        file_name = f'unrelated.png'
+        sprite = src.Sprite(file_name)
+        root_dir = Path(tmp.path)
+
+        sprite_path = (root_dir / paths.SPRITES_FOLDER)
+        sprite_path.mkdir()
+
+        sprite.supply(root_dir)
+        tmp.check_dir(sprite_path.as_posix())
+
+
 def test_sprite_supply():
     with TempDirectory() as tmp:
         color = 'red'

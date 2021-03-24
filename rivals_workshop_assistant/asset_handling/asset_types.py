@@ -37,8 +37,9 @@ class Sprite(Asset):
         path = root_dir / paths.SPRITES_FOLDER / file_name
         if not path.exists():
             sprite = generate_sprite_for_file_name(file_name)
-            path.parent.mkdir(parents=True, exist_ok=True)
-            sprite.save(path)
+            if sprite:
+                path.parent.mkdir(parents=True, exist_ok=True)
+                sprite.save(path)
 
 
 ASSET_TYPES = [Sprite]
