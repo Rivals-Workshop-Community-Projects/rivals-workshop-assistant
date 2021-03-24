@@ -196,6 +196,20 @@ my_define()
     assert result_scripts == {PATH_A: script.rstrip()}
 
 
+def test_does_provide_assistant_supplied_define():
+    script = f"""\
+define1()
+
+{application.INJECTION_START_HEADER}
+{define1.gml}
+{application.INJECTION_END_HEADER}"""
+    scripts = {PATH_A: script}
+
+    library = [define1]
+    result_scripts = application.apply_injection(scripts, library)
+    assert result_scripts == scripts
+
+
 def test_doesnt_provide_user_supplied_macro():
     script = f"""\
 print(my_macro)

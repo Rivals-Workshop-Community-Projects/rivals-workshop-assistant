@@ -88,7 +88,8 @@ def _gml_uses_inject(gml: str, injection: GmlInjection):
 
 
 def _gml_supplies_inject(gml: str, inject: GmlInjection):
-    return re.search(pattern=inject.give_pattern, string=gml)
+    return re.search(pattern=inject.give_pattern,
+                     string=gml.split(INJECTION_START_MARKER)[0])
 
 
 def _add_inject_gmls_in_script(script: str, dependency_gmls: list[str]) -> str:
