@@ -90,7 +90,8 @@ class Define(GmlDeclaration):
         content = _remove_brackets(content)
         content = textwrap.dedent(content).strip('\n')
         docs, content = _split_docs_and_gml(content)
-        return cls(name=name, docs=docs, content=content)
+        name, params = _split_name_and_params(name)
+        return cls(name=name, params=params, docs=docs, content=content)
 
 
 def _remove_brackets(content):
@@ -123,6 +124,18 @@ def _split_docs_and_gml(content: str) -> tuple[str, str]:
         gml_lines.append(line.rstrip())
 
     return '\n'.join(doc_lines), '\n'.join(gml_lines)
+
+
+def _split_name_and_params(name: str) -> tuple[str, list[str]]:
+    name = name.strip()
+    if '(' not in name:
+        return name, []
+    else:
+        if not name.endswith(')'):
+            raise ValueError(f'Missing ) for parameter line: {name}')
+        name, param_string = name.rstrip(')').split('(')
+        params = [param.strip() for param in param_string.split(',') if param]
+        return name, params
 
 
 class Macro(GmlDeclaration):  # todo untested

@@ -37,6 +37,38 @@ def test_loads_dependency_minimal(content, define):
     assert actual_library == [define]
 
 
+
+@pytest.mark.parametrize(
+    "content, define",
+    [
+        pytest.param("""\
+#define name()
+    content""",
+                     Define(name='name', content='content')),
+        pytest.param("""\
+content
+#define other(blah)
+    return blah + 1
+""",
+                     Define(name='other', params=['blah'],
+                            content='return blah + 1')),
+        pytest.param("""\
+content
+#define other(param1, param2,    param3)
+    some content
+""",
+                     Define(name='other', params=['param1', 'param2',
+                                                  'param3'],
+                            content='some content')),
+    ],
+)
+def test_loads_dependency_parameters(content, define):
+    actual_library = get_injection_library_from_gml(content)
+
+    assert actual_library == [define]
+
+
+
 @pytest.mark.parametrize(
     "content, library",
     [
