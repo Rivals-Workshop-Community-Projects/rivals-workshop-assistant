@@ -27,7 +27,7 @@ def test_apply_injection_irrelevant_injection():
 
 
 define1 = Define(
-    name='define1', version=0, docs='docs', content='content')
+    name='define1', params=['param'], version=0, docs='docs', content='content')
 define2 = Define(
     name='define2', version=4, docs='docs2\ndocs2',
     content='content2\ncontent2')
@@ -116,7 +116,8 @@ def test_removes_injection_when_not_needed():
 {application.INJECTION_END_HEADER}"""
 
     scripts = {PATH_A: script}
-    result_scripts = application.apply_injection(scripts, [])
+    result_scripts = application.apply_injection(scripts=scripts,
+                                                 injection_library=[define1])
     assert result_scripts == {PATH_A: script_content}
 
 

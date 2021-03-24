@@ -82,8 +82,8 @@ class Define(GmlDeclaration):
 
         final = f"{head} // Version {version}\n{docs}{content}"
         gml = textwrap.dedent(final).strip()
-
-        super().__init__(name, gml, use_pattern=fr"(^|\W){name}\(", )
+        use_pattern = fr"(?<!#define)(^|\W){name}\("
+        super().__init__(name, gml, use_pattern=use_pattern, )
 
     @classmethod
     def from_gml(cls, name: str, content: str):
