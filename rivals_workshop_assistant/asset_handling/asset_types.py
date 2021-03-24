@@ -25,7 +25,7 @@ class Asset(abc.ABC):
 
 
 class Sprite(Asset):
-    _pattern = r"(?<=sprite_get\([\"'])(.+?)(?=['\"]\))"
+    _pattern = r"""sprite_get\(\s*["']([^)"']+?)["')]\s*\)"""
 
     @classmethod
     def get_from_text(cls, text) -> set['Sprite']:

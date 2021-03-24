@@ -26,8 +26,8 @@ def test_get_required_assets__no_assets():
             {Sprite('a'), Sprite('b')}
         ),
         pytest.param(
-            {Path('patha'): "sprite_get('a')",
-             Path('pathb'): "sprite_get('b')"},
+            {Path('patha'): "sprite_get('a' )",
+             Path('pathb'): "sprite_get( 'b')"},
             {Sprite('a'), Sprite('b')}
         ),
     ]
