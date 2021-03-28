@@ -1,18 +1,69 @@
+import os
+import zipfile
+from pathlib import Path
 import subprocess
 import shutil
 
 exe_name = 'rivals_workshop_assistant'
 
+vscode_extension_project_path = Path(
+    r"E:\Users\User\WebstormProjects\vscode_extension\rivals-lib")
+vscode_extension_path = (vscode_extension_project_path /
+                         r"out")
+
+gmedit_extension_project_path = Path(
+    r"D:/Users/User/IdeaProjects"
+    r"/rivals-workshop-assistant-gmedit"
+)
+
+gmedit_extension_path = (gmedit_extension_project_path /
+                         r"rivals-workshop-assistant-gmedit")
+
+exe_path = fr"dist/{exe_name}.exe"
+
+# version_type = 'major'
+# version_type = 'minor'
+version_type = 'patch'
+
+
+def build_exe():
+    build_script = ('pyinstaller --noconfirm --onefile --console --name '
+                    f'"{exe_name}" '
+                    '"D:/Users/User/PycharmProjects/rivals-workshop-assistant'
+                    '/rivals_workshop_assistant/main.py"')
+    subprocess.run(build_script)
+
+
+def build_vscode():
+    shutil.copy(src=exe_path, dst=vscode_extension_path)
+
+    vscode_publish_script = f'vsce publish {version_type}'
+    wd = os.getcwd()
+    os.chdir(vscode_extension_project_path)
+    subprocess.call(vscode_publish_script, shell=True)
+    os.chdir(wd)
+
+
+def build_gmedit():
+    shutil.copy(src=exe_path, dst=gmedit_extension_path)
+
+    zip_path = (gmedit_extension_project_path
+                / "rivals-workshop-assistant-gmedit.zip")
+    with zipfile.ZipFile(zip_path, "w") as release_zip:
+        release_zip.write(gmedit_extension_path)
+
+    # requests.post('POST https://api.github.com/repos'
+    #               f'/{paths.REPO_OWNER}'
+    #               f'/{paths.REPO_NAME}'
+    #               '/releases',
+    # )
+    # todo
+    #  Create release
+    #  Zip files
+    #  upload zip
+
+
 if __name__ == '__main__':
-    script = ('pyinstaller --noconfirm --onefile --console --name '
-              f'"{exe_name}" '
-              '"D:/Users/User/PycharmProjects/rivals-workshop-assistant'
-              '/rivals_workshop_assistant/main.py"')
-
-    subprocess.run(script)
-
-    exe_path = fr"dist/{exe_name}.exe"
-    extension_path = (r"E:\Users\User\WebstormProjects\vscode_extension"
-                      r"\rivals-lib\out")
-
-    shutil.copy(src=exe_path, dst=extension_path)
+    build_exe()
+    build_vscode()
+    build_gmedit()

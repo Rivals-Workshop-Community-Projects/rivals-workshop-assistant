@@ -148,7 +148,7 @@ def get_releases() -> list[Release]:
     """Controller"""
     release_dicts = requests.get(
         f'https://api.github.com/repos'
-        f'/{inject_paths.REPO_OWNER}/{inject_paths.REPO_NAME}/releases'
+        f'/{paths.REPO_OWNER}/{paths.REPO_NAME}/releases'
     ).json()
     releases = [Release.from_github_response(release_dict)
                 for release_dict in release_dicts

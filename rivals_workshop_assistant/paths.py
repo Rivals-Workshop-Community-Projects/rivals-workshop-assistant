@@ -10,3 +10,5 @@ SPRITES_FOLDER = Path('sprites')
 SCRIPTS_FOLDER = Path('scripts')
 
 Scripts = dict[Path, str]
+REPO_OWNER = 'Rivals-Workshop-Community-Projects'
+REPO_NAME = 'injector-library'
