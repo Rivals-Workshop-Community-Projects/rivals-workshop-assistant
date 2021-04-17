@@ -3,10 +3,10 @@ from pathlib import Path
 from .installation import update_injection_library
 from .application import apply_injection
 from .library import read_injection_library
-from ..paths import Scripts
+from rivals_workshop_assistant.script_mod import Script
 
 
-def handle_injection(root_dir: Path, scripts: Scripts):
+def handle_injection(root_dir: Path, scripts: list[Script]):
     """Controller"""
     update_injection_library(root_dir)
     injection_library = read_injection_library(root_dir)
