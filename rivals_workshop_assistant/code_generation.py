@@ -56,7 +56,7 @@ def handle_foreach_codegen(seed) -> typing.Optional[str]:
     iterator_name = item_name + '_i'
 
     code = f'''\
-for(var {iterator_name}=0; {iterator_name}<array_length({collection_name}); {iterator_name}++) {{
+for (var {iterator_name}=0; {iterator_name}<array_length({collection_name}); {iterator_name}++) {{
     var {item_name} = {collection_name}[{iterator_name}]
 }}'''
     return code
