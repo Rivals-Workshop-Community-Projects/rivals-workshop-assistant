@@ -1,3 +1,4 @@
+import datetime
 import sys
 from pathlib import Path
 
@@ -44,7 +45,7 @@ def read_scripts(root_dir: Path) -> list[Script]:
         Script(
             path=gml_path,
             original_content=gml_path.read_text(),
-            modified_time=None,
+            modified_time=datetime.datetime.fromtimestamp(gml_path.stat().st_mtime),
             processed_time=None,
         )
         for gml_path in gml_paths

@@ -9,7 +9,7 @@ INJECTION_START_WARNING = (
     "Generated defines and macros below.\n"
     "// Write NO-INJECT in a comment above this area to disable injection."
 )
-INJECTION_START_HEADER = f"{INJECTION_START_MARKER}" f"{INJECTION_START_WARNING}"
+INJECTION_START_HEADER = f"{INJECTION_START_MARKER}{INJECTION_START_WARNING}"
 INJECTION_END_HEADER = (
     "// DANGER: "
     "Write your code ABOVE the LIBRARY DEFINES AND MACROS header "

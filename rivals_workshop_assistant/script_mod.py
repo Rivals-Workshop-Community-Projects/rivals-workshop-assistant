@@ -28,8 +28,6 @@ class Script:
     def __eq__(self, other):
         return (
             self.path == other.path
-            and self.modified_time == other.modified_time
-            and self.processed_time == other.processed_time
             and self.original_content == other.original_content
             and self.working_content == other.working_content
         )
