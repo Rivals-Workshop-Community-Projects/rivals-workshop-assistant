@@ -15,9 +15,9 @@ gmedit_extension_project_path = Path(
     r"D:/Users/User/IdeaProjects"
     r"/rivals-workshop-assistant-gmedit"
 )
-
+gmedit_extension_name = Path("rivals-workshop-assistant-gmedit")
 gmedit_extension_path = (gmedit_extension_project_path /
-                         r"rivals-workshop-assistant-gmedit")
+                         gmedit_extension_name)
 
 exe_path = fr"dist/{exe_name}.exe"
 
@@ -49,8 +49,17 @@ def build_gmedit():
 
     zip_path = (gmedit_extension_project_path
                 / "rivals-workshop-assistant-gmedit.zip")
+
+    wd = os.getcwd()
+    os.chdir(vscode_extension_project_path)
+
     with zipfile.ZipFile(zip_path, "w") as release_zip:
-        release_zip.write(gmedit_extension_path)
+        for path in gmedit_extension_path.glob('*'):
+            release_zip.write(path, arcname=gmedit_extension_name / path.name)
+
+    os.chdir(wd)
+
+
 
     # requests.post('POST https://api.github.com/repos'
     #               f'/{paths.REPO_OWNER}'
