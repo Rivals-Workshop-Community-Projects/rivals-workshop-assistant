@@ -9,7 +9,7 @@ from .asset_handling import get_required_assets, save_assets
 from .setup import make_basic_folder_structure
 from .injection import handle_injection
 from .code_generation import handle_codegen
-from .dotfile_mod import read_dotfile, PROCESSED_TIME_REGISTER
+import rivals_workshop_assistant.dotfile_mod as dotfile_mod
 
 
 def main(given_dir: Path):
@@ -38,31 +38,16 @@ def get_root_dir(given_dir: Path) -> Path:
         raise FileNotFoundError("Given folder does not contain config.ini. Aborting.")
 
 
-def _get_processed_time_register(root_dir: Path) -> dict[Path, datetime.datetime]:
-    dotfile = read_dotfile(root_dir)
-    return _get_processed_time_register_logic(root_dir, dotfile)
-
-
-def _get_processed_time_register_logic(root_path: Path, dotfile: dict):
-    absolute_register = dotfile.get(PROCESSED_TIME_REGISTER, {})
-    relative_register = {
-        Path(os.path.relpath(path=path, start=root_path)): absolute_register[path]
-        for path in absolute_register
-    }
-    return relative_register
-
-
-def get_processed_time(
-    processed_time_register: dict[Path, datetime.datetime], path: Path
-) -> typing.Optional[datetime.datetime]:
-    return processed_time_register.get(path, None)
+def get_processed_time(dotfile: dict, path: Path) -> typing.Optional[datetime.datetime]:
+    if path in dotfile.get(dotfile_mod.SEEN_FILES, []):
+        return dotfile.get(dotfile_mod.PROCESSED_TIME, None)
+    else:
+        return None
 
 
 def read_scripts(root_dir: Path) -> list[Script]:
     """Returns all Scripts in the scripts directory."""
     gml_paths = list((root_dir / "scripts").rglob("*.gml"))
-
-    processed_time_register = _get_processed_time_register(root_dir)
 
     scripts = []
     for gml_path in gml_paths:
@@ -70,7 +55,6 @@ def read_scripts(root_dir: Path) -> list[Script]:
             path=gml_path,
             original_content=gml_path.read_text(),
             modified_time=datetime.datetime.fromtimestamp(gml_path.stat().st_mtime),
-            processed_time=get_processed_time(processed_time_register, gml_path),
         )
         scripts.append(script)
 
@@ -80,6 +64,8 @@ def read_scripts(root_dir: Path) -> list[Script]:
 def save_scripts(root_dir: Path, scripts: list[Script]):
     for script in scripts:
         script.save(root_dir)
+    now = datetime.datetime.now()
+    # TODO add processed time to dotfile
 
 
 if __name__ == "__main__":

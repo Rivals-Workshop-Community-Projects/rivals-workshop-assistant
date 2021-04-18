@@ -10,7 +10,8 @@ YAML_HANDLER = YAML()
 
 VERSION = "version"
 LAST_UPDATED = "last_updated"
-PROCESSED_TIME_REGISTER = "processed_time_register"
+PROCESSED_TIME = "processed_time"
+SEEN_FILES = "seen_files"
 
 
 def read_dotfile(root_dir: Path) -> dict:

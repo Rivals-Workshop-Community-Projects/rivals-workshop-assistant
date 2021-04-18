@@ -81,7 +81,7 @@ class Release:
             download_url=response_dict["zipball_url"],
         )
 
-    def __lt__(self, other):
+    def __lt__(self, other: "Release"):
         return self.version < other.version
 
 

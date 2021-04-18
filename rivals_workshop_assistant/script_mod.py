@@ -7,13 +7,11 @@ class Script:
         self,
         path: Path,
         modified_time: datetime,
-        processed_time: datetime,
         original_content: str,
         working_content: str = None,
     ):
         self.path = path
         self.modified_time = modified_time
-        self.processed_time = processed_time
         self.original_content = original_content
 
         if working_content is None:

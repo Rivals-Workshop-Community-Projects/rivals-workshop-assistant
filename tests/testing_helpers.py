@@ -55,7 +55,6 @@ def make_script(path: Path, original_content: str, working_content: str = None):
     return Script(
         path=path,
         modified_time=None,
-        processed_time=None,
         original_content=original_content,
         working_content=working_content,
     )

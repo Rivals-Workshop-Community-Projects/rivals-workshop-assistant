@@ -1,7 +1,7 @@
 import datetime
 from pathlib import Path
 
-from rivals_workshop_assistant.dotfile_mod import PROCESSED_TIME_REGISTER
+import rivals_workshop_assistant.dotfile_mod as dotfile_mod
 from rivals_workshop_assistant import main as src
 
 ROOT_PATH = Path("C:/a/file/path/the_root/")
@@ -15,22 +15,15 @@ def make_time(time_str=TEST_DATETIME):
 
 
 def test_get_processed_time__no_register__none():
-    processed_time_register = {}
-    result = src.get_processed_time(processed_time_register, PATH_ABSOLUTE)
+    dotfile = {}
+    result = src.get_processed_time(dotfile=dotfile, path=PATH_ABSOLUTE)
     assert result is None
 
 
 def test_get_processed_time():
-    processed_time_register = {PATH_ABSOLUTE: make_time()}
-    result = src.get_processed_time(processed_time_register, PATH_ABSOLUTE)
-    assert result == make_time()
-
-
-def test_get_processed_time_register_logic():
     dotfile = {
-        "unrelated": "Blah",
-        PROCESSED_TIME_REGISTER: {PATH_ABSOLUTE: make_time()},
+        dotfile_mod.SEEN_FILES: [PATH_ABSOLUTE],
+        dotfile_mod.PROCESSED_TIME: make_time(),
     }
-    result = src._get_processed_time_register_logic(ROOT_PATH, dotfile)
-
-    assert result == {PATH_RELATIVE: make_time()}
+    result = src.get_processed_time(dotfile=dotfile, path=PATH_ABSOLUTE)
+    assert result == make_time()
