@@ -49,12 +49,15 @@ def read_scripts(root_dir: Path) -> list[Script]:
     """Returns all Scripts in the scripts directory."""
     gml_paths = list((root_dir / "scripts").rglob("*.gml"))
 
+    dotfile = dotfile_mod.read_dotfile(root_dir)
+
     scripts = []
     for gml_path in gml_paths:
         script = Script(
             path=gml_path,
             original_content=gml_path.read_text(),
             modified_time=datetime.datetime.fromtimestamp(gml_path.stat().st_mtime),
+            processed_time=get_processed_time(dotfile=dotfile, path=gml_path),
         )
         scripts.append(script)
 

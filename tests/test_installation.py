@@ -4,7 +4,7 @@ import pytest
 
 from rivals_workshop_assistant.dotfile_mod import yaml_load
 from rivals_workshop_assistant.injection import installation as src
-from tests.testing_helpers import make_version, make_release, test_date_string
+from tests.testing_helpers import make_version, make_release, TEST_DATE_STRING
 
 
 def test__make_update_config_empty():
@@ -49,10 +49,10 @@ def test__get_dotfile_with_new_release():
 
     result = src._get_dotfile_with_new_version_and_last_updated(
         version=version,
-        last_updated=datetime.date.fromisoformat(test_date_string),
+        last_updated=datetime.date.fromisoformat(TEST_DATE_STRING),
         dotfile=dotfile,
     )
-    assert result == f"version: 10.11.12\nlast_updated: {test_date_string}\n"
+    assert result == f"version: 10.11.12\nlast_updated: {TEST_DATE_STRING}\n"
 
 
 def test__get_dotfile_with_new_release_with_other_data():
@@ -65,7 +65,7 @@ version: 3.2.1"""
 
     result = src._get_dotfile_with_new_version_and_last_updated(
         version=release,
-        last_updated=datetime.date.fromisoformat(test_date_string),
+        last_updated=datetime.date.fromisoformat(TEST_DATE_STRING),
         dotfile=dotfile,
     )
     assert (
@@ -73,7 +73,7 @@ version: 3.2.1"""
         == f"""\
 something_else: version
 version: 10.11.12
-last_updated: {test_date_string}
+last_updated: {TEST_DATE_STRING}
 """
     )
 

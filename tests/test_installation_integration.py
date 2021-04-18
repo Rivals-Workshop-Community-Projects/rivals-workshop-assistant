@@ -13,7 +13,7 @@ from tests.testing_helpers import (
     ScriptWithPath,
     make_release,
     make_version,
-    test_date_string,
+    TEST_DATE_STRING,
     assert_script_with_path,
 )
 
@@ -55,7 +55,7 @@ def test__update_dotfile_with_new_release():
         src._update_dotfile_for_install(
             root_dir=Path(tmp.path),
             version=make_version("4.5.6"),
-            last_updated=datetime.date.fromisoformat(test_date_string),
+            last_updated=datetime.date.fromisoformat(TEST_DATE_STRING),
         )
 
         result = tmp.read(paths.DOTFILE_PATH.as_posix(), encoding="utf8")
@@ -64,7 +64,7 @@ def test__update_dotfile_with_new_release():
             == f"""\
 other_content: 42
 {VERSION}: 4.5.6
-{LAST_UPDATED}: {test_date_string}
+{LAST_UPDATED}: {TEST_DATE_STRING}
 """
         )
 
@@ -82,7 +82,7 @@ def test__update_dotfile_with_new_release_when_missing_dotfile():
             result
             == f"""\
 {VERSION}: 4.5.6
-{LAST_UPDATED}: {test_date_string}
+{LAST_UPDATED}: {TEST_DATE_STRING}
 """
         )
 
@@ -154,7 +154,7 @@ def test__update_dotfile__no_dotfile():
             dotpath_content
             == f"""\
 {VERSION}: 4.5.6
-{LAST_UPDATED}: {test_date_string}
+{LAST_UPDATED}: {TEST_DATE_STRING}
 """
         )
 
@@ -179,7 +179,7 @@ def test__update_dotfile():
             dotfile
             == f"""\
 {VERSION}: 4.5.6
-{LAST_UPDATED}: {test_date_string}
+{LAST_UPDATED}: {TEST_DATE_STRING}
 """
         )
 

@@ -1,3 +1,4 @@
+import datetime
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -31,7 +32,15 @@ def make_release(version_str: str, url: str) -> src.Release:
     return src.Release(version=version, download_url=url)
 
 
-test_date_string = "2019-12-04"
+TEST_DATE_STRING = "2019-12-04"
+ROOT_PATH = Path("C:/a/file/path/the_root/")
+PATH_ABSOLUTE = Path("C:/a/file/path/the_root/scripts/script_1.gml")
+PATH_RELATIVE = Path("scripts/script_1.gml")
+TEST_DATETIME_STRING = "2019-12-04*09:34:22"
+
+
+def make_time(time_str=TEST_DATETIME_STRING):
+    return datetime.datetime.fromisoformat(time_str)
 
 
 def assert_script_with_path(tmp, script: ScriptWithPath):
@@ -54,7 +63,7 @@ def make_script(path: Path, original_content: str, working_content: str = None):
         working_content = original_content
     return Script(
         path=path,
-        modified_time=None,
+        modified_time=make_time(),
         original_content=original_content,
         working_content=working_content,
     )

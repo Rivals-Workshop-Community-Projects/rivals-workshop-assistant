@@ -1,17 +1,6 @@
-import datetime
-from pathlib import Path
-
 import rivals_workshop_assistant.dotfile_mod as dotfile_mod
 from rivals_workshop_assistant import main as src
-
-ROOT_PATH = Path("C:/a/file/path/the_root/")
-PATH_ABSOLUTE = Path("C:/a/file/path/the_root/scripts/script_1.gml")
-PATH_RELATIVE = Path("scripts/script_1.gml")
-TEST_DATETIME = "2019-12-04*09:34:22"
-
-
-def make_time(time_str=TEST_DATETIME):
-    return datetime.datetime.fromisoformat(time_str)
+from tests.testing_helpers import PATH_ABSOLUTE, make_time
 
 
 def test_get_processed_time__no_register__none():
