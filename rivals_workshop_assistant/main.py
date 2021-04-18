@@ -9,7 +9,7 @@ from .asset_handling import get_required_assets, save_assets
 from .setup import make_basic_folder_structure
 from .injection import handle_injection
 from .code_generation import handle_codegen
-from .dotfile_mod import read_dotfile, yaml_load, DotfileFields
+from .dotfile_mod import read_dotfile, PROCESSED_TIME_REGISTER
 
 
 def main(given_dir: Path):
@@ -44,7 +44,7 @@ def _get_processed_time_register(root_dir: Path) -> dict[Path, datetime.datetime
 
 
 def _get_processed_time_register_logic(root_path: Path, dotfile: dict):
-    absolute_register = dotfile.get(DotfileFields.PROCESSED_TIME_REGISTER, {})
+    absolute_register = dotfile.get(PROCESSED_TIME_REGISTER, {})
     relative_register = {
         Path(os.path.relpath(path=path, start=root_path)): absolute_register[path]
         for path in absolute_register

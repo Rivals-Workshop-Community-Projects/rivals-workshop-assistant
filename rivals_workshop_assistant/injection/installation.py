@@ -13,7 +13,14 @@ import requests
 
 import rivals_workshop_assistant.paths as paths
 from . import paths as inject_paths
-from ..dotfile_mod import read_dotfile, save_dotfile, yaml_dumps, yaml_load
+from ..dotfile_mod import (
+    read_dotfile,
+    save_dotfile,
+    yaml_dumps,
+    yaml_load,
+    LAST_UPDATED,
+    VERSION,
+)
 
 UPDATE_LEVEL_NAME = "update_level"
 
@@ -74,8 +81,8 @@ class Release:
             download_url=response_dict["zipball_url"],
         )
 
-    def __gt__(self, other):
-        return self.version > other.version
+    def __lt__(self, other):
+        return self.version < other.version
 
 
 def update_injection_library(root_dir: Path):
@@ -108,7 +115,7 @@ def _get_should_update_from_dotfile_and_date(
 ) -> bool:
     default_date = datetime.date.fromisoformat("1996-01-01")
 
-    last_update_day = dotfile.get("last_updated", default_date)
+    last_update_day = dotfile.get(LAST_UPDATED, default_date)
 
     days_passed = (today - last_update_day).days
     return days_passed > 0
@@ -142,8 +149,6 @@ def _read_config(root_dir: Path) -> str:
 
 def _make_update_config(config_text: str) -> UpdateConfig:
     config_yaml: typing.Optional[dict] = yaml_load(config_text)
-    if not config_yaml:
-        return UpdateConfig.PATCH
     return UpdateConfig(config_yaml.get("update_level", UpdateConfig.PATCH))
 
 
@@ -268,6 +273,6 @@ def _update_dotfile_for_install(
 def _get_dotfile_with_new_version_and_last_updated(
     version: Version, last_updated: datetime.date, dotfile: dict
 ) -> str:
-    dotfile["version"] = str(version)
-    dotfile["last_updated"] = last_updated
+    dotfile[VERSION] = str(version)
+    dotfile[LAST_UPDATED] = last_updated
     return yaml_dumps(dotfile)

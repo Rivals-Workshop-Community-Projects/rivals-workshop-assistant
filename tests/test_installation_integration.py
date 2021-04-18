@@ -4,6 +4,7 @@ from pathlib import Path
 import pytest
 from testfixtures import TempDirectory
 
+from rivals_workshop_assistant.dotfile_mod import VERSION, LAST_UPDATED
 import rivals_workshop_assistant.injection.paths as inject_paths
 import rivals_workshop_assistant.paths as paths
 from rivals_workshop_assistant.injection import installation as src
@@ -62,8 +63,8 @@ def test__update_dotfile_with_new_release():
             result
             == f"""\
 other_content: 42
-version: 4.5.6
-last_updated: {test_date_string}
+{VERSION}: 4.5.6
+{LAST_UPDATED}: {test_date_string}
 """
         )
 
@@ -80,8 +81,8 @@ def test__update_dotfile_with_new_release_when_missing_dotfile():
         assert (
             result
             == f"""\
-version: 4.5.6
-last_updated: {test_date_string}
+{VERSION}: 4.5.6
+{LAST_UPDATED}: {test_date_string}
 """
         )
 
@@ -152,8 +153,8 @@ def test__update_dotfile__no_dotfile():
         assert (
             dotpath_content
             == f"""\
-version: 4.5.6
-last_updated: {test_date_string}
+{VERSION}: 4.5.6
+{LAST_UPDATED}: {test_date_string}
 """
         )
 
@@ -161,7 +162,11 @@ last_updated: {test_date_string}
 def test__update_dotfile():
     with TempDirectory() as tmp:
         create_script(
-            tmp, ScriptWithPath(path=paths.DOTFILE_PATH, content="version: 3.4.5\n")
+            tmp,
+            ScriptWithPath(
+                path=paths.DOTFILE_PATH,
+                content=f"{VERSION}: 3.4.5\n",
+            ),
         )
         src._update_dotfile_for_install(
             root_dir=Path(tmp.path),
@@ -173,8 +178,8 @@ def test__update_dotfile():
         assert (
             dotfile
             == f"""\
-version: 4.5.6
-last_updated: {test_date_string}
+{VERSION}: 4.5.6
+{LAST_UPDATED}: {test_date_string}
 """
         )
 
@@ -182,7 +187,11 @@ last_updated: {test_date_string}
 def test__install_release():
     with TempDirectory() as tmp:
         create_script(
-            tmp, ScriptWithPath(path=paths.DOTFILE_PATH, content="version: 0.0.0")
+            tmp,
+            ScriptWithPath(
+                path=paths.DOTFILE_PATH,
+                content=f"{VERSION}: 0.0.0",
+            ),
         )
         create_script(
             tmp,

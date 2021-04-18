@@ -1,7 +1,7 @@
 import datetime
 from pathlib import Path
 
-from rivals_workshop_assistant.dotfile_mod import DotfileFields
+from rivals_workshop_assistant.dotfile_mod import PROCESSED_TIME_REGISTER
 from rivals_workshop_assistant import main as src
 
 ROOT_PATH = Path("C:/a/file/path/the_root/")
@@ -29,7 +29,7 @@ def test_get_processed_time():
 def test_get_processed_time_register_logic():
     dotfile = {
         "unrelated": "Blah",
-        DotfileFields.PROCESSED_TIME_REGISTER: {PATH_ABSOLUTE: make_time()},
+        PROCESSED_TIME_REGISTER: {PATH_ABSOLUTE: make_time()},
     }
     result = src._get_processed_time_register_logic(ROOT_PATH, dotfile)
 

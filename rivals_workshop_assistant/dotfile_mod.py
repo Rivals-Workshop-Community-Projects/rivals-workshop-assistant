@@ -1,4 +1,3 @@
-import enum
 from pathlib import Path
 
 from ruamel.yaml import StringIO, YAML
@@ -9,10 +8,9 @@ from rivals_workshop_assistant.file_handling import create_file
 YAML_HANDLER = YAML()
 
 
-class DotfileFields(enum.Enum):
-    VERSION = "version"
-    LAST_UPDATED = "last_updated"
-    PROCESSED_TIME_REGISTER = "processed_time_register"
+VERSION = "version"
+LAST_UPDATED = "last_updated"
+PROCESSED_TIME_REGISTER = "processed_time_register"
 
 
 def read_dotfile(root_dir: Path) -> dict:
