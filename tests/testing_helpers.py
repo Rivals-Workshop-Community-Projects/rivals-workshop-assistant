@@ -37,6 +37,7 @@ ROOT_PATH = Path("C:/a/file/path/the_root/")
 PATH_ABSOLUTE = Path("C:/a/file/path/the_root/scripts/script_1.gml")
 PATH_RELATIVE = Path("scripts/script_1.gml")
 TEST_DATETIME_STRING = "2019-12-04*09:34:22"
+TEST_LATER_DATETIME_STRING = "2019-12-05*10:31:20"
 
 
 def make_time(time_str=TEST_DATETIME_STRING):
@@ -58,7 +59,9 @@ def assert_images_equal(img1, img2):
     assert not ImageChops.difference(img1, img2).getbbox()
 
 
-def make_script(path: Path, original_content: str, working_content: str = None):
+def make_script(
+    path: Path, original_content: str, working_content: str = None
+) -> Script:
     if working_content is None:
         working_content = original_content
     return Script(

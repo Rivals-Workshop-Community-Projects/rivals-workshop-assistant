@@ -1,5 +1,4 @@
 import datetime
-import os.path
 import sys
 import typing
 from pathlib import Path
@@ -67,8 +66,19 @@ def read_scripts(root_dir: Path) -> list[Script]:
 def save_scripts(root_dir: Path, scripts: list[Script]):
     for script in scripts:
         script.save(root_dir)
+
+    old_dotfile = dotfile_mod.read_dotfile(root_dir)
     now = datetime.datetime.now()
-    # TODO add processed time to dotfile
+    new_dotfile = _get_dotfile_after_saving(old_dotfile, now, scripts)
+    dotfile_mod.save_dotfile(root_dir, new_dotfile)
+
+
+def _get_dotfile_after_saving(
+    dotfile: dict, now: datetime.datetime, scripts: list[Script]
+) -> dict:
+    dotfile[dotfile_mod.PROCESSED_TIME] = now
+    dotfile[dotfile_mod.SEEN_FILES] = [script.path.as_posix() for script in scripts]
+    return dotfile
 
 
 if __name__ == "__main__":

@@ -16,8 +16,7 @@ from . import paths as inject_paths
 from ..dotfile_mod import (
     read_dotfile,
     save_dotfile,
-    yaml_dumps,
-    yaml_load,
+    _yaml_load,
     LAST_UPDATED,
     VERSION,
 )
@@ -148,7 +147,7 @@ def _read_config(root_dir: Path) -> str:
 
 
 def _make_update_config(config_text: str) -> UpdateConfig:
-    config_yaml: typing.Optional[dict] = yaml_load(config_text)
+    config_yaml: typing.Optional[dict] = _yaml_load(config_text)
     return UpdateConfig(config_yaml.get("update_level", UpdateConfig.PATCH))
 
 
@@ -272,7 +271,7 @@ def _update_dotfile_for_install(
 
 def _get_dotfile_with_new_version_and_last_updated(
     version: Version, last_updated: datetime.date, dotfile: dict
-) -> str:
+) -> dict:
     dotfile[VERSION] = str(version)
     dotfile[LAST_UPDATED] = last_updated
-    return yaml_dumps(dotfile)
+    return dotfile

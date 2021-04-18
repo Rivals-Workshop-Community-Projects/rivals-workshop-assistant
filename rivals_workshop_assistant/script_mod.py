@@ -2,6 +2,12 @@ from pathlib import Path
 from datetime import datetime
 
 
+def _get_is_fresh(processed_time: datetime, modified_time: datetime):
+    if processed_time is None:
+        return True
+    return processed_time < modified_time
+
+
 class Script:
     def __init__(
         self,
@@ -18,7 +24,7 @@ class Script:
             working_content = original_content
         self.working_content = working_content
 
-        self.is_fresh = self._get_is_fresh(processed_time, modified_time)
+        self.is_fresh = _get_is_fresh(processed_time, modified_time)
 
     def save(self, root_dir: Path):
         with open((root_dir / self.path), "w", newline="\n") as f:
@@ -31,8 +37,3 @@ class Script:
             and self.working_content == other.working_content
             and self.is_fresh == other.is_fresh
         )
-
-    def _get_is_fresh(self, processed_time: datetime, modified_time: datetime):
-        if processed_time is None:
-            return True
-        return processed_time < modified_time
