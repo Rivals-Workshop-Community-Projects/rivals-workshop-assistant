@@ -38,8 +38,7 @@ def get_root_dir(given_dir: Path) -> Path:
 
 
 def read_scripts(root_dir: Path) -> list[Script]:
-    """Returns path:content dict for files that have been modified since last
-    process."""
+    """Returns all Scripts in the scripts directory."""
     gml_paths = list((root_dir / "scripts").rglob("*.gml"))
     scripts = [
         Script(
@@ -50,7 +49,7 @@ def read_scripts(root_dir: Path) -> list[Script]:
         )
         for gml_path in gml_paths
     ]
-    # todo add time handling to this
+    # todo add processed time handling to this
 
     return scripts
 

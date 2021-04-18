@@ -10,14 +10,12 @@ from pathlib import Path
 import zipfile
 
 import requests
-from ruamel.yaml import YAML, StringIO
 
 import rivals_workshop_assistant.paths as paths
 from . import paths as inject_paths
+from ..dotfile_mod import read_dotfile, save_dotfile, yaml_dumps, yaml_load
 
-yaml_handler = YAML()
-
-UPDATE_LEVEL_NAME = 'update_level'
+UPDATE_LEVEL_NAME = "update_level"
 
 
 class UpdateConfig(enum.Enum):
@@ -49,14 +47,18 @@ class Version:
     patch: int = 0
 
     def __str__(self):
-        return f'{self.major}.{self.minor}.{self.patch}'
+        return f"{self.major}.{self.minor}.{self.patch}"
 
     def __gt__(self, other):
-        return (self.major > other.major
-                or (self.major == other.major and self.minor > other.minor)
-                or (self.major == other.major and self.minor == other.minor
-                    and self.patch > other.patch)
-                )
+        return (
+            self.major > other.major
+            or (self.major == other.major and self.minor > other.minor)
+            or (
+                self.major == other.major
+                and self.minor == other.minor
+                and self.patch > other.patch
+            )
+        )
 
 
 @dataclasses.dataclass
@@ -66,11 +68,11 @@ class Release:
 
     @classmethod
     def from_github_response(cls, response_dict):
-        major, minor, patch = (response_dict['tag_name']
-                               .split('-')[0]
-                               .split('.'))
-        return cls(version=Version(major=major, minor=minor, patch=patch),
-                   download_url=response_dict['zipball_url'])
+        major, minor, patch = response_dict["tag_name"].split("-")[0].split(".")
+        return cls(
+            version=Version(major=major, minor=minor, patch=patch),
+            download_url=response_dict["zipball_url"],
+        )
 
     def __gt__(self, other):
         return self.version > other.version
@@ -85,10 +87,13 @@ def update_injection_library(root_dir: Path):
         _update_dotfile_for_install(
             root_dir,
             release_to_install.version if release_to_install else current_version,
-            datetime.date.today())
+            datetime.date.today(),
+        )
 
-        if (release_to_install is not None
-                and current_version != release_to_install.version):
+        if (
+            release_to_install is not None
+            and current_version != release_to_install.version
+        ):
             install_release(root_dir, release_to_install)
 
 
@@ -99,14 +104,15 @@ def should_update(root_dir: Path) -> bool:
 
 
 def _get_should_update_from_dotfile_and_date(
-        dotfile: str, today: datetime.date) -> bool:
-    default_date = datetime.date.fromisoformat('1996-01-01')
+    dotfile: str, today: datetime.date
+) -> bool:
+    default_date = datetime.date.fromisoformat("1996-01-01")
 
-    dotfile_yaml = yaml_handler.load(dotfile)
+    dotfile_yaml = yaml_load(dotfile)
     if dotfile_yaml is None:
         last_update_day = default_date
     else:
-        last_update_day = dotfile_yaml.get('last_updated', default_date)
+        last_update_day = dotfile_yaml.get("last_updated", default_date)
 
     days_passed = (today - last_update_day).days
     return days_passed > 0
@@ -117,7 +123,8 @@ def get_release_to_install(root_dir: Path, current_version: Version) -> Release:
     update_config = get_update_config(root_dir)
     releases = get_releases()
     release_to_install = _get_legal_release_to_install(
-        update_config, releases, current_version)
+        update_config, releases, current_version
+    )
     return release_to_install
 
 
@@ -134,38 +141,43 @@ def _read_config(root_dir: Path) -> str:
         config_text = (root_dir / paths.ASSISTANT_CONFIG_PATH).read_text()
         return config_text
     except FileNotFoundError:
-        return ''
+        return ""
 
 
 def _make_update_config(config_text: str) -> UpdateConfig:
-    config_yaml: typing.Optional[dict] = yaml_handler.load(config_text)
+    config_yaml: typing.Optional[dict] = yaml_load(config_text)
     if not config_yaml:
         return UpdateConfig.PATCH
-    return UpdateConfig(config_yaml.get('update_level', UpdateConfig.PATCH))
+    return UpdateConfig(config_yaml.get("update_level", UpdateConfig.PATCH))
 
 
 def get_releases() -> list[Release]:
     """Controller"""
     release_dicts = requests.get(
-        f'https://api.github.com/repos'
-        f'/{paths.REPO_OWNER}/{paths.REPO_NAME}/releases'
+        f"https://api.github.com/repos"
+        f"/{paths.REPO_OWNER}/{paths.REPO_NAME}/releases"
     ).json()
-    releases = [Release.from_github_response(release_dict)
-                for release_dict in release_dicts
-                if not release_dict['prerelease']]
+    releases = [
+        Release.from_github_response(release_dict)
+        for release_dict in release_dicts
+        if not release_dict["prerelease"]
+    ]
     return releases
 
 
 def _get_legal_release_to_install(
-        update_config: UpdateConfig,
-        releases: list[Release],
-        current_version: typing.Optional[Version]) -> typing.Optional[Release]:
+    update_config: UpdateConfig,
+    releases: list[Release],
+    current_version: typing.Optional[Version],
+) -> typing.Optional[Release]:
     if current_version is None:
         candidates = releases.copy()
     else:
-        candidates = _get_legal_releases(update_config=update_config,
-                                         releases=releases,
-                                         current_version=current_version)
+        candidates = _get_legal_releases(
+            update_config=update_config,
+            releases=releases,
+            current_version=current_version,
+        )
     if candidates:
         newest_version = max(candidates)
         return newest_version
@@ -174,9 +186,7 @@ def _get_legal_release_to_install(
 
 
 def _get_legal_releases(
-        update_config: UpdateConfig,
-        releases: list[Release],
-        current_version: Version
+    update_config: UpdateConfig, releases: list[Release], current_version: Version
 ) -> list[Release]:
     """Releases are constrained based on config and current version."""
     if update_config == UpdateConfig.NONE:
@@ -185,15 +195,21 @@ def _get_legal_releases(
     candidates = releases.copy()
 
     if update_config == UpdateConfig.MINOR:
-        candidates = [candidate for candidate in candidates
-                      if candidate.version.major == current_version.major
-                      and candidate.version > current_version]
+        candidates = [
+            candidate
+            for candidate in candidates
+            if candidate.version.major == current_version.major
+            and candidate.version > current_version
+        ]
 
     elif update_config == UpdateConfig.PATCH:
-        candidates = [candidate for candidate in candidates
-                      if candidate.version.major == current_version.major
-                      and candidate.version.minor == current_version.minor
-                      and candidate.version > current_version]
+        candidates = [
+            candidate
+            for candidate in candidates
+            if candidate.version.major == current_version.major
+            and candidate.version.minor == current_version.minor
+            and candidate.version > current_version
+        ]
     return candidates
 
 
@@ -204,15 +220,15 @@ def _get_current_version(root_dir: Path) -> Version:
 
 
 def get_current_version_from_dotfile(dotfile: str) -> typing.Optional[Version]:
-    dotfile_yaml = yaml_handler.load(dotfile)
+    dotfile_yaml = yaml_load(dotfile)
     if dotfile_yaml is None:
         return None
 
-    version_string: str = dotfile_yaml.get('version', None)
+    version_string: str = dotfile_yaml.get("version", None)
     if version_string is None:
         return None
 
-    major, minor, patch = (int(val) for val in version_string.split('.'))
+    major, minor, patch = (int(val) for val in version_string.split("."))
     return Version(major=major, minor=minor, patch=patch)
 
 
@@ -224,7 +240,7 @@ def install_release(root_dir: Path, release: Release):
 
 def _delete_old_release(root_dir: Path):
     """Controller"""
-    inject_path = (root_dir / inject_paths.INJECT_FOLDER)
+    inject_path = root_dir / inject_paths.INJECT_FOLDER
     try:
         shutil.rmtree(inject_path)
     except FileNotFoundError:
@@ -238,63 +254,33 @@ def _download_and_unzip_release(root_dir: Path, release: Release):
         zipped_release = zipfile.ZipFile(io.BytesIO(response.content))
         zipped_release.extractall(path=tmp)
 
-        release_root = list(Path(tmp).glob('*'))[0]  # gets the subfolder
+        release_root = list(Path(tmp).glob("*"))[0]  # gets the subfolder
 
-        os.rename(release_root / 'inject', release_root / '.inject')
-        shutil.move(src=release_root / '.inject',
-                    dst=root_dir / inject_paths.INJECT_FOLDER)
+        os.rename(release_root / "inject", release_root / ".inject")
+        shutil.move(
+            src=release_root / ".inject", dst=root_dir / inject_paths.INJECT_FOLDER
+        )
 
 
 def _update_dotfile_for_install(
-        root_dir: Path, version: Version, last_updated: datetime.date):
+    root_dir: Path, version: Version, last_updated: datetime.date
+):
     """Controller"""
     old_dotfile = read_dotfile(root_dir)
     new_dotfile = _get_dotfile_with_new_version_and_last_updated(
-        version=version,
-        last_updated=last_updated,
-        old_dotfile=old_dotfile)
+        version=version, last_updated=last_updated, old_dotfile=old_dotfile
+    )
     save_dotfile(root_dir, new_dotfile)
 
 
-def read_dotfile(root_dir: Path):
-    """Controller"""
-    dotfile_path = root_dir / paths.DOTFILE_PATH
-    try:
-        return dotfile_path.read_text()
-    except FileNotFoundError:
-        return ''
-
-
 def _get_dotfile_with_new_version_and_last_updated(
-        version: Version, last_updated: datetime.date, old_dotfile: str) -> str:
-    dotfile_yaml = yaml_handler.load(old_dotfile)
+    version: Version, last_updated: datetime.date, old_dotfile: str
+) -> str:
+    dotfile_yaml = yaml_load(old_dotfile)
 
     if dotfile_yaml is None:
         dotfile_yaml = {}
 
-    dotfile_yaml['version'] = str(version)
-    dotfile_yaml['last_updated'] = last_updated
-    return _yaml_dumps(dotfile_yaml)
-
-
-def save_dotfile(root_dir: Path, dotfile: str):
-    """Controller"""
-    dotfile_path = root_dir / paths.DOTFILE_PATH
-    create_file(path=dotfile_path, content=dotfile, overwrite=True)
-
-
-def _yaml_dumps(obj) -> str:
-    with StringIO() as string_stream:
-        yaml_handler.dump(obj, string_stream)
-        output_str = string_stream.getvalue()
-    return output_str
-
-
-def create_file(path: Path, content: str, overwrite=False):
-    """Creates or overwrites the file with the given content"""
-    path.parent.mkdir(exist_ok=True)
-    if not overwrite and path.exists():
-        return
-
-    with open(path, 'w+', newline='\n') as f:
-        f.write(content)
+    dotfile_yaml["version"] = str(version)
+    dotfile_yaml["last_updated"] = last_updated
+    return yaml_dumps(dotfile_yaml)
