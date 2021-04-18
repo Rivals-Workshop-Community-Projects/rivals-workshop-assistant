@@ -1,12 +1,14 @@
 import datetime
 import sys
+import typing
 from pathlib import Path
 
-from rivals_workshop_assistant.script_mod import Script
-from rivals_workshop_assistant.asset_handling import get_required_assets, save_assets
-from rivals_workshop_assistant.setup import make_basic_folder_structure
-from rivals_workshop_assistant.injection import handle_injection
-from rivals_workshop_assistant.code_generation import handle_codegen
+from .script_mod import Script
+from .asset_handling import get_required_assets, save_assets
+from .setup import make_basic_folder_structure
+from .injection import handle_injection
+from .code_generation import handle_codegen
+from .dotfile_mod import read_dotfile, yaml_load
 
 
 def main(given_dir: Path):
@@ -37,19 +39,37 @@ def get_root_dir(given_dir: Path) -> Path:
         #  if config is not in current file, keep searching parent directory
 
 
+def _get_processed_time_register(root_dir: Path) -> dict[Path, datetime.datetime]:
+    dotfile = read_dotfile(root_dir)  # TODO this and yaml load should be combined?
+
+    yaml = yaml_load(dotfile)
+
+    # TODO make absolute
+
+    return yaml
+
+
+def get_processed_time(
+    processed_time_register: dict[Path, datetime.datetime], path: Path
+) -> typing.Optional[Script]:
+    return processed_time_register.get(path, None)
+
+
 def read_scripts(root_dir: Path) -> list[Script]:
     """Returns all Scripts in the scripts directory."""
     gml_paths = list((root_dir / "scripts").rglob("*.gml"))
-    scripts = [
-        Script(
+
+    processed_time_register = _get_processed_time_register(root_dir)
+
+    scripts = []
+    for gml_path in gml_paths:
+        script = Script(
             path=gml_path,
             original_content=gml_path.read_text(),
             modified_time=datetime.datetime.fromtimestamp(gml_path.stat().st_mtime),
-            processed_time=None,
+            processed_time=get_processed_time(processed_time_register, gml_path),
         )
-        for gml_path in gml_paths
-    ]
-    # todo add processed time handling to this
+        scripts.append(script)
 
     return scripts
 

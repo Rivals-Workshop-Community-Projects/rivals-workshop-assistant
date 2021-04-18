@@ -21,8 +21,11 @@ def save_dotfile(root_dir: Path, dotfile: str):
     create_file(path=dotfile_path, content=dotfile, overwrite=True)
 
 
-def yaml_load(yaml: str):
-    return yaml_handler.load(yaml)
+def yaml_load(yaml_str: str):
+    yaml_obj = yaml_handler.load(yaml_str)
+    if yaml_obj is None:
+        yaml_obj = {}
+    return yaml_obj
 
 
 def yaml_dumps(obj) -> str:
