@@ -60,15 +60,20 @@ def assert_images_equal(img1, img2):
 
 
 def make_script(
-    path: Path, original_content: str, working_content: str = None
+    path: Path,
+    original_content: str,
+    working_content: str = None,
+    modified_time=make_time(),
+    processed_time=None,
 ) -> Script:
     if working_content is None:
         working_content = original_content
     return Script(
         path=path,
-        modified_time=make_time(),
+        modified_time=modified_time,
         original_content=original_content,
         working_content=working_content,
+        processed_time=processed_time,
     )
 
 

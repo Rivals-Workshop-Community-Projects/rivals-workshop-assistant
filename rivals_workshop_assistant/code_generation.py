@@ -9,7 +9,7 @@ from rivals_workshop_assistant.script_mod import Script
 
 def handle_codegen(scripts: list[Script]) -> list[Script]:
     result_scripts = []
-    for script in scripts:
+    for script in [script for script in scripts if script.is_fresh]:
         script.working_content = handle_codegen_for_script(script.working_content)
         result_scripts.append(script)
     return result_scripts

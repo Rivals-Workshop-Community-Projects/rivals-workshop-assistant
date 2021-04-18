@@ -3,7 +3,7 @@ from pathlib import Path
 import pytest
 
 from rivals_workshop_assistant import code_generation as src
-from tests.testing_helpers import make_script
+from tests.testing_helpers import make_script, make_time, TEST_LATER_DATETIME_STRING
 
 PATH_A = Path("a")
 
@@ -66,3 +66,18 @@ def test_handle_codegen__for_loop(original_content, expected_content):
             PATH_A, original_content=original_content, working_content=expected_content
         )
     ]
+
+
+def test_already_processed_file__nothing_happens():
+    original_content = "$foreach blah$"
+    scripts = [
+        make_script(
+            PATH_A,
+            original_content=original_content,
+            processed_time=make_time(TEST_LATER_DATETIME_STRING),
+        )
+    ]
+
+    result = src.handle_codegen(scripts)
+
+    assert result == []
