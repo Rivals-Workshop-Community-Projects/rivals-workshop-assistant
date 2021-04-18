@@ -1,4 +1,5 @@
 import datetime
+import os.path
 import sys
 import typing
 from pathlib import Path
@@ -8,7 +9,7 @@ from .asset_handling import get_required_assets, save_assets
 from .setup import make_basic_folder_structure
 from .injection import handle_injection
 from .code_generation import handle_codegen
-from .dotfile_mod import read_dotfile, yaml_load
+from .dotfile_mod import read_dotfile, yaml_load, DotfileFields
 
 
 def main(given_dir: Path):
@@ -39,15 +40,21 @@ def get_root_dir(given_dir: Path) -> Path:
 
 def _get_processed_time_register(root_dir: Path) -> dict[Path, datetime.datetime]:
     dotfile = read_dotfile(root_dir)
+    return _get_processed_time_register_logic(root_dir, dotfile)
 
-    # TODO make absolute
 
-    return dotfile
+def _get_processed_time_register_logic(root_path: Path, dotfile: dict):
+    absolute_register = dotfile.get(DotfileFields.PROCESSED_TIME_REGISTER, {})
+    relative_register = {
+        Path(os.path.relpath(path=path, start=root_path)): absolute_register[path]
+        for path in absolute_register
+    }
+    return relative_register
 
 
 def get_processed_time(
     processed_time_register: dict[Path, datetime.datetime], path: Path
-) -> typing.Optional[Script]:
+) -> typing.Optional[datetime.datetime]:
     return processed_time_register.get(path, None)
 
 
