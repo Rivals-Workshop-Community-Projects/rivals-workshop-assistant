@@ -5,14 +5,18 @@ from ruamel.yaml import StringIO, YAML
 from rivals_workshop_assistant import paths as paths
 from rivals_workshop_assistant.file_handling import create_file
 
+YAML_HANDLER = YAML()
 
-def read_dotfile(root_dir: Path):
+
+def read_dotfile(root_dir: Path) -> dict:
     """Controller"""
     dotfile_path = root_dir / paths.DOTFILE_PATH
     try:
-        return dotfile_path.read_text()
+        dotfile_str = dotfile_path.read_text()
     except FileNotFoundError:
-        return ""
+        dotfile_str = ""
+
+    return yaml_load(dotfile_str)
 
 
 def save_dotfile(root_dir: Path, dotfile: str):
@@ -21,8 +25,8 @@ def save_dotfile(root_dir: Path, dotfile: str):
     create_file(path=dotfile_path, content=dotfile, overwrite=True)
 
 
-def yaml_load(yaml_str: str):
-    yaml_obj = yaml_handler.load(yaml_str)
+def yaml_load(yaml_str: str) -> dict:
+    yaml_obj = YAML_HANDLER.load(yaml_str)
     if yaml_obj is None:
         yaml_obj = {}
     return yaml_obj
@@ -30,9 +34,6 @@ def yaml_load(yaml_str: str):
 
 def yaml_dumps(obj) -> str:
     with StringIO() as string_stream:
-        yaml_handler.dump(obj, string_stream)
+        YAML_HANDLER.dump(obj, string_stream)
         output_str = string_stream.getvalue()
     return output_str
-
-
-yaml_handler = YAML()

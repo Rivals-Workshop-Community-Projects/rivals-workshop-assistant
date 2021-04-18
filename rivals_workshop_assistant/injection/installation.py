@@ -104,15 +104,11 @@ def should_update(root_dir: Path) -> bool:
 
 
 def _get_should_update_from_dotfile_and_date(
-    dotfile: str, today: datetime.date
+    dotfile: dict, today: datetime.date
 ) -> bool:
     default_date = datetime.date.fromisoformat("1996-01-01")
 
-    dotfile_yaml = yaml_load(dotfile)
-    if dotfile_yaml is None:
-        last_update_day = default_date
-    else:
-        last_update_day = dotfile_yaml.get("last_updated", default_date)
+    last_update_day = dotfile.get("last_updated", default_date)
 
     days_passed = (today - last_update_day).days
     return days_passed > 0
@@ -219,12 +215,8 @@ def _get_current_version(root_dir: Path) -> Version:
     return get_current_version_from_dotfile(dotfile)
 
 
-def get_current_version_from_dotfile(dotfile: str) -> typing.Optional[Version]:
-    dotfile_yaml = yaml_load(dotfile)
-    if dotfile_yaml is None:
-        return None
-
-    version_string: str = dotfile_yaml.get("version", None)
+def get_current_version_from_dotfile(dotfile: dict) -> typing.Optional[Version]:
+    version_string: str = dotfile.get("version", None)
     if version_string is None:
         return None
 
@@ -268,19 +260,14 @@ def _update_dotfile_for_install(
     """Controller"""
     old_dotfile = read_dotfile(root_dir)
     new_dotfile = _get_dotfile_with_new_version_and_last_updated(
-        version=version, last_updated=last_updated, old_dotfile=old_dotfile
+        version=version, last_updated=last_updated, dotfile=old_dotfile
     )
     save_dotfile(root_dir, new_dotfile)
 
 
 def _get_dotfile_with_new_version_and_last_updated(
-    version: Version, last_updated: datetime.date, old_dotfile: str
+    version: Version, last_updated: datetime.date, dotfile: dict
 ) -> str:
-    dotfile_yaml = yaml_load(old_dotfile)
-
-    if dotfile_yaml is None:
-        dotfile_yaml = {}
-
-    dotfile_yaml["version"] = str(version)
-    dotfile_yaml["last_updated"] = last_updated
-    return yaml_dumps(dotfile_yaml)
+    dotfile["version"] = str(version)
+    dotfile["last_updated"] = last_updated
+    return yaml_dumps(dotfile)

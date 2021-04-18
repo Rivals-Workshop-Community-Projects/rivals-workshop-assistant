@@ -35,18 +35,14 @@ def get_root_dir(given_dir: Path) -> Path:
         return given_dir
     else:
         raise FileNotFoundError("Given folder does not contain config.ini. Aborting.")
-        # Todo,
-        #  if config is not in current file, keep searching parent directory
 
 
 def _get_processed_time_register(root_dir: Path) -> dict[Path, datetime.datetime]:
-    dotfile = read_dotfile(root_dir)  # TODO this and yaml load should be combined?
-
-    yaml = yaml_load(dotfile)
+    dotfile = read_dotfile(root_dir)
 
     # TODO make absolute
 
-    return yaml
+    return dotfile
 
 
 def get_processed_time(
