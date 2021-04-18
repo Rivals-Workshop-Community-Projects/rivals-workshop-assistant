@@ -24,10 +24,11 @@ def apply_injection(
     supplied dependencies."""
     result_scripts = []
     for script in scripts:
-        script.working_content = _apply_injection_to_script(
-            script.working_content, injection_library
-        )
-        result_scripts.append(script)
+        if script.is_fresh:
+            script.working_content = _apply_injection_to_script(
+                script.working_content, injection_library
+            )
+            result_scripts.append(script)
 
     return result_scripts
 

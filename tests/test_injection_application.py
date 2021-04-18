@@ -4,8 +4,7 @@ import pytest
 
 import rivals_workshop_assistant.injection.application as application
 from rivals_workshop_assistant.injection.dependency_handling import Define, Macro
-from tests.testing_helpers import make_script
-
+from tests.testing_helpers import make_script, make_time, TEST_LATER_DATETIME_STRING
 
 PATH_A = Path("a")
 
@@ -268,3 +267,21 @@ print(my_macro)
     assert result_scripts == [
         make_script(PATH_A, original_content=script, working_content=script.rstrip())
     ]
+
+
+def test_already_processed_file__nothing_happens():
+    script = """\
+content
+define1()"""
+    define = define1
+
+    scripts = [
+        make_script(
+            PATH_A, script, processed_time=make_time(TEST_LATER_DATETIME_STRING)
+        )
+    ]
+
+    result_scripts = application.apply_injection(
+        scripts=scripts, injection_library=[define]
+    )
+    assert result_scripts == []
