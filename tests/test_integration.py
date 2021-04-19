@@ -77,7 +77,7 @@ def test_read_scripts():
         create_script(tmp, script_1)
         create_script(tmp, script_subfolder)
 
-        result = read_scripts(Path(tmp.path))
+        result = read_scripts(Path(tmp.path), {})
 
         assert result == [
             make_script_from_script_with_path(tmp, script_1),
@@ -104,7 +104,7 @@ def test_full_injection():
         create_script(tmp, injection_at_root)
         create_script(tmp, injection_in_subfolder)
 
-        scripts = read_scripts(Path(tmp.path))
+        scripts = read_scripts(Path(tmp.path), {})
         library = injection.read_injection_library(Path(tmp.path))
         result_scripts = apply_injection(scripts=scripts, injection_library=library)
 
@@ -139,7 +139,7 @@ def test_full_injection():
             ),
         ]
 
-        save_scripts(root_dir=Path(tmp.path), scripts=result_scripts)
+        save_scripts(root_dir=Path(tmp.path), dotfile={}, scripts=result_scripts)
 
         actual_script_1 = tmp.read(script_1.path.as_posix(), encoding="utf8")
         assert actual_script_1 == expected_script_1

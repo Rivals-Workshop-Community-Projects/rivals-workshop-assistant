@@ -18,12 +18,12 @@ def main(given_dir: Path):
 
     dotfile = dotfile_mod.read_dotfile(root_dir)
 
-    scripts = read_scripts(root_dir)
+    scripts = read_scripts(root_dir, dotfile)
 
     scripts = handle_codegen(scripts)
     scripts = handle_injection(root_dir, dotfile, scripts)
 
-    save_scripts(root_dir, scripts)
+    save_scripts(root_dir, dotfile, scripts)
 
     assets = get_required_assets(scripts)
     save_assets(root_dir, assets)
@@ -48,11 +48,9 @@ def get_processed_time(dotfile: dict, path: Path) -> typing.Optional[datetime.da
         return None
 
 
-def read_scripts(root_dir: Path) -> list[Script]:
+def read_scripts(root_dir: Path, dotfile: dict) -> list[Script]:
     """Returns all Scripts in the scripts directory."""
     gml_paths = list((root_dir / "scripts").rglob("*.gml"))
-
-    dotfile = dotfile_mod.read_dotfile(root_dir)
 
     scripts = []
     for gml_path in gml_paths:
@@ -67,17 +65,15 @@ def read_scripts(root_dir: Path) -> list[Script]:
     return scripts
 
 
-def save_scripts(root_dir: Path, scripts: list[Script]):
+def save_scripts(root_dir: Path, dotfile: dict, scripts: list[Script]):
     for script in scripts:
         script.save(root_dir)
 
-    old_dotfile = dotfile_mod.read_dotfile(root_dir)
     now = datetime.datetime.now()
-    new_dotfile = _get_dotfile_after_saving(old_dotfile, now, scripts)
-    dotfile_mod.save_dotfile(root_dir, new_dotfile)
+    _update_docfile_after_saving_scripts(dotfile, now, scripts)
 
 
-def _get_dotfile_after_saving(
+def _update_docfile_after_saving_scripts(
     dotfile: dict, now: datetime.datetime, scripts: list[Script]
 ) -> dict:
     dotfile[dotfile_mod.PROCESSED_TIME] = now

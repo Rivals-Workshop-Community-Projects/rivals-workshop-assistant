@@ -14,8 +14,6 @@ import requests
 import rivals_workshop_assistant.paths as paths
 from . import paths as inject_paths
 from ..dotfile_mod import (
-    read_dotfile,
-    save_dotfile,
     _yaml_load,
     LAST_UPDATED,
     VERSION,
@@ -87,13 +85,13 @@ class Release:
 def update_injection_library(root_dir: Path, dotfile: dict):
     """Controller"""
     if should_update(dotfile):
-        current_version = _get_current_version(root_dir)
+        current_version = get_current_version_from_dotfile(dotfile)
         release_to_install = get_release_to_install(root_dir, current_version)
 
-        _update_dotfile_for_install(
-            root_dir,
+        update_dotfile_after_update(
             release_to_install.version if release_to_install else current_version,
             datetime.date.today(),
+            dotfile,
         )
 
         if (
@@ -212,12 +210,6 @@ def _get_legal_releases(
     return candidates
 
 
-def _get_current_version(root_dir: Path) -> Version:
-    """Controller"""
-    dotfile = read_dotfile(root_dir)
-    return get_current_version_from_dotfile(dotfile)
-
-
 def get_current_version_from_dotfile(dotfile: dict) -> typing.Optional[Version]:
     version_string: str = dotfile.get("version", None)
     if version_string is None:
@@ -257,18 +249,7 @@ def _download_and_unzip_release(root_dir: Path, release: Release):
         )
 
 
-def _update_dotfile_for_install(
-    root_dir: Path, version: Version, last_updated: datetime.date
-):
-    """Controller"""
-    old_dotfile = read_dotfile(root_dir)
-    new_dotfile = _get_dotfile_with_new_version_and_last_updated(
-        version=version, last_updated=last_updated, dotfile=old_dotfile
-    )
-    save_dotfile(root_dir, new_dotfile)
-
-
-def _get_dotfile_with_new_version_and_last_updated(
+def update_dotfile_after_update(
     version: Version, last_updated: datetime.date, dotfile: dict
 ) -> dict:
     dotfile[VERSION] = str(version)

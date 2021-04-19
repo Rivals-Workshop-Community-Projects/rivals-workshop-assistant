@@ -47,13 +47,13 @@ def test__get_dotfile_with_new_release():
     version = src.Version(major=10, minor=11, patch=12)
     dotfile = _yaml_load("version: 3.2.1")
 
-    result = src._get_dotfile_with_new_version_and_last_updated(
+    result = src.update_dotfile_after_update(
         version=version,
         last_updated=datetime.date.fromisoformat(TEST_DATE_STRING),
         dotfile=dotfile,
     )
     assert result == _yaml_load(
-        f"version: 10.11.12\nlast_updated: " f"{TEST_DATE_STRING}\n"
+        f"version: 10.11.12\nlast_updated: {TEST_DATE_STRING}\n"
     )
 
 
@@ -65,7 +65,7 @@ something_else: version
 version: 3.2.1"""
     )
 
-    result = src._get_dotfile_with_new_version_and_last_updated(
+    result = src.update_dotfile_after_update(
         version=release,
         last_updated=datetime.date.fromisoformat(TEST_DATE_STRING),
         dotfile=dotfile,

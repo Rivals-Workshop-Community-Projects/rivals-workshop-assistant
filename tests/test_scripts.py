@@ -32,7 +32,7 @@ def test_dotfile_after_saving():
     script = make_script(PATH_ABSOLUTE, "content")
     time = make_time()
 
-    result = src._get_dotfile_after_saving(
+    result = src._update_docfile_after_saving_scripts(
         dotfile=old_dotfile, now=time, scripts=[script]
     )
 

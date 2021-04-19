@@ -46,47 +46,6 @@ def test__get_releases():
     #   something
 
 
-def test__update_dotfile_with_new_release():
-    with TempDirectory() as tmp:
-        create_script(
-            tmp, ScriptWithPath(path=paths.DOTFILE_PATH, content="other_content: 42")
-        )
-
-        src._update_dotfile_for_install(
-            root_dir=Path(tmp.path),
-            version=make_version("4.5.6"),
-            last_updated=datetime.date.fromisoformat(TEST_DATE_STRING),
-        )
-
-        result = tmp.read(paths.DOTFILE_PATH.as_posix(), encoding="utf8")
-        assert (
-            result
-            == f"""\
-other_content: 42
-{VERSION}: 4.5.6
-{LAST_UPDATED}: {TEST_DATE_STRING}
-"""
-        )
-
-
-def test__update_dotfile_with_new_release_when_missing_dotfile():
-    with TempDirectory() as tmp:
-        src._update_dotfile_for_install(
-            root_dir=Path(tmp.path),
-            version=src.Version(major=4, minor=5, patch=6),
-            last_updated=datetime.date.fromisoformat("2019-12-04"),
-        )
-        result = tmp.read(paths.DOTFILE_PATH.as_posix(), encoding="utf8")
-
-        assert (
-            result
-            == f"""\
-{VERSION}: 4.5.6
-{LAST_UPDATED}: {TEST_DATE_STRING}
-"""
-        )
-
-
 TEST_RELEASE = make_release(
     "0.0.0",
     "https://github.com/Rivals-Workshop-Community-Projects"
@@ -137,51 +96,6 @@ def test__download_and_unzip_release():
     with TempDirectory() as tmp:
         src._download_and_unzip_release(root_dir=Path(tmp.path), release=TEST_RELEASE)
         assert_test_release_scripts_installed(tmp)
-
-
-def test__update_dotfile__no_dotfile():
-    with TempDirectory() as tmp:
-        src._update_dotfile_for_install(
-            root_dir=Path(tmp.path),
-            version=make_version("4.5.6"),
-            last_updated=datetime.date.fromisoformat("2019-12-04"),
-        )
-
-        dotpath_content = tmp.read(
-            filepath=paths.DOTFILE_PATH.as_posix(), encoding="utf8"
-        )
-        assert (
-            dotpath_content
-            == f"""\
-{VERSION}: 4.5.6
-{LAST_UPDATED}: {TEST_DATE_STRING}
-"""
-        )
-
-
-def test__update_dotfile():
-    with TempDirectory() as tmp:
-        create_script(
-            tmp,
-            ScriptWithPath(
-                path=paths.DOTFILE_PATH,
-                content=f"{VERSION}: 3.4.5\n",
-            ),
-        )
-        src._update_dotfile_for_install(
-            root_dir=Path(tmp.path),
-            version=make_version("4.5.6"),
-            last_updated=datetime.date.fromisoformat("2019-12-04"),
-        )
-
-        dotfile = tmp.read(filepath=paths.DOTFILE_PATH.as_posix(), encoding="utf8")
-        assert (
-            dotfile
-            == f"""\
-{VERSION}: 4.5.6
-{LAST_UPDATED}: {TEST_DATE_STRING}
-"""
-        )
 
 
 def test__install_release():
