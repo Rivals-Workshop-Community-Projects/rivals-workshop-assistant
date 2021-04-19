@@ -16,15 +16,19 @@ def main(given_dir: Path):
     root_dir = get_root_dir(given_dir)
     make_basic_folder_structure(root_dir)
 
+    dotfile = dotfile_mod.read_dotfile(root_dir)
+
     scripts = read_scripts(root_dir)
 
     scripts = handle_codegen(scripts)
-    scripts = handle_injection(root_dir, scripts)
+    scripts = handle_injection(root_dir, dotfile, scripts)
 
     save_scripts(root_dir, scripts)
 
     assets = get_required_assets(scripts)
     save_assets(root_dir, assets)
+
+    dotfile_mod.save_dotfile(root_dir, dotfile)
 
 
 def get_root_dir(given_dir: Path) -> Path:

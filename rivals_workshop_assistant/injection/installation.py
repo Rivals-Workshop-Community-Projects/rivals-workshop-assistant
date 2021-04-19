@@ -84,9 +84,9 @@ class Release:
         return self.version < other.version
 
 
-def update_injection_library(root_dir: Path):
+def update_injection_library(root_dir: Path, dotfile: dict):
     """Controller"""
-    if should_update(root_dir):
+    if should_update(dotfile):
         current_version = _get_current_version(root_dir)
         release_to_install = get_release_to_install(root_dir, current_version)
 
@@ -103,8 +103,7 @@ def update_injection_library(root_dir: Path):
             install_release(root_dir, release_to_install)
 
 
-def should_update(root_dir: Path) -> bool:
-    dotfile = read_dotfile(root_dir)
+def should_update(dotfile: dict) -> bool:
     today = datetime.date.today()
     return _get_should_update_from_dotfile_and_date(dotfile, today)
 
