@@ -9,8 +9,9 @@ def get_required_assets(scripts: list[Script]) -> set[Asset]:
     assistant's responsibility.
     Those assets are filtered out in the supply step, after this."""
     required_assets_for_scripts = set()
-    for script in scripts.values():
-        required_assets_for_scripts.update(_get_required_assets_for_script(script))
+    for script in scripts:
+        if script.is_fresh:
+            required_assets_for_scripts.update(_get_required_assets_for_script(script))
 
     return required_assets_for_scripts
 
@@ -18,7 +19,7 @@ def get_required_assets(scripts: list[Script]) -> set[Asset]:
 def _get_required_assets_for_script(script: Script) -> set[Asset]:
     assets = set()
     for asset_type in ASSET_TYPES:
-        assets.update(asset_type.get_from_text(script))
+        assets.update(asset_type.get_from_text(script.working_content))
     return assets
 
 
