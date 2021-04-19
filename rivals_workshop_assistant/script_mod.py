@@ -65,3 +65,7 @@ class Anim(File):
         with open(self.path, "rb") as f:
             contents = f.read()
         return aseprite_loading.AsepriteFile(contents)
+
+    def save(self, root_dir: Path):
+        # Will need aseprite path, and small_sprites setting
+        raise NotImplementedError

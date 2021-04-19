@@ -4,8 +4,7 @@ import sys
 import typing
 from pathlib import Path
 
-import rivals_workshop_assistant.aseprite_loading
-from .script_mod import Script, Anim
+from .script_mod import Script, Anim, File
 from .asset_handling import get_required_assets, save_assets
 from .setup import make_basic_folder_structure
 from .injection import handle_injection
@@ -24,7 +23,12 @@ def main(given_dir: Path):
 
     scripts = handle_codegen(scripts)
     scripts = handle_injection(root_dir, dotfile, scripts)
-    save_scripts(root_dir, dotfile, scripts)
+
+    save_scripts(root_dir, scripts)
+    save_anims(root_dir, anims)
+    update_dotfile_after_saving(
+        now=datetime.datetime.now(), dotfile=dotfile, files=scripts + anims
+    )
 
     assets = get_required_assets(scripts)
     save_assets(root_dir, assets)
@@ -50,7 +54,7 @@ def get_processed_time(dotfile: dict, path: Path) -> typing.Optional[datetime.da
 
 
 def _get_modified_time(path: Path) -> datetime.datetime:
-    datetime.datetime.fromtimestamp(path.stat().st_mtime)
+    return datetime.datetime.fromtimestamp(path.stat().st_mtime)
 
 
 def read_scripts(root_dir: Path, dotfile: dict) -> list[Script]:
@@ -89,20 +93,21 @@ def read_anims(root_dir: Path, dotfile: dict) -> list[Anim]:
     return anims
 
 
-def save_scripts(root_dir: Path, dotfile: dict, scripts: list[Script]):
+def save_scripts(root_dir: Path, scripts: list[Script]):
     for script in scripts:
         script.save(root_dir)
 
-    now = datetime.datetime.now()
-    _update_docfile_after_saving_scripts(dotfile, now, scripts)
+
+def save_anims(root_dir: Path, anims: list[Anim]):
+    for anim in anims:
+        anim.save(root_dir)  # todo add small_sprites compatibility
 
 
-def _update_docfile_after_saving_scripts(
-    dotfile: dict, now: datetime.datetime, scripts: list[Script]
-) -> dict:
+def update_dotfile_after_saving(
+    dotfile: dict, now: datetime.datetime, files: list[File]
+):
     dotfile[dotfile_mod.PROCESSED_TIME] = now
-    dotfile[dotfile_mod.SEEN_FILES] = [script.path.as_posix() for script in scripts]
-    return dotfile
+    dotfile[dotfile_mod.SEEN_FILES] = [file.path.as_posix() for file in files]
 
 
 if __name__ == "__main__":

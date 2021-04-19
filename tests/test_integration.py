@@ -3,7 +3,6 @@ from pathlib import Path
 import pytest
 from testfixtures import TempDirectory
 
-import rivals_workshop_assistant.script_mod
 from rivals_workshop_assistant import paths, injection
 from rivals_workshop_assistant.setup import make_basic_folder_structure
 from rivals_workshop_assistant.injection import apply_injection, installation
@@ -16,7 +15,6 @@ from tests.testing_helpers import (
     create_script,
     make_script_from_script_with_path,
     supply_anim,
-    make_time,
     TEST_ANIM_NAME,
 )
 
@@ -143,7 +141,7 @@ def test_full_injection():
             ),
         ]
 
-        src.save_scripts(root_dir=Path(tmp.path), dotfile={}, scripts=result_scripts)
+        src.save_scripts(root_dir=Path(tmp.path), scripts=result_scripts)
 
         actual_script_1 = tmp.read(script_1.path.as_posix(), encoding="utf8")
         assert actual_script_1 == expected_script_1

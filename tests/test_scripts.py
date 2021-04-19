@@ -24,7 +24,7 @@ def test_get_processed_time():
 
 
 def test_dotfile_after_saving():
-    old_dotfile = {
+    dotfile = {
         dotfile_mod.SEEN_FILES: ["some/other/path.gml"],
         dotfile_mod.PROCESSED_TIME: make_time(TEST_LATER_DATETIME_STRING),
     }
@@ -32,11 +32,9 @@ def test_dotfile_after_saving():
     script = make_script(PATH_ABSOLUTE, "content")
     time = make_time()
 
-    result = src._update_docfile_after_saving_scripts(
-        dotfile=old_dotfile, now=time, scripts=[script]
-    )
+    src.update_dotfile_after_saving(dotfile=dotfile, now=time, files=[script])
 
-    assert result == {
+    assert dotfile == {
         dotfile_mod.SEEN_FILES: [script.path.as_posix()],
         dotfile_mod.PROCESSED_TIME: time,
     }
