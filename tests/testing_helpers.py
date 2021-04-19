@@ -1,4 +1,5 @@
 import datetime
+import shutil
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -38,6 +39,14 @@ PATH_ABSOLUTE = Path("C:/a/file/path/the_root/scripts/script_1.gml")
 PATH_RELATIVE = Path("scripts/script_1.gml")
 TEST_DATETIME_STRING = "2019-12-04*09:34:22"
 TEST_LATER_DATETIME_STRING = "2019-12-05*10:31:20"
+
+TEST_ANIM_NAME = Path("testsprite.aseprite")
+
+
+def supply_anim(tmp, name=TEST_ANIM_NAME):
+    dest = Path(tmp.path) / "anims/"
+    dest.mkdir(parents=True, exist_ok=True)
+    shutil.copy(Path("assets" / name), dest)
 
 
 def make_time(time_str=TEST_DATETIME_STRING):

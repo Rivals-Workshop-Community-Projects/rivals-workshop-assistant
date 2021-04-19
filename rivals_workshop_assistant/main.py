@@ -1,9 +1,11 @@
 import datetime
+import itertools
 import sys
 import typing
 from pathlib import Path
 
-from .script_mod import Script
+import rivals_workshop_assistant.aseprite_loading
+from .script_mod import Script, Anim
 from .asset_handling import get_required_assets, save_assets
 from .setup import make_basic_folder_structure
 from .injection import handle_injection
@@ -15,14 +17,13 @@ def main(given_dir: Path):
     """Runs all processes on scripts in the root_dir"""
     root_dir = get_root_dir(given_dir)
     make_basic_folder_structure(root_dir)
-
     dotfile = dotfile_mod.read_dotfile(root_dir)
 
     scripts = read_scripts(root_dir, dotfile)
+    anims = read_anims(root_dir, dotfile)
 
     scripts = handle_codegen(scripts)
     scripts = handle_injection(root_dir, dotfile, scripts)
-
     save_scripts(root_dir, dotfile, scripts)
 
     assets = get_required_assets(scripts)
@@ -48,21 +49,44 @@ def get_processed_time(dotfile: dict, path: Path) -> typing.Optional[datetime.da
         return None
 
 
+def _get_modified_time(path: Path) -> datetime.datetime:
+    datetime.datetime.fromtimestamp(path.stat().st_mtime)
+
+
 def read_scripts(root_dir: Path, dotfile: dict) -> list[Script]:
     """Returns all Scripts in the scripts directory."""
     gml_paths = list((root_dir / "scripts").rglob("*.gml"))
 
     scripts = []
-    for gml_path in gml_paths:
+    for path in gml_paths:
         script = Script(
-            path=gml_path,
-            original_content=gml_path.read_text(),
-            modified_time=datetime.datetime.fromtimestamp(gml_path.stat().st_mtime),
-            processed_time=get_processed_time(dotfile=dotfile, path=gml_path),
+            path=path,
+            original_content=path.read_text(),
+            modified_time=_get_modified_time(path),
+            processed_time=get_processed_time(dotfile=dotfile, path=path),
         )
         scripts.append(script)
 
     return scripts
+
+
+def read_anims(root_dir: Path, dotfile: dict) -> list[Anim]:
+    ase_paths = itertools.chain(
+        *[
+            list((root_dir / "anims").rglob(f"*.{filetype}"))
+            for filetype in ("ase", "aseprite")
+        ]
+    )
+
+    anims = []
+    for path in ase_paths:
+        anim = Anim(
+            path=path,
+            modified_time=_get_modified_time(path),
+            processed_time=get_processed_time(dotfile=dotfile, path=path),
+        )
+        anims.append(anim)
+    return anims
 
 
 def save_scripts(root_dir: Path, dotfile: dict, scripts: list[Script]):

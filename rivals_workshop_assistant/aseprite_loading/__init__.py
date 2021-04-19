@@ -18,7 +18,7 @@ from .chunks import (
 )
 
 
-class AsepriteFile(object):
+class AsepriteFile:
     def __init__(self, data):
         self.header, self.frames = AsepriteFile.parse_data(data)
         self.build_layer_tree()
