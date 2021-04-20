@@ -206,9 +206,10 @@ def test__read_anims():
 
 
 def test__save_anims():
+    aseprite_path = get_aseprite_path()
+
     with TempDirectory() as tmp:
         anims = [supply_anim(tmp, TEST_ANIM_NAME)]
-        aseprite_path = get_aseprite_path()
         root_dir = Path(tmp.path)
 
         src.save_anims(
@@ -225,9 +226,11 @@ def test__save_anims():
 
 
 def test__save_anims__removes_old_spritesheet():
+    aseprite_path = get_aseprite_path()
+
     with TempDirectory() as tmp:
         anims = [supply_anim(tmp, TEST_ANIM_NAME)]
-        aseprite_path = get_aseprite_path()
+
         root_dir = Path(tmp.path)
 
         old_filename = (
@@ -246,3 +249,31 @@ def test__save_anims__removes_old_spritesheet():
 
         assert not old_filename.exists()
         assert other_filename.exists()
+
+
+def test__save_anims__uses_subfolder_name():
+    subfolder_name = "subfolder"
+    aseprite_path = get_aseprite_path()
+
+    with TempDirectory() as tmp:
+        anims = [
+            supply_anim(
+                tmp, TEST_ANIM_NAME, relative_dest=Path("anims") / subfolder_name
+            )
+        ]
+
+        root_dir = Path(tmp.path)
+
+        src.save_anims(
+            root_dir=root_dir,
+            aseprite_path=Path(aseprite_path),
+            anims=anims,
+        )
+
+        with Image.open(
+            root_dir
+            / paths.SPRITES_FOLDER
+            / f"{subfolder_name}_{TEST_ANIM_NAME.stem}_strip3.png"
+        ) as img:
+            assert img.height == 66 * 2
+            assert img.width == 76 * 3 * 2

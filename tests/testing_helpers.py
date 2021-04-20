@@ -53,9 +53,13 @@ def make_anim(path: Path, modified_time=make_time(), processed_time=None):
 
 
 def supply_anim(
-    tmp, name=TEST_ANIM_NAME, modified_time=make_time(), processed_time=None
+    tmp,
+    name=TEST_ANIM_NAME,
+    modified_time=make_time(),
+    processed_time=None,
+    relative_dest=Path("anims"),
 ):
-    dest = Path(tmp.path) / "anims/"
+    dest = Path(tmp.path) / relative_dest
     dest.mkdir(parents=True, exist_ok=True)
     shutil.copy(Path("assets" / name), dest)
     return make_anim(

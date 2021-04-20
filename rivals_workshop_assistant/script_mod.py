@@ -73,11 +73,19 @@ class Anim(File):
     def name(self):
         return self.path.stem
 
+    @functools.cache
+    def get_sprite_base_name(self, root_dir):
+        relative_path = self.path.relative_to(root_dir / paths.ANIMS_FOLDER)
+        subfolders = list(relative_path.parents)[:-1]
+        path_parts = [path.name for path in reversed(subfolders)] + [self.name]
+        base_name = "_".join(path_parts)
+        return base_name
+
     def save(self, root_dir: Path, aseprite_path: Path):
         self._delete_old_save(root_dir)
 
         num_frames = len(self.content.frames)
-        dest_name = f"{self.name}_strip{num_frames}.png"
+        dest_name = f"{self.get_sprite_base_name(root_dir)}_strip{num_frames}.png"
         dest = root_dir / paths.SPRITES_FOLDER / dest_name
 
         dest.parent.mkdir(parents=True, exist_ok=True)
@@ -93,6 +101,8 @@ class Anim(File):
         subprocess.run(export_command)
 
     def _delete_old_save(self, root_dir: Path):
-        old_paths = (root_dir / paths.SPRITES_FOLDER).glob(f"{self.name}_strip*.png")
+        old_paths = (root_dir / paths.SPRITES_FOLDER).glob(
+            f"{self.get_sprite_base_name(root_dir)}_strip*.png"
+        )
         for old_path in old_paths:
             os.remove(old_path)
