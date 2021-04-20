@@ -1,38 +1,11 @@
 from pathlib import Path
-from PIL import Image
 
+from PIL import Image
 import pytest
 from testfixtures import TempDirectory
 
-from rivals_workshop_assistant import paths, injection
-from rivals_workshop_assistant.setup import make_basic_folder_structure
-from rivals_workshop_assistant.injection import apply_injection, installation
-from rivals_workshop_assistant.injection.paths import INJECT_FOLDER, USER_INJECT_FOLDER
-from rivals_workshop_assistant.injection.dependency_handling import Define
-import rivals_workshop_assistant.main as src
 from tests.testing_helpers import (
-    make_script,
-    ScriptWithPath,
-    create_script,
-    make_script_from_script_with_path,
-    supply_anim,
-    TEST_ANIM_NAME,
-    get_aseprite_path,
     make_empty_file,
-)
-from pathlib import Path
-
-from PIL import Image
-import pytest
-from testfixtures import TempDirectory
-
-from rivals_workshop_assistant import paths, injection
-from rivals_workshop_assistant.setup import make_basic_folder_structure
-from rivals_workshop_assistant.injection import apply_injection, installation
-from rivals_workshop_assistant.injection.paths import INJECT_FOLDER, USER_INJECT_FOLDER
-from rivals_workshop_assistant.injection.dependency_handling import Define
-import rivals_workshop_assistant.main as src
-from tests.testing_helpers import (
     make_script,
     ScriptWithPath,
     create_script,
@@ -41,6 +14,12 @@ from tests.testing_helpers import (
     TEST_ANIM_NAME,
     get_aseprite_path,
 )
+from rivals_workshop_assistant import paths, injection
+from rivals_workshop_assistant.setup import make_basic_folder_structure
+from rivals_workshop_assistant.injection import apply_injection, installation
+from rivals_workshop_assistant.injection.paths import INJECT_FOLDER, USER_INJECT_FOLDER
+from rivals_workshop_assistant.injection.dependency_handling import Define
+import rivals_workshop_assistant.main as src
 
 pytestmark = pytest.mark.slow
 
@@ -205,12 +184,20 @@ def test__read_anims():
         assert result[0].is_fresh
 
 
+def assert_anim(root_dir, filename=f"{TEST_ANIM_NAME.stem}_strip3.png"):
+    """Right now this assumes that the sprite is the absa dashstart anim stored in
+    TEST_ANIM_NAME"""
+    with Image.open(root_dir / paths.SPRITES_FOLDER / filename) as img:
+        assert img.height == 66 * 2
+        assert img.width == 76 * 3 * 2
+
+
 def test__save_anims():
     aseprite_path = get_aseprite_path()
 
     with TempDirectory() as tmp:
-        anims = [supply_anim(tmp, TEST_ANIM_NAME)]
         root_dir = Path(tmp.path)
+        anims = [supply_anim(tmp)]
 
         src.save_anims(
             root_dir=root_dir,
@@ -218,26 +205,38 @@ def test__save_anims():
             anims=anims,
         )
 
-        with Image.open(
-            root_dir / paths.SPRITES_FOLDER / f"{TEST_ANIM_NAME.stem}_strip3.png"
-        ) as img:
-            assert img.height == 66 * 2
-            assert img.width == 76 * 3 * 2
+        assert_anim(root_dir)
+
+
+def test__save_anims__uses_subfolder_name():
+    subfolder_name = "subfolder"
+    aseprite_path = get_aseprite_path()
+
+    with TempDirectory() as tmp:
+        root_dir = Path(tmp.path)
+        anims = [supply_anim(tmp, relative_dest=Path("anims") / subfolder_name)]
+
+        src.save_anims(
+            root_dir=root_dir,
+            aseprite_path=Path(aseprite_path),
+            anims=anims,
+        )
+
+        assert_anim(
+            root_dir, filename=f"{subfolder_name}_{TEST_ANIM_NAME.stem}_strip3.png"
+        )
 
 
 def test__save_anims__removes_old_spritesheet():
     aseprite_path = get_aseprite_path()
 
     with TempDirectory() as tmp:
-        anims = [supply_anim(tmp, TEST_ANIM_NAME)]
-
         root_dir = Path(tmp.path)
-
+        anims = [supply_anim(tmp)]
         old_filename = (
             root_dir / paths.SPRITES_FOLDER / f"{TEST_ANIM_NAME.stem}_strip2.png"
         )
         make_empty_file(old_filename)
-
         other_filename = root_dir / paths.SPRITES_FOLDER / f"unrelated_strip2.png"
         make_empty_file(other_filename)
 
@@ -251,18 +250,23 @@ def test__save_anims__removes_old_spritesheet():
         assert other_filename.exists()
 
 
-def test__save_anims__uses_subfolder_name():
-    subfolder_name = "subfolder"
+def test__save_anims__removes_old_spritesheet__with_subfolder():
     aseprite_path = get_aseprite_path()
+    subfolder_name = "subfolder"
 
     with TempDirectory() as tmp:
-        anims = [
-            supply_anim(
-                tmp, TEST_ANIM_NAME, relative_dest=Path("anims") / subfolder_name
-            )
-        ]
-
         root_dir = Path(tmp.path)
+        anims = [supply_anim(tmp, relative_dest=Path("anims") / subfolder_name)]
+        old_filename = (
+            root_dir
+            / paths.SPRITES_FOLDER
+            / f"{subfolder_name}_{TEST_ANIM_NAME.stem}_strip2.png"
+        )
+        make_empty_file(old_filename)
+        other_filename = (
+            root_dir / paths.SPRITES_FOLDER / f"{subfolder_name}_unrelated_strip2.png"
+        )
+        make_empty_file(other_filename)
 
         src.save_anims(
             root_dir=root_dir,
@@ -270,10 +274,5 @@ def test__save_anims__uses_subfolder_name():
             anims=anims,
         )
 
-        with Image.open(
-            root_dir
-            / paths.SPRITES_FOLDER
-            / f"{subfolder_name}_{TEST_ANIM_NAME.stem}_strip3.png"
-        ) as img:
-            assert img.height == 66 * 2
-            assert img.width == 76 * 3 * 2
+        assert not old_filename.exists()
+        assert other_filename.exists()
