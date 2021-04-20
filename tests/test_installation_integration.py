@@ -4,7 +4,9 @@ from pathlib import Path
 import pytest
 from testfixtures import TempDirectory
 
-from rivals_workshop_assistant.info_files import VERSION, LAST_UPDATED
+import rivals_workshop_assistant.config_mod
+import rivals_workshop_assistant.dotfile_mod
+from rivals_workshop_assistant.dotfile_mod import VERSION, LAST_UPDATED
 import rivals_workshop_assistant.injection.paths as inject_paths
 import rivals_workshop_assistant.paths as paths
 from rivals_workshop_assistant.injection import installation as src
@@ -25,7 +27,7 @@ def test__get_update_config():
         create_script(
             tmp,
             ScriptWithPath(
-                path=paths.ASSISTANT_CONFIG_PATH,
+                path=rivals_workshop_assistant.config_mod.PATH,
                 content=f"""\
 
 {src.UPDATE_LEVEL_NAME}: minor
@@ -103,14 +105,15 @@ def test__install_release():
         create_script(
             tmp,
             ScriptWithPath(
-                path=paths.DOTFILE_PATH,
+                path=rivals_workshop_assistant.dotfile_mod.PATH,
                 content=f"{VERSION}: 0.0.0",
             ),
         )
         create_script(
             tmp,
             ScriptWithPath(
-                path=paths.ASSISTANT_CONFIG_PATH, content="update_level: none"
+                path=rivals_workshop_assistant.config_mod.PATH,
+                content="update_level: none",
             ),
         )
         create_script(

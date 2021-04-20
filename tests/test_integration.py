@@ -4,6 +4,7 @@ from PIL import Image
 import pytest
 from testfixtures import TempDirectory
 
+import rivals_workshop_assistant.config_mod
 from tests.testing_helpers import (
     make_empty_file,
     make_script,
@@ -159,13 +160,15 @@ def test__make_basic_folder_structure__make_missing_config():
     with TempDirectory() as tmp:
         make_basic_folder_structure(Path(tmp.path))
 
-        actual = (Path(tmp.path) / paths.ASSISTANT_CONFIG_PATH).read_text()
+        actual = (
+            Path(tmp.path) / rivals_workshop_assistant.config_mod.PATH
+        ).read_text()
         assert actual == installation.DEFAULT_CONFIG
 
 
 def test__make_basic_folder_structure__config_present():
     with TempDirectory() as tmp:
-        config_path = Path(tmp.path) / paths.ASSISTANT_CONFIG_PATH
+        config_path = Path(tmp.path) / rivals_workshop_assistant.config_mod.PATH
         create_script(tmp, ScriptWithPath(path=config_path, content="a"))
 
         make_basic_folder_structure(Path(tmp.path))

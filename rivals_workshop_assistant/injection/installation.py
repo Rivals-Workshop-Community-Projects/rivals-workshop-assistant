@@ -11,13 +11,13 @@ import zipfile
 
 import requests
 
+import rivals_workshop_assistant.config_mod
 import rivals_workshop_assistant.paths as paths
 from . import paths as inject_paths
 from ..info_files import (
     _yaml_load,
-    LAST_UPDATED,
-    VERSION,
 )
+from ..dotfile_mod import VERSION, LAST_UPDATED
 
 UPDATE_LEVEL_NAME = "update_level"
 
@@ -59,7 +59,7 @@ DEFAULT_CONFIG = fr"""\
 ANIMS_FOLDER_README = f"""\
 Put your aseprite files in here.
 
-If you have `aseprite_path` set in `{paths.ASSISTANT_CONFIG_PATH}, the assistant will automatically convert them to spritesheets in your sprites folder.
+If you have `aseprite_path` set in `{rivals_workshop_assistant.config_mod.PATH}, the assistant will automatically convert them to spritesheets in your sprites folder.
 They will be saved as `<anim_name>_strip<num_frames>.png`
 This will *overwrite existing sprites with that name.* It is recommended to only change the aseprite file, not the spritesheets, to avoid losing changes.
 """
@@ -158,7 +158,7 @@ def get_update_config(root_dir: Path) -> UpdateConfig:
 def _read_config(root_dir: Path) -> str:
     """Controller"""
     try:
-        config_text = (root_dir / paths.ASSISTANT_CONFIG_PATH).read_text()
+        config_text = (root_dir / rivals_workshop_assistant.config_mod.PATH).read_text()
         return config_text
     except FileNotFoundError:
         return ""

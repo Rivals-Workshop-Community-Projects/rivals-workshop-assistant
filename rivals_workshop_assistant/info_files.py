@@ -1,46 +1,25 @@
-from pathlib import Path
+"""This file powers reading yaml files. Backend stuff."""
 
 from ruamel.yaml import StringIO, YAML
-
-from rivals_workshop_assistant import paths as paths
+from pathlib import Path
 from rivals_workshop_assistant.file_handling import create_file
 
 YAML_HANDLER = YAML()
 
 
-VERSION = "version"
-LAST_UPDATED = "last_updated"
-PROCESSED_TIME = "processed_time"
-SEEN_FILES = "seen_files"
-
-
-def read_dotfile(root_dir: Path) -> dict:
+def read(path: Path) -> dict:
     """Controller"""
-    dotfile_path = root_dir / paths.DOTFILE_PATH
     try:
-        dotfile_str = dotfile_path.read_text()
+        content = path.read_text()
     except FileNotFoundError:
-        dotfile_str = ""
+        content = ""
 
-    return _yaml_load(dotfile_str)
-
-
-def save_dotfile(root_dir: Path, dotfile: dict):
-    """Controller"""
-    content = _yaml_dumps(dotfile)
-    dotfile_path = root_dir / paths.DOTFILE_PATH
-    create_file(path=dotfile_path, content=content, overwrite=True)
+    return _yaml_load(content)
 
 
-def read_config(root_dir: Path) -> dict:
-    """Controller"""
-    config_path = root_dir / paths.ASSISTANT_CONFIG_PATH
-    try:
-        config_str = config_path.read_text()
-    except FileNotFoundError:
-        config_str = ""
-
-    return _yaml_load(config_str)
+def save(path: Path, content: dict):
+    content = _yaml_dumps(content)
+    create_file(path=path, content=content, overwrite=True)
 
 
 def _yaml_load(yaml_str: str) -> dict:

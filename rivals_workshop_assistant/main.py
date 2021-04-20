@@ -4,6 +4,8 @@ import sys
 import typing
 from pathlib import Path
 
+import rivals_workshop_assistant.config_mod
+import rivals_workshop_assistant.dotfile_mod
 from rivals_workshop_assistant.injection.installation import ASEPRITE_PATH_NAME
 from .script_mod import Script, Anim, File
 from .asset_handling import get_required_assets, save_assets
@@ -17,8 +19,8 @@ def main(given_dir: Path):
     """Runs all processes on scripts in the root_dir"""
     root_dir = get_root_dir(given_dir)
     make_basic_folder_structure(root_dir)
-    dotfile = info_files.read_dotfile(root_dir)
-    config = info_files.read_config(root_dir)
+    dotfile = rivals_workshop_assistant.dotfile_mod.read_dotfile(root_dir)
+    config = rivals_workshop_assistant.config_mod.read_config(root_dir)
 
     scripts = read_scripts(root_dir, dotfile)
     anims = read_anims(root_dir, dotfile)
@@ -28,8 +30,9 @@ def main(given_dir: Path):
 
     save_scripts(root_dir, scripts)
 
-    aseprite_path = config.get(ASEPRITE_PATH_NAME, None)
-    save_anims(root_dir, aseprite_path, anims)
+    save_anims(
+        root_dir, aseprite_path=config.get(ASEPRITE_PATH_NAME, None), anims=anims
+    )
     update_dotfile_after_saving(
         now=datetime.datetime.now(), dotfile=dotfile, files=scripts + anims
     )
@@ -37,7 +40,7 @@ def main(given_dir: Path):
     assets = get_required_assets(scripts)
     save_assets(root_dir, assets)
 
-    info_files.save_dotfile(root_dir, dotfile)
+    rivals_workshop_assistant.dotfile_mod.save_dotfile(root_dir, dotfile)
 
 
 def get_root_dir(given_dir: Path) -> Path:
@@ -51,8 +54,8 @@ def get_root_dir(given_dir: Path) -> Path:
 
 
 def get_processed_time(dotfile: dict, path: Path) -> typing.Optional[datetime.datetime]:
-    if path in dotfile.get(info_files.SEEN_FILES, []):
-        return dotfile.get(info_files.PROCESSED_TIME, None)
+    if path in dotfile.get(rivals_workshop_assistant.dotfile_mod.SEEN_FILES, []):
+        return dotfile.get(rivals_workshop_assistant.dotfile_mod.PROCESSED_TIME, None)
     else:
         return None
 
@@ -111,8 +114,10 @@ def save_anims(root_dir: Path, aseprite_path: Path, anims: list[Anim]):
 def update_dotfile_after_saving(
     dotfile: dict, now: datetime.datetime, files: list[File]
 ):
-    dotfile[info_files.PROCESSED_TIME] = now
-    dotfile[info_files.SEEN_FILES] = [file.path.as_posix() for file in files]
+    dotfile[rivals_workshop_assistant.dotfile_mod.PROCESSED_TIME] = now
+    dotfile[rivals_workshop_assistant.dotfile_mod.SEEN_FILES] = [
+        file.path.as_posix() for file in files
+    ]
 
 
 if __name__ == "__main__":
