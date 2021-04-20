@@ -1,4 +1,5 @@
 import functools
+import os
 import subprocess
 from pathlib import Path
 from datetime import datetime
@@ -73,7 +74,7 @@ class Anim(File):
         return self.path.stem
 
     def save(self, root_dir: Path, aseprite_path: Path):
-        # TODO Delete old version of strip, may have different suffix :(
+        self._delete_old_save(root_dir)
 
         num_frames = len(self.content.frames)
         dest_name = f"{self.name}_strip{num_frames}.png"
@@ -90,3 +91,8 @@ class Anim(File):
             ]
         )
         subprocess.run(export_command)
+
+    def _delete_old_save(self, root_dir: Path):
+        old_paths = (root_dir / paths.SPRITES_FOLDER).glob(f"{self.name}_strip*.png")
+        for old_path in old_paths:
+            os.remove(old_path)

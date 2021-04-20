@@ -1,3 +1,4 @@
+import configparser
 import datetime
 import shutil
 from dataclasses import dataclass
@@ -62,6 +63,15 @@ def supply_anim(
     )
 
 
+def make_empty_file(path: Path):
+    path.parent.mkdir(parents=True, exist_ok=True)
+    try:
+        open(path, "x")
+    except FileExistsError:
+        pass
+    assert path.exists()
+
+
 def assert_script_with_path(tmp, script: ScriptWithPath):
     actual_content = tmp.read(filepath=script.path.as_posix(), encoding="utf8")
     assert actual_content == script.content
@@ -100,3 +110,10 @@ def make_script_from_script_with_path(tmp, script_with_path: ScriptWithPath) -> 
         path=script_with_path.absolute_path(tmp),
         original_content=script_with_path.content,
     )
+
+
+def get_aseprite_path():
+    config = configparser.ConfigParser()
+    config.read("dev_config.ini")
+    aseprite_path = config["aseprite"]["path"]
+    return aseprite_path

@@ -1,5 +1,3 @@
-import configparser
-import time
 from pathlib import Path
 from PIL import Image
 
@@ -19,8 +17,30 @@ from tests.testing_helpers import (
     make_script_from_script_with_path,
     supply_anim,
     TEST_ANIM_NAME,
+    get_aseprite_path,
+    make_empty_file,
 )
+from pathlib import Path
 
+from PIL import Image
+import pytest
+from testfixtures import TempDirectory
+
+from rivals_workshop_assistant import paths, injection
+from rivals_workshop_assistant.setup import make_basic_folder_structure
+from rivals_workshop_assistant.injection import apply_injection, installation
+from rivals_workshop_assistant.injection.paths import INJECT_FOLDER, USER_INJECT_FOLDER
+from rivals_workshop_assistant.injection.dependency_handling import Define
+import rivals_workshop_assistant.main as src
+from tests.testing_helpers import (
+    make_script,
+    ScriptWithPath,
+    create_script,
+    make_script_from_script_with_path,
+    supply_anim,
+    TEST_ANIM_NAME,
+    get_aseprite_path,
+)
 
 pytestmark = pytest.mark.slow
 
@@ -188,11 +208,8 @@ def test__read_anims():
 def test__save_anims():
     with TempDirectory() as tmp:
         anims = [supply_anim(tmp, TEST_ANIM_NAME)]
+        aseprite_path = get_aseprite_path()
         root_dir = Path(tmp.path)
-
-        config = configparser.ConfigParser()
-        config.read("dev_config.ini")
-        aseprite_path = config["aseprite"]["path"]
 
         src.save_anims(
             root_dir=root_dir,
@@ -205,3 +222,27 @@ def test__save_anims():
         ) as img:
             assert img.height == 66 * 2
             assert img.width == 76 * 3 * 2
+
+
+def test__save_anims__removes_old_spritesheet():
+    with TempDirectory() as tmp:
+        anims = [supply_anim(tmp, TEST_ANIM_NAME)]
+        aseprite_path = get_aseprite_path()
+        root_dir = Path(tmp.path)
+
+        old_filename = (
+            root_dir / paths.SPRITES_FOLDER / f"{TEST_ANIM_NAME.stem}_strip2.png"
+        )
+        make_empty_file(old_filename)
+
+        other_filename = root_dir / paths.SPRITES_FOLDER / f"unrelated_strip2.png"
+        make_empty_file(other_filename)
+
+        src.save_anims(
+            root_dir=root_dir,
+            aseprite_path=Path(aseprite_path),
+            anims=anims,
+        )
+
+        assert not old_filename.exists()
+        assert other_filename.exists()
