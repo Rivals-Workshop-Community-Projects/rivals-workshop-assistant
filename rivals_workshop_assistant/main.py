@@ -17,6 +17,7 @@ def main(given_dir: Path):
     root_dir = get_root_dir(given_dir)
     make_basic_folder_structure(root_dir)
     dotfile = dotfile_mod.read_dotfile(root_dir)
+    config = NotImplemented
 
     scripts = read_scripts(root_dir, dotfile)
     anims = read_anims(root_dir, dotfile)
@@ -25,7 +26,7 @@ def main(given_dir: Path):
     scripts = handle_injection(root_dir, dotfile, scripts)
 
     save_scripts(root_dir, scripts)
-    save_anims(root_dir, anims)
+    save_anims(root_dir, aseprite_path, anims)
     update_dotfile_after_saving(
         now=datetime.datetime.now(), dotfile=dotfile, files=scripts + anims
     )
@@ -98,9 +99,9 @@ def save_scripts(root_dir: Path, scripts: list[Script]):
         script.save(root_dir)
 
 
-def save_anims(root_dir: Path, anims: list[Anim]):
+def save_anims(root_dir: Path, aseprite_path: Path, anims: list[Anim]):
     for anim in anims:
-        anim.save(root_dir)  # todo add small_sprites compatibility
+        anim.save(root_dir, aseprite_path)  # todo add small_sprites compatibility
 
 
 def update_dotfile_after_saving(

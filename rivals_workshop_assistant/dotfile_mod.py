@@ -1,4 +1,4 @@
-from pathlib import Path, WindowsPath
+from pathlib import Path
 
 from ruamel.yaml import StringIO, YAML
 
@@ -30,6 +30,17 @@ def save_dotfile(root_dir: Path, dotfile: dict):
     content = _yaml_dumps(dotfile)
     dotfile_path = root_dir / paths.DOTFILE_PATH
     create_file(path=dotfile_path, content=content, overwrite=True)
+
+
+def read_config(root_dir: Path) -> dict:
+    """Controller"""
+    config_path = root_dir / paths.ASSISTANT_CONFIG_PATH
+    try:
+        config_str = config_path.read_text()
+    except FileNotFoundError:
+        config_str = ""
+
+    return _yaml_load(config_str)
 
 
 def _yaml_load(yaml_str: str) -> dict:

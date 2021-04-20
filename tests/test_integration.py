@@ -1,4 +1,7 @@
+import configparser
+import time
 from pathlib import Path
+from PIL import Image
 
 import pytest
 from testfixtures import TempDirectory
@@ -17,6 +20,7 @@ from tests.testing_helpers import (
     supply_anim,
     TEST_ANIM_NAME,
 )
+
 
 pytestmark = pytest.mark.slow
 
@@ -179,3 +183,25 @@ def test__read_anims():
         assert len(result) == 1
         assert result[0].path == Path(tmp.path) / "anims" / TEST_ANIM_NAME
         assert result[0].is_fresh
+
+
+def test__save_anims():
+    with TempDirectory() as tmp:
+        anims = [supply_anim(tmp, TEST_ANIM_NAME)]
+        root_dir = Path(tmp.path)
+
+        config = configparser.ConfigParser()
+        config.read("dev_config.ini")
+        aseprite_path = config["aseprite"]["path"]
+
+        src.save_anims(
+            root_dir=root_dir,
+            aseprite_path=Path(aseprite_path),
+            anims=anims,
+        )
+
+        with Image.open(
+            root_dir / paths.SPRITES_FOLDER / f"{TEST_ANIM_NAME.stem}_strip3.png"
+        ) as img:
+            assert img.height == 66 * 2
+            assert img.width == 76 * 3 * 2

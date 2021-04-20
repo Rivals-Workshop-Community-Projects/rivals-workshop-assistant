@@ -1,7 +1,9 @@
 import functools
+import subprocess
 from pathlib import Path
 from datetime import datetime
 
+from rivals_workshop_assistant import paths
 from rivals_workshop_assistant import aseprite_loading
 
 
@@ -66,6 +68,25 @@ class Anim(File):
             contents = f.read()
         return aseprite_loading.AsepriteFile(contents)
 
-    def save(self, root_dir: Path):
-        # Will need aseprite path, and small_sprites setting
-        raise NotImplementedError
+    @property
+    def name(self):
+        return self.path.stem
+
+    def save(self, root_dir: Path, aseprite_path: Path):
+        # TODO Delete old version of strip, may have different suffix :(
+
+        num_frames = len(self.content.frames)
+        dest_name = f"{self.name}_strip{num_frames}.png"
+        dest = root_dir / paths.SPRITES_FOLDER / dest_name
+
+        dest.parent.mkdir(parents=True, exist_ok=True)
+        export_command = " ".join(
+            [
+                f'"{aseprite_path}"',
+                "-b",
+                f'"{self.path}"',
+                f"--scale 2",  # Will need small_sprites setting
+                f'--sheet "{dest}"',
+            ]
+        )
+        subprocess.run(export_command)

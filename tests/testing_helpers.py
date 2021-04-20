@@ -7,7 +7,7 @@ from PIL import Image, ImageChops
 from testfixtures import TempDirectory
 
 from rivals_workshop_assistant.injection import installation as src
-from rivals_workshop_assistant.script_mod import Script
+from rivals_workshop_assistant.script_mod import Script, Anim
 
 
 @dataclass
@@ -43,14 +43,23 @@ TEST_LATER_DATETIME_STRING = "2019-12-05*10:31:20"
 TEST_ANIM_NAME = Path("testsprite.aseprite")
 
 
-def supply_anim(tmp, name=TEST_ANIM_NAME):
+def make_time(time_str=TEST_DATETIME_STRING):
+    return datetime.datetime.fromisoformat(time_str)
+
+
+def make_anim(path: Path, modified_time=make_time(), processed_time=None):
+    return Anim(path=path, modified_time=modified_time, processed_time=processed_time)
+
+
+def supply_anim(
+    tmp, name=TEST_ANIM_NAME, modified_time=make_time(), processed_time=None
+):
     dest = Path(tmp.path) / "anims/"
     dest.mkdir(parents=True, exist_ok=True)
     shutil.copy(Path("assets" / name), dest)
-
-
-def make_time(time_str=TEST_DATETIME_STRING):
-    return datetime.datetime.fromisoformat(time_str)
+    return make_anim(
+        path=dest / name, modified_time=modified_time, processed_time=processed_time
+    )
 
 
 def assert_script_with_path(tmp, script: ScriptWithPath):
