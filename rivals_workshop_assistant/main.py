@@ -4,20 +4,21 @@ import sys
 import typing
 from pathlib import Path
 
+from rivals_workshop_assistant.injection.installation import ASEPRITE_PATH_NAME
 from .script_mod import Script, Anim, File
 from .asset_handling import get_required_assets, save_assets
 from .setup import make_basic_folder_structure
 from .injection import handle_injection
 from .code_generation import handle_codegen
-import rivals_workshop_assistant.dotfile_mod as dotfile_mod
+import rivals_workshop_assistant.info_files as info_files
 
 
 def main(given_dir: Path):
     """Runs all processes on scripts in the root_dir"""
     root_dir = get_root_dir(given_dir)
     make_basic_folder_structure(root_dir)
-    dotfile = dotfile_mod.read_dotfile(root_dir)
-    config = NotImplemented
+    dotfile = info_files.read_dotfile(root_dir)
+    config = info_files.read_config(root_dir)
 
     scripts = read_scripts(root_dir, dotfile)
     anims = read_anims(root_dir, dotfile)
@@ -26,6 +27,8 @@ def main(given_dir: Path):
     scripts = handle_injection(root_dir, dotfile, scripts)
 
     save_scripts(root_dir, scripts)
+
+    aseprite_path = config.get(ASEPRITE_PATH_NAME, None)
     save_anims(root_dir, aseprite_path, anims)
     update_dotfile_after_saving(
         now=datetime.datetime.now(), dotfile=dotfile, files=scripts + anims
@@ -34,7 +37,7 @@ def main(given_dir: Path):
     assets = get_required_assets(scripts)
     save_assets(root_dir, assets)
 
-    dotfile_mod.save_dotfile(root_dir, dotfile)
+    info_files.save_dotfile(root_dir, dotfile)
 
 
 def get_root_dir(given_dir: Path) -> Path:
@@ -48,8 +51,8 @@ def get_root_dir(given_dir: Path) -> Path:
 
 
 def get_processed_time(dotfile: dict, path: Path) -> typing.Optional[datetime.datetime]:
-    if path in dotfile.get(dotfile_mod.SEEN_FILES, []):
-        return dotfile.get(dotfile_mod.PROCESSED_TIME, None)
+    if path in dotfile.get(info_files.SEEN_FILES, []):
+        return dotfile.get(info_files.PROCESSED_TIME, None)
     else:
         return None
 
@@ -100,15 +103,16 @@ def save_scripts(root_dir: Path, scripts: list[Script]):
 
 
 def save_anims(root_dir: Path, aseprite_path: Path, anims: list[Anim]):
-    for anim in anims:
-        anim.save(root_dir, aseprite_path)  # todo add small_sprites compatibility
+    if aseprite_path:
+        for anim in anims:
+            anim.save(root_dir, aseprite_path)  # todo add small_sprites compatibility
 
 
 def update_dotfile_after_saving(
     dotfile: dict, now: datetime.datetime, files: list[File]
 ):
-    dotfile[dotfile_mod.PROCESSED_TIME] = now
-    dotfile[dotfile_mod.SEEN_FILES] = [file.path.as_posix() for file in files]
+    dotfile[info_files.PROCESSED_TIME] = now
+    dotfile[info_files.SEEN_FILES] = [file.path.as_posix() for file in files]
 
 
 if __name__ == "__main__":

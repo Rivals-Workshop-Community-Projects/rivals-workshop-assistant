@@ -13,7 +13,7 @@ import requests
 
 import rivals_workshop_assistant.paths as paths
 from . import paths as inject_paths
-from ..dotfile_mod import (
+from ..info_files import (
     _yaml_load,
     LAST_UPDATED,
     VERSION,

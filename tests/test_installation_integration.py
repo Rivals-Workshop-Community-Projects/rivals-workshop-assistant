@@ -4,7 +4,7 @@ from pathlib import Path
 import pytest
 from testfixtures import TempDirectory
 
-from rivals_workshop_assistant.dotfile_mod import VERSION, LAST_UPDATED
+from rivals_workshop_assistant.info_files import VERSION, LAST_UPDATED
 import rivals_workshop_assistant.injection.paths as inject_paths
 import rivals_workshop_assistant.paths as paths
 from rivals_workshop_assistant.injection import installation as src

@@ -2,7 +2,7 @@ import datetime
 
 import pytest
 
-from rivals_workshop_assistant.dotfile_mod import _yaml_load
+from rivals_workshop_assistant.info_files import _yaml_load
 from rivals_workshop_assistant.injection import installation as src
 from tests.testing_helpers import make_version, make_release, TEST_DATE_STRING
 
