@@ -31,7 +31,10 @@ class UpdateConfig(enum.Enum):
 
 UPDATE_LEVEL_DEFAULT = UpdateConfig.PATCH
 
-DEFAULT_CONFIG = f"""\
+
+ASEPRITE_PATH_NAME = "aseprite_path"
+
+DEFAULT_CONFIG = fr"""\
 {UPDATE_LEVEL_NAME}: {UPDATE_LEVEL_DEFAULT.value}
     # What kind of library updates to allow. 
     # {UpdateConfig.MAJOR.value} = All updates are allowed, even if they may 
@@ -41,6 +44,24 @@ DEFAULT_CONFIG = f"""\
     # {UpdateConfig.PATCH.value} = Only allow changes to existing functions 
     #   that fix bugs or can't break current functionality.
     # {UpdateConfig.NONE.value} = No updates.
+    
+# {ASEPRITE_PATH_NAME}: <REPLACE ME, and remove # from beginning of this line>
+    # Point this to your Aseprite.exe absolute path, for example: C:\Program Files\Aseprite\aseprite.exe
+    # This is needed for the assistant to automatically export your animations to spritesheets.
+    # If you use Steam for Aseprite, you can find the path with:
+    #   1. The aseprite page of your library
+    #   2. The gear icon at the top right
+    #   3. Manage
+    #   4. Browse Local Files\
+    #   5. Copy the path of Aseprite.exe
+"""
+
+ANIMS_FOLDER_README = f"""\
+Put your aseprite files in here.
+
+If you have `aseprite_path` set in `{paths.ASSISTANT_CONFIG_PATH}, the assistant will automatically convert them to spritesheets in your sprites folder.
+They will be saved as `<anim_name>_strip<num_frames>.png`
+This will *overwrite existing sprites with that name.* It is recommended to only change the aseprite file, not the spritesheets, to avoid losing changes.
 """
 
 

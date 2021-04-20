@@ -8,6 +8,7 @@ ASSISTANT_CONFIG_PATH = ASSISTANT_FOLDER / ASSISTANT_CONFIG_NAME
 
 SPRITES_FOLDER = Path("sprites")
 SCRIPTS_FOLDER = Path("scripts")
+ANIMS_FOLDER = Path("anims")
 
 REPO_OWNER = "Rivals-Workshop-Community-Projects"
 REPO_NAME = "injector-library"
