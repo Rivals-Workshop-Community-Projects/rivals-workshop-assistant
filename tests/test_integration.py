@@ -4,7 +4,7 @@ from PIL import Image
 import pytest
 from testfixtures import TempDirectory
 
-import rivals_workshop_assistant.config_mod
+import rivals_workshop_assistant.assistant_config_mod
 from tests.testing_helpers import (
     make_empty_file,
     make_script,
@@ -17,7 +17,7 @@ from tests.testing_helpers import (
 )
 from rivals_workshop_assistant import paths, injection
 from rivals_workshop_assistant.setup import make_basic_folder_structure
-from rivals_workshop_assistant.injection import apply_injection, installation
+from rivals_workshop_assistant.injection import apply_injection
 from rivals_workshop_assistant.injection.paths import INJECT_FOLDER, USER_INJECT_FOLDER
 from rivals_workshop_assistant.injection.dependency_handling import Define
 import rivals_workshop_assistant.main as src
@@ -161,14 +161,16 @@ def test__make_basic_folder_structure__make_missing_config():
         make_basic_folder_structure(Path(tmp.path))
 
         actual = (
-            Path(tmp.path) / rivals_workshop_assistant.config_mod.PATH
+            Path(tmp.path) / rivals_workshop_assistant.assistant_config_mod.PATH
         ).read_text()
-        assert actual == rivals_workshop_assistant.config_mod.DEFAULT_CONFIG
+        assert actual == rivals_workshop_assistant.assistant_config_mod.DEFAULT_CONFIG
 
 
 def test__make_basic_folder_structure__config_present():
     with TempDirectory() as tmp:
-        config_path = Path(tmp.path) / rivals_workshop_assistant.config_mod.PATH
+        config_path = (
+            Path(tmp.path) / rivals_workshop_assistant.assistant_config_mod.PATH
+        )
         create_script(tmp, ScriptWithPath(path=config_path, content="a"))
 
         make_basic_folder_structure(Path(tmp.path))
@@ -187,15 +189,18 @@ def test__read_anims():
         assert result[0].is_fresh
 
 
-def assert_anim(root_dir, filename=f"{TEST_ANIM_NAME.stem}_strip3.png"):
+def assert_anim(
+    root_dir, filename=f"{TEST_ANIM_NAME.stem}_strip3.png", has_small_sprites=False
+):
     """Right now this assumes that the sprite is the absa dashstart anim stored in
     TEST_ANIM_NAME"""
     with Image.open(root_dir / paths.SPRITES_FOLDER / filename) as img:
-        assert img.height == 66 * 2
-        assert img.width == 76 * 3 * 2
+        assert img.height == 66 * (int(has_small_sprites) + 1)
+        assert img.width == 76 * 3 * (int(has_small_sprites) + 1)
 
 
-def test__save_anims():
+@pytest.mark.parametrize("has_small_sprites", [pytest.param(False), pytest.param(True)])
+def test__save_anims(has_small_sprites):
     aseprite_path = get_aseprite_path()
 
     with TempDirectory() as tmp:
@@ -206,9 +211,10 @@ def test__save_anims():
             root_dir=root_dir,
             aseprite_path=Path(aseprite_path),
             anims=anims,
+            has_small_sprites=has_small_sprites,
         )
 
-        assert_anim(root_dir)
+        assert_anim(root_dir, has_small_sprites=has_small_sprites)
 
 
 def test__save_anims__uses_subfolder_name():
@@ -223,10 +229,13 @@ def test__save_anims__uses_subfolder_name():
             root_dir=root_dir,
             aseprite_path=Path(aseprite_path),
             anims=anims,
+            has_small_sprites=False,
         )
 
         assert_anim(
-            root_dir, filename=f"{subfolder_name}_{TEST_ANIM_NAME.stem}_strip3.png"
+            root_dir,
+            filename=f"{subfolder_name}_{TEST_ANIM_NAME.stem}_strip3.png",
+            has_small_sprites=False,
         )
 
 
@@ -247,6 +256,7 @@ def test__save_anims__removes_old_spritesheet():
             root_dir=root_dir,
             aseprite_path=Path(aseprite_path),
             anims=anims,
+            has_small_sprites=False,
         )
 
         assert not old_filename.exists()
@@ -275,6 +285,7 @@ def test__save_anims__removes_old_spritesheet__with_subfolder():
             root_dir=root_dir,
             aseprite_path=Path(aseprite_path),
             anims=anims,
+            has_small_sprites=False,
         )
 
         assert not old_filename.exists()

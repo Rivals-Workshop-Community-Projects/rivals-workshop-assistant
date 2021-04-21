@@ -1,39 +1,52 @@
+import re
+from configparser import ConfigParser
 import datetime
 import itertools
 import sys
 import typing
 from pathlib import Path
 
-import rivals_workshop_assistant.config_mod
-import rivals_workshop_assistant.dotfile_mod
-from rivals_workshop_assistant.config_mod import ASEPRITE_PATH_FIELD
+from rivals_workshop_assistant import (
+    assistant_config_mod,
+    dotfile_mod,
+    character_config_mod,
+)
+from rivals_workshop_assistant.assistant_config_mod import ASEPRITE_PATH_FIELD
 from .script_mod import Script, Anim, File
 from .asset_handling import get_required_assets, save_assets
 from .setup import make_basic_folder_structure
 from .injection import handle_injection
 from .code_generation import handle_codegen
-import rivals_workshop_assistant.info_files as info_files
 
 
 def main(given_dir: Path):
     """Runs all processes on scripts in the root_dir"""
     root_dir = get_root_dir(given_dir)
     make_basic_folder_structure(root_dir)
-    dotfile = rivals_workshop_assistant.dotfile_mod.read_dotfile(root_dir)
-    config = rivals_workshop_assistant.config_mod.read_config(root_dir)
+    dotfile = dotfile_mod.read(root_dir)
+    assistant_config = assistant_config_mod.read(root_dir)
+    character_config = character_config_mod.read(root_dir)
 
     scripts = read_scripts(root_dir, dotfile)
     anims = read_anims(root_dir, dotfile)
 
     scripts = handle_codegen(scripts)
     scripts = handle_injection(
-        root_dir=root_dir, dotfile=dotfile, config=config, scripts=scripts
+        root_dir=root_dir,
+        dotfile=dotfile,
+        assistant_config=assistant_config,
+        scripts=scripts,
     )
 
     save_scripts(root_dir, scripts)
 
     save_anims(
-        root_dir, aseprite_path=config.get(ASEPRITE_PATH_FIELD, None), anims=anims
+        root_dir,
+        aseprite_path=assistant_config.get(ASEPRITE_PATH_FIELD, None),
+        anims=anims,
+        has_small_sprites=get_has_small_sprites(
+            scripts=scripts, character_config=character_config
+        ),
     )
     update_dotfile_after_saving(
         now=datetime.datetime.now(), dotfile=dotfile, files=scripts + anims
@@ -42,7 +55,7 @@ def main(given_dir: Path):
     assets = get_required_assets(scripts)
     save_assets(root_dir, assets)
 
-    rivals_workshop_assistant.dotfile_mod.save_dotfile(root_dir, dotfile)
+    dotfile_mod.save_dotfile(root_dir, dotfile)
 
 
 def get_root_dir(given_dir: Path) -> Path:
@@ -56,10 +69,8 @@ def get_root_dir(given_dir: Path) -> Path:
 
 
 def get_processed_time(dotfile: dict, path: Path) -> typing.Optional[datetime.datetime]:
-    if path in dotfile.get(rivals_workshop_assistant.dotfile_mod.SEEN_FILES_FIELD, []):
-        return dotfile.get(
-            rivals_workshop_assistant.dotfile_mod.PROCESSED_TIME_FIELD, None
-        )
+    if path in dotfile.get(dotfile_mod.SEEN_FILES_FIELD, []):
+        return dotfile.get(dotfile_mod.PROCESSED_TIME_FIELD, None)
     else:
         return None
 
@@ -109,19 +120,42 @@ def save_scripts(root_dir: Path, scripts: list[Script]):
         script.save(root_dir)
 
 
-def save_anims(root_dir: Path, aseprite_path: Path, anims: list[Anim]):
+def save_anims(
+    root_dir: Path, aseprite_path: Path, anims: list[Anim], has_small_sprites: bool
+):
     if aseprite_path:
         for anim in anims:
-            anim.save(root_dir, aseprite_path)  # todo add small_sprites compatibility
+            anim.save(
+                root_dir=root_dir,
+                aseprite_path=aseprite_path,
+                has_small_sprites=has_small_sprites,
+            )
 
 
 def update_dotfile_after_saving(
     dotfile: dict, now: datetime.datetime, files: list[File]
 ):
-    dotfile[rivals_workshop_assistant.dotfile_mod.PROCESSED_TIME_FIELD] = now
-    dotfile[rivals_workshop_assistant.dotfile_mod.SEEN_FILES_FIELD] = [
-        file.path.as_posix() for file in files
-    ]
+    dotfile[dotfile_mod.PROCESSED_TIME_FIELD] = now
+    dotfile[dotfile_mod.SEEN_FILES_FIELD] = [file.path.as_posix() for file in files]
+
+
+def get_has_small_sprites(scripts: list[Script], character_config: ConfigParser):
+    in_character_config = character_config.get(
+        "general", character_config_mod.SMALL_SPRITES_FIELD, fallback=None
+    )
+
+    try:
+        init_gml = [
+            script.working_content
+            for script in scripts
+            if script.path.name == "init.gml"
+        ][0]
+    except IndexError:
+        init_gml = ""
+    match = re.search(pattern=r"small_sprites\s*=\s*(1|true)", string=init_gml)
+    return bool(in_character_config) or bool(match)
+    # Get character config. Search for 'small_sprites="1"'
+    # get init.gml. Search for small_sprites assignment to 1 or true.
 
 
 if __name__ == "__main__":

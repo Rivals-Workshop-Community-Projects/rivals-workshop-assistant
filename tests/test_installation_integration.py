@@ -4,7 +4,7 @@ from pathlib import Path
 import pytest
 from testfixtures import TempDirectory
 
-import rivals_workshop_assistant.config_mod
+import rivals_workshop_assistant.assistant_config_mod
 import rivals_workshop_assistant.dotfile_mod
 from rivals_workshop_assistant.dotfile_mod import VERSION_FIELD, LAST_UPDATED_FIELD
 import rivals_workshop_assistant.injection.paths as inject_paths
@@ -94,7 +94,7 @@ def test__install_release():
         create_script(
             tmp,
             ScriptWithPath(
-                path=rivals_workshop_assistant.config_mod.PATH,
+                path=rivals_workshop_assistant.assistant_config_mod.PATH,
                 content="update_level: none",
             ),
         )

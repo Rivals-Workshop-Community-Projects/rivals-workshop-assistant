@@ -81,7 +81,7 @@ class Anim(File):
         base_name = "_".join(path_parts)
         return base_name
 
-    def save(self, root_dir: Path, aseprite_path: Path):
+    def save(self, root_dir: Path, aseprite_path: Path, has_small_sprites: bool):
         self._delete_old_save(root_dir)
 
         num_frames = len(self.content.frames)
@@ -94,7 +94,7 @@ class Anim(File):
                 f'"{aseprite_path}"',
                 "-b",
                 f'"{self.path}"',
-                f"--scale 2",  # Will need small_sprites setting
+                f"--scale {int(has_small_sprites) + 1}",
                 f'--sheet "{dest}"',
             ]
         )

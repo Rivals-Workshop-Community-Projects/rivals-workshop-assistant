@@ -12,7 +12,7 @@ PROCESSED_TIME_FIELD = "processed_time"
 SEEN_FILES_FIELD = "seen_files"
 
 
-def read_dotfile(root_dir: Path) -> dict:
+def read(root_dir: Path) -> dict:
     """Controller"""
     return info_files.read(root_dir / PATH)
 

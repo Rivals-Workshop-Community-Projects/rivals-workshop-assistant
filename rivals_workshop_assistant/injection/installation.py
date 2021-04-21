@@ -10,16 +10,16 @@ import zipfile
 
 import requests
 
-import rivals_workshop_assistant.config_mod
+import rivals_workshop_assistant.assistant_config_mod
 import rivals_workshop_assistant.paths as paths
 from . import paths as inject_paths
-from ..config_mod import UpdateConfig
+from ..assistant_config_mod import UpdateConfig
 from ..dotfile_mod import VERSION_FIELD, LAST_UPDATED_FIELD
 
 ANIMS_FOLDER_README = f"""\
 Put your aseprite files in here.
 
-If you have `aseprite_path` set in `{rivals_workshop_assistant.config_mod.PATH}, the assistant will automatically convert them to spritesheets in your sprites folder.
+If you have `aseprite_path` set in `{rivals_workshop_assistant.assistant_config_mod.PATH}, the assistant will automatically convert them to spritesheets in your sprites folder.
 They will be saved as `<anim_name>_strip<num_frames>.png`
 This will *overwrite existing sprites with that name.* It is recommended to only change the aseprite file, not the spritesheets, to avoid losing changes.
 """
