@@ -1,6 +1,5 @@
 import dataclasses
 import datetime
-import enum
 import io
 import os
 import shutil
@@ -14,47 +13,8 @@ import requests
 import rivals_workshop_assistant.config_mod
 import rivals_workshop_assistant.paths as paths
 from . import paths as inject_paths
-from ..info_files import (
-    _yaml_load,
-)
-from ..dotfile_mod import VERSION, LAST_UPDATED
-
-UPDATE_LEVEL_NAME = "update_level"
-
-
-class UpdateConfig(enum.Enum):
-    MAJOR = "major"
-    MINOR = "minor"
-    PATCH = "patch"
-    NONE = "none"
-
-
-UPDATE_LEVEL_DEFAULT = UpdateConfig.PATCH
-
-
-ASEPRITE_PATH_NAME = "aseprite_path"
-
-DEFAULT_CONFIG = fr"""\
-{UPDATE_LEVEL_NAME}: {UPDATE_LEVEL_DEFAULT.value}
-    # What kind of library updates to allow. 
-    # {UpdateConfig.MAJOR.value} = All updates are allowed, even if they may 
-    #   break existing code.
-    # {UpdateConfig.MINOR.value} = Don't allow breaking changes to existing 
-    #   functions, but do allow new functions. Could cause name collisions.
-    # {UpdateConfig.PATCH.value} = Only allow changes to existing functions 
-    #   that fix bugs or can't break current functionality.
-    # {UpdateConfig.NONE.value} = No updates.
-    
-# {ASEPRITE_PATH_NAME}: <REPLACE ME, and remove # from beginning of this line>
-    # Point this to your Aseprite.exe absolute path, for example: C:\Program Files\Aseprite\aseprite.exe
-    # This is needed for the assistant to automatically export your animations to spritesheets.
-    # If you use Steam for Aseprite, you can find the path with:
-    #   1. The aseprite page of your library
-    #   2. The gear icon at the top right
-    #   3. Manage
-    #   4. Browse Local Files\
-    #   5. Copy the path of Aseprite.exe
-"""
+from ..config_mod import UpdateConfig
+from ..dotfile_mod import VERSION_FIELD, LAST_UPDATED_FIELD
 
 ANIMS_FOLDER_README = f"""\
 Put your aseprite files in here.
@@ -103,11 +63,13 @@ class Release:
         return self.version < other.version
 
 
-def update_injection_library(root_dir: Path, dotfile: dict):
+def update_injection_library(root_dir: Path, dotfile: dict, config: dict):
     """Controller"""
     if should_update(dotfile):
         current_version = get_current_version_from_dotfile(dotfile)
-        release_to_install = get_release_to_install(root_dir, current_version)
+        release_to_install = get_release_to_install(
+            current_version=current_version, config=config
+        )
 
         update_dotfile_after_update(
             release_to_install.version if release_to_install else current_version,
@@ -132,15 +94,15 @@ def _get_should_update_from_dotfile_and_date(
 ) -> bool:
     default_date = datetime.date.fromisoformat("1996-01-01")
 
-    last_update_day = dotfile.get(LAST_UPDATED, default_date)
+    last_update_day = dotfile.get(LAST_UPDATED_FIELD, default_date)
 
     days_passed = (today - last_update_day).days
     return days_passed > 0
 
 
-def get_release_to_install(root_dir: Path, current_version: Version) -> Release:
+def get_release_to_install(current_version: Version, config: dict) -> Release:
     """Controller"""
-    update_config = get_update_config(root_dir)
+    update_config = _make_update_config(config)
     releases = get_releases()
     release_to_install = _get_legal_release_to_install(
         update_config, releases, current_version
@@ -148,25 +110,8 @@ def get_release_to_install(root_dir: Path, current_version: Version) -> Release:
     return release_to_install
 
 
-def get_update_config(root_dir: Path) -> UpdateConfig:
-    """Controller"""
-    config_text = _read_config(root_dir)
-    update_config = _make_update_config(config_text)
-    return update_config
-
-
-def _read_config(root_dir: Path) -> str:
-    """Controller"""
-    try:
-        config_text = (root_dir / rivals_workshop_assistant.config_mod.PATH).read_text()
-        return config_text
-    except FileNotFoundError:
-        return ""
-
-
-def _make_update_config(config_text: str) -> UpdateConfig:
-    config_yaml: typing.Optional[dict] = _yaml_load(config_text)
-    return UpdateConfig(config_yaml.get("update_level", UpdateConfig.PATCH))
+def _make_update_config(config: dict) -> UpdateConfig:
+    return UpdateConfig(config.get("update_level", UpdateConfig.PATCH))
 
 
 def get_releases() -> list[Release]:
@@ -273,6 +218,6 @@ def _download_and_unzip_release(root_dir: Path, release: Release):
 def update_dotfile_after_update(
     version: Version, last_updated: datetime.date, dotfile: dict
 ) -> dict:
-    dotfile[VERSION] = str(version)
-    dotfile[LAST_UPDATED] = last_updated
+    dotfile[VERSION_FIELD] = str(version)
+    dotfile[LAST_UPDATED_FIELD] = last_updated
     return dotfile

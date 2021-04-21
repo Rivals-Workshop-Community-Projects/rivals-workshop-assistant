@@ -17,8 +17,8 @@ def test_get_processed_time__no_register__none():
 
 def test_get_processed_time():
     dotfile = {
-        rivals_workshop_assistant.dotfile_mod.SEEN_FILES: [PATH_ABSOLUTE],
-        rivals_workshop_assistant.dotfile_mod.PROCESSED_TIME: make_time(),
+        rivals_workshop_assistant.dotfile_mod.SEEN_FILES_FIELD: [PATH_ABSOLUTE],
+        rivals_workshop_assistant.dotfile_mod.PROCESSED_TIME_FIELD: make_time(),
     }
     result = src.get_processed_time(dotfile=dotfile, path=PATH_ABSOLUTE)
     assert result == make_time()
@@ -26,8 +26,8 @@ def test_get_processed_time():
 
 def test_dotfile_after_saving():
     dotfile = {
-        rivals_workshop_assistant.dotfile_mod.SEEN_FILES: ["some/other/path.gml"],
-        rivals_workshop_assistant.dotfile_mod.PROCESSED_TIME: make_time(
+        rivals_workshop_assistant.dotfile_mod.SEEN_FILES_FIELD: ["some/other/path.gml"],
+        rivals_workshop_assistant.dotfile_mod.PROCESSED_TIME_FIELD: make_time(
             TEST_LATER_DATETIME_STRING
         ),
     }
@@ -38,6 +38,8 @@ def test_dotfile_after_saving():
     src.update_dotfile_after_saving(dotfile=dotfile, now=time, files=[script])
 
     assert dotfile == {
-        rivals_workshop_assistant.dotfile_mod.SEEN_FILES: [script.path.as_posix()],
-        rivals_workshop_assistant.dotfile_mod.PROCESSED_TIME: time,
+        rivals_workshop_assistant.dotfile_mod.SEEN_FILES_FIELD: [
+            script.path.as_posix()
+        ],
+        rivals_workshop_assistant.dotfile_mod.PROCESSED_TIME_FIELD: time,
     }

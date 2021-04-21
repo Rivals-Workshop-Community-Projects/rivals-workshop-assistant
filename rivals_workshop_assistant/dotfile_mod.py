@@ -6,10 +6,10 @@ from rivals_workshop_assistant.paths import ASSISTANT_FOLDER
 FILENAME = ".assistant"
 PATH = ASSISTANT_FOLDER / FILENAME
 
-VERSION = "version"
-LAST_UPDATED = "last_updated"
-PROCESSED_TIME = "processed_time"
-SEEN_FILES = "seen_files"
+VERSION_FIELD = "version"
+LAST_UPDATED_FIELD = "last_updated"
+PROCESSED_TIME_FIELD = "processed_time"
+SEEN_FILES_FIELD = "seen_files"
 
 
 def read_dotfile(root_dir: Path) -> dict:

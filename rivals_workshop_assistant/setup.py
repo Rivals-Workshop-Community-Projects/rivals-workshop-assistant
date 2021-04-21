@@ -4,9 +4,9 @@ import rivals_workshop_assistant.config_mod
 from rivals_workshop_assistant import paths as paths
 from rivals_workshop_assistant.injection import paths as inject_paths
 from rivals_workshop_assistant.injection.installation import (
-    DEFAULT_CONFIG,
     ANIMS_FOLDER_README,
 )
+from rivals_workshop_assistant.config_mod import DEFAULT_CONFIG
 from rivals_workshop_assistant.file_handling import create_file
 
 

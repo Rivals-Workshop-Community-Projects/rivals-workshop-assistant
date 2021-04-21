@@ -163,7 +163,7 @@ def test__make_basic_folder_structure__make_missing_config():
         actual = (
             Path(tmp.path) / rivals_workshop_assistant.config_mod.PATH
         ).read_text()
-        assert actual == installation.DEFAULT_CONFIG
+        assert actual == rivals_workshop_assistant.config_mod.DEFAULT_CONFIG
 
 
 def test__make_basic_folder_structure__config_present():

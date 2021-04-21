@@ -6,7 +6,7 @@ from testfixtures import TempDirectory
 
 import rivals_workshop_assistant.config_mod
 import rivals_workshop_assistant.dotfile_mod
-from rivals_workshop_assistant.dotfile_mod import VERSION, LAST_UPDATED
+from rivals_workshop_assistant.dotfile_mod import VERSION_FIELD, LAST_UPDATED_FIELD
 import rivals_workshop_assistant.injection.paths as inject_paths
 import rivals_workshop_assistant.paths as paths
 from rivals_workshop_assistant.injection import installation as src
@@ -20,24 +20,6 @@ from tests.testing_helpers import (
 )
 
 pytestmark = pytest.mark.slow
-
-
-def test__get_update_config():
-    with TempDirectory() as tmp:
-        create_script(
-            tmp,
-            ScriptWithPath(
-                path=rivals_workshop_assistant.config_mod.PATH,
-                content=f"""\
-
-{src.UPDATE_LEVEL_NAME}: minor
-
-""",
-            ),
-        )
-
-        result = src.get_update_config(Path(tmp.path))
-        assert result == src.UpdateConfig.MINOR
 
 
 def test__get_releases():
@@ -106,7 +88,7 @@ def test__install_release():
             tmp,
             ScriptWithPath(
                 path=rivals_workshop_assistant.dotfile_mod.PATH,
-                content=f"{VERSION}: 0.0.0",
+                content=f"{VERSION_FIELD}: 0.0.0",
             ),
         )
         create_script(

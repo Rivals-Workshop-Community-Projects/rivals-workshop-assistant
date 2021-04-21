@@ -2,32 +2,32 @@ import datetime
 
 import pytest
 
+import rivals_workshop_assistant.config_mod
 from rivals_workshop_assistant.info_files import _yaml_load
 from rivals_workshop_assistant.injection import installation as src
 from tests.testing_helpers import make_version, make_release, TEST_DATE_STRING
 
 
 def test__make_update_config_empty():
-    config_text = ""
+    config = {}
 
-    result = src._make_update_config(config_text)
-    assert result == src.UpdateConfig.PATCH
+    result = src._make_update_config(config)
+    assert result == rivals_workshop_assistant.config_mod.UpdateConfig.PATCH
 
 
 @pytest.mark.parametrize(
     "config_value, expected",
     [
-        pytest.param("major", src.UpdateConfig.MAJOR),
-        pytest.param("minor", src.UpdateConfig.MINOR),
-        pytest.param("patch", src.UpdateConfig.PATCH),
-        pytest.param("none", src.UpdateConfig.NONE),
+        pytest.param("major", rivals_workshop_assistant.config_mod.UpdateConfig.MAJOR),
+        pytest.param("minor", rivals_workshop_assistant.config_mod.UpdateConfig.MINOR),
+        pytest.param("patch", rivals_workshop_assistant.config_mod.UpdateConfig.PATCH),
+        pytest.param("none", rivals_workshop_assistant.config_mod.UpdateConfig.NONE),
     ],
 )
 def test__make_update_config_major_level(config_value, expected):
-    config_text = f"""\
-{src.UPDATE_LEVEL_NAME}: {config_value}"""
+    config = {rivals_workshop_assistant.config_mod.UPDATE_LEVEL_FIELD: config_value}
 
-    result = src._make_update_config(config_text)
+    result = src._make_update_config(config)
     assert result == expected
 
 
@@ -83,49 +83,49 @@ last_updated: {TEST_DATE_STRING}
     "update_config, current_version, other_releases, expected_release",
     [
         pytest.param(
-            src.UpdateConfig.MAJOR,
+            rivals_workshop_assistant.config_mod.UpdateConfig.MAJOR,
             make_version("1.2.3"),
             [make_release("2.3.4", "urlb")],
             make_release("5.0.1", "urlc"),
         ),
         pytest.param(
-            src.UpdateConfig.MAJOR,
+            rivals_workshop_assistant.config_mod.UpdateConfig.MAJOR,
             make_version("3.0.2"),
             [make_release("3.0.3", "urlb")],
             make_release("3.0.4", "urlnew"),
         ),
         pytest.param(
-            src.UpdateConfig.MINOR,
+            rivals_workshop_assistant.config_mod.UpdateConfig.MINOR,
             make_version("3.0.2"),
             [make_release("4.0.3", "urlb"), make_release("4.0.4", "urlc")],
             None,
         ),
         pytest.param(
-            src.UpdateConfig.MINOR,
+            rivals_workshop_assistant.config_mod.UpdateConfig.MINOR,
             make_version("3.0.2"),
             [make_release("3.0.3", "urlb")],
             make_release("3.0.4", "urlc"),
         ),
         pytest.param(
-            src.UpdateConfig.MINOR,
+            rivals_workshop_assistant.config_mod.UpdateConfig.MINOR,
             None,
             [make_release("3.0.3", "urlb"), make_release("3.0.4", "urlc")],
             make_release("3.0.5", "urld"),
         ),
         pytest.param(
-            src.UpdateConfig.PATCH,
+            rivals_workshop_assistant.config_mod.UpdateConfig.PATCH,
             make_version("3.0.2"),
             [make_release("4.1.3", "urlb"), make_release("3.2.3", "urlc")],
             make_release("3.0.8", "urld"),
         ),
         pytest.param(
-            src.UpdateConfig.NONE,
+            rivals_workshop_assistant.config_mod.UpdateConfig.NONE,
             make_version("3.0.2"),
             [make_release("3.0.3", "urlb"), make_release("3.0.4", "urlc")],
             None,
         ),
         pytest.param(
-            src.UpdateConfig.NONE,
+            rivals_workshop_assistant.config_mod.UpdateConfig.NONE,
             None,
             [make_release("3.0.3", "urlb"), make_release("3.0.4", "urlc")],
             make_release("3.0.5", "urld"),

@@ -6,7 +6,7 @@ from pathlib import Path
 
 import rivals_workshop_assistant.config_mod
 import rivals_workshop_assistant.dotfile_mod
-from rivals_workshop_assistant.injection.installation import ASEPRITE_PATH_NAME
+from rivals_workshop_assistant.config_mod import ASEPRITE_PATH_FIELD
 from .script_mod import Script, Anim, File
 from .asset_handling import get_required_assets, save_assets
 from .setup import make_basic_folder_structure
@@ -26,12 +26,14 @@ def main(given_dir: Path):
     anims = read_anims(root_dir, dotfile)
 
     scripts = handle_codegen(scripts)
-    scripts = handle_injection(root_dir, dotfile, scripts)
+    scripts = handle_injection(
+        root_dir=root_dir, dotfile=dotfile, config=config, scripts=scripts
+    )
 
     save_scripts(root_dir, scripts)
 
     save_anims(
-        root_dir, aseprite_path=config.get(ASEPRITE_PATH_NAME, None), anims=anims
+        root_dir, aseprite_path=config.get(ASEPRITE_PATH_FIELD, None), anims=anims
     )
     update_dotfile_after_saving(
         now=datetime.datetime.now(), dotfile=dotfile, files=scripts + anims
@@ -54,8 +56,10 @@ def get_root_dir(given_dir: Path) -> Path:
 
 
 def get_processed_time(dotfile: dict, path: Path) -> typing.Optional[datetime.datetime]:
-    if path in dotfile.get(rivals_workshop_assistant.dotfile_mod.SEEN_FILES, []):
-        return dotfile.get(rivals_workshop_assistant.dotfile_mod.PROCESSED_TIME, None)
+    if path in dotfile.get(rivals_workshop_assistant.dotfile_mod.SEEN_FILES_FIELD, []):
+        return dotfile.get(
+            rivals_workshop_assistant.dotfile_mod.PROCESSED_TIME_FIELD, None
+        )
     else:
         return None
 
@@ -114,8 +118,8 @@ def save_anims(root_dir: Path, aseprite_path: Path, anims: list[Anim]):
 def update_dotfile_after_saving(
     dotfile: dict, now: datetime.datetime, files: list[File]
 ):
-    dotfile[rivals_workshop_assistant.dotfile_mod.PROCESSED_TIME] = now
-    dotfile[rivals_workshop_assistant.dotfile_mod.SEEN_FILES] = [
+    dotfile[rivals_workshop_assistant.dotfile_mod.PROCESSED_TIME_FIELD] = now
+    dotfile[rivals_workshop_assistant.dotfile_mod.SEEN_FILES_FIELD] = [
         file.path.as_posix() for file in files
     ]
 
