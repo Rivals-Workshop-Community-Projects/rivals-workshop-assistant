@@ -4,7 +4,7 @@ from pathlib import Path
 import rivals_workshop_assistant.info_files as info_files
 from rivals_workshop_assistant.paths import ASSISTANT_FOLDER
 
-FILENAME = "assistant_config.ini"
+FILENAME = "assistant_config.yaml"
 PATH = ASSISTANT_FOLDER / FILENAME
 
 ASEPRITE_PATH_FIELD = "aseprite_path"
@@ -42,7 +42,8 @@ DEFAULT_CONFIG = f"""\
     # {UpdateConfig.NONE.value} = No updates.
     
 # {ASEPRITE_PATH_FIELD}: <REPLACE ME, and remove # from beginning of this line>
-    # Point this to your Aseprite.exe absolute path, for example: C:/Program Files/Aseprite/aseprite.exe
+    # Point this to your Aseprite.exe absolute path, for example: 
+    # aseprite_path: C:/Program Files/Aseprite/aseprite.exe
     # This is needed for the assistant to automatically export your animations to spritesheets.
     # If you use Steam for Aseprite, you can find the path with:
     #   The aseprite page of your library, The gear icon at the top right,

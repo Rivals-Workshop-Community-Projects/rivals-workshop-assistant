@@ -12,11 +12,11 @@ from rivals_workshop_assistant import (
     character_config_mod,
 )
 from rivals_workshop_assistant.assistant_config_mod import ASEPRITE_PATH_FIELD
-from .script_mod import Script, Anim, File
-from .asset_handling import get_required_assets, save_assets
-from .setup import make_basic_folder_structure
-from .injection import handle_injection
-from .code_generation import handle_codegen
+from rivals_workshop_assistant.script_mod import Script, Anim, File
+from rivals_workshop_assistant.asset_handling import get_required_assets, save_assets
+from rivals_workshop_assistant.setup import make_basic_folder_structure
+from rivals_workshop_assistant.injection import handle_injection
+from rivals_workshop_assistant.code_generation import handle_codegen
 
 
 def main(given_dir: Path):
@@ -42,7 +42,7 @@ def main(given_dir: Path):
 
     save_anims(
         root_dir,
-        aseprite_path=assistant_config.get(ASEPRITE_PATH_FIELD, None),
+        aseprite_path=get_aseprite_path(assistant_config),
         anims=anims,
         has_small_sprites=get_has_small_sprites(
             scripts=scripts, character_config=character_config
@@ -58,6 +58,14 @@ def main(given_dir: Path):
     dotfile_mod.save_dotfile(root_dir, dotfile)
 
 
+def get_aseprite_path(assistant_config: dict) -> typing.Optional[Path]:
+    path_string = assistant_config.get(ASEPRITE_PATH_FIELD, None)
+    if path_string:
+        return Path(path_string)
+    else:
+        return None
+
+
 def get_root_dir(given_dir: Path) -> Path:
     """Return the absolute path to the character's root directory, containing
     their config file.
@@ -69,7 +77,10 @@ def get_root_dir(given_dir: Path) -> Path:
 
 
 def get_processed_time(dotfile: dict, path: Path) -> typing.Optional[datetime.datetime]:
-    if path in dotfile.get(dotfile_mod.SEEN_FILES_FIELD, []):
+    seen_files = dotfile.get(dotfile_mod.SEEN_FILES_FIELD, [])
+    if seen_files is None:
+        seen_files = []
+    if path.as_posix() in seen_files:
         return dotfile.get(dotfile_mod.PROCESSED_TIME_FIELD, None)
     else:
         return None
@@ -87,7 +98,7 @@ def read_scripts(root_dir: Path, dotfile: dict) -> list[Script]:
     for path in gml_paths:
         script = Script(
             path=path,
-            original_content=path.read_text(),
+            original_content=path.read_text(encoding="UTF8", errors="surrogateescape"),
             modified_time=_get_modified_time(path),
             processed_time=get_processed_time(dotfile=dotfile, path=path),
         )

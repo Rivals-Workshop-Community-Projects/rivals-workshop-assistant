@@ -42,7 +42,13 @@ class Script(File):
         self.working_content = working_content
 
     def save(self, root_dir: Path):
-        with open((root_dir / self.path), "w", newline="\n") as f:
+        with open(
+            (root_dir / self.path),
+            "w",
+            encoding="UTF8",
+            errors="surrogateescape",
+            newline="\n",
+        ) as f:
             f.write(self.working_content)
 
     def __eq__(self, other: "Script"):
