@@ -6,6 +6,7 @@ import sys
 import typing
 from pathlib import Path
 
+import rivals_workshop_assistant.updating
 from rivals_workshop_assistant import (
     assistant_config_mod,
     dotfile_mod,
@@ -27,14 +28,16 @@ def main(given_dir: Path):
     assistant_config = assistant_config_mod.read(root_dir)
     character_config = character_config_mod.read(root_dir)
 
+    rivals_workshop_assistant.updating.update(
+        root_dir=root_dir, dotfile=dotfile, config=assistant_config
+    )
+
     scripts = read_scripts(root_dir, dotfile)
     anims = read_anims(root_dir, dotfile)
 
     scripts = handle_codegen(scripts)
     scripts = handle_injection(
         root_dir=root_dir,
-        dotfile=dotfile,
-        assistant_config=assistant_config,
         scripts=scripts,
     )
 

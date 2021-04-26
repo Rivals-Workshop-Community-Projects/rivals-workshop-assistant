@@ -3,6 +3,7 @@ import datetime
 import pytest
 
 import rivals_workshop_assistant.assistant_config_mod
+import rivals_workshop_assistant.updating
 from rivals_workshop_assistant.info_files import _yaml_load
 from rivals_workshop_assistant.injection import installation as src
 from tests.testing_helpers import make_version, make_release, TEST_DATE_STRING
@@ -11,7 +12,7 @@ from tests.testing_helpers import make_version, make_release, TEST_DATE_STRING
 def test__make_update_config_empty():
     config = {}
 
-    result = src._make_update_config(config)
+    result = rivals_workshop_assistant.updating._make_update_config(config)
     assert result == rivals_workshop_assistant.assistant_config_mod.UpdateConfig.PATCH
 
 
@@ -37,27 +38,27 @@ def test__make_update_config_major_level(config_value, expected):
         rivals_workshop_assistant.assistant_config_mod.UPDATE_LEVEL_FIELD: config_value
     }
 
-    result = src._make_update_config(config)
+    result = rivals_workshop_assistant.updating._make_update_config(config)
     assert result == expected
 
 
 def test__get_current_release_from_empty_dotfile():
     dotfile = _yaml_load("")
-    result = src.get_current_version_from_dotfile(dotfile)
+    result = rivals_workshop_assistant.updating.get_current_library_version(dotfile)
     assert result is None
 
 
 def test__get_current_release_from_dotfile():
     dotfile = _yaml_load("version: 3.2.1")
-    result = src.get_current_version_from_dotfile(dotfile)
+    result = rivals_workshop_assistant.updating.get_current_library_version(dotfile)
     assert result == make_version("3.2.1")
 
 
 def test__get_dotfile_with_new_release():
-    version = src.Version(major=10, minor=11, patch=12)
+    version = rivals_workshop_assistant.updating.Version(major=10, minor=11, patch=12)
     dotfile = _yaml_load("version: 3.2.1")
 
-    result = src.update_dotfile_after_update(
+    result = rivals_workshop_assistant.updating.update_dotfile_after_library_update(
         version=version,
         last_updated=datetime.date.fromisoformat(TEST_DATE_STRING),
         dotfile=dotfile,
@@ -75,7 +76,7 @@ something_else: version
 version: 3.2.1"""
     )
 
-    result = src.update_dotfile_after_update(
+    result = rivals_workshop_assistant.updating.update_dotfile_after_library_update(
         version=release,
         last_updated=datetime.date.fromisoformat(TEST_DATE_STRING),
         dotfile=dotfile,
@@ -148,11 +149,15 @@ def test__get_release_to_install_from_config_and_releases(
     releases = other_releases
 
     if current_version is not None:
-        releases += [src.Release(version=current_version, download_url="urla")]
+        releases += [
+            rivals_workshop_assistant.updating.Release(
+                version=current_version, download_url="urla"
+            )
+        ]
     if expected_release is not None:
         releases += [expected_release]
 
-    result = src._get_legal_release_to_install(
+    result = rivals_workshop_assistant.updating._get_legal_library_release_to_install(
         update_config=update_config, releases=releases, current_version=current_version
     )
     assert result == expected_release
@@ -172,8 +177,10 @@ other: blah
 last_updated: {last_updated_string}"""
     )
 
-    should_update = src._get_should_update_from_dotfile_and_date(
-        dotfile=dotfile, today=datetime.date.fromisoformat(today_string)
+    should_update = (
+        rivals_workshop_assistant.updating._get_should_update_from_dotfile_and_date(
+            dotfile=dotfile, today=datetime.date.fromisoformat(today_string)
+        )
     )
 
     assert should_update == expected

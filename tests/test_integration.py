@@ -18,7 +18,7 @@ from tests.testing_helpers import (
 from rivals_workshop_assistant import paths, injection
 from rivals_workshop_assistant.setup import make_basic_folder_structure
 from rivals_workshop_assistant.injection import apply_injection
-from rivals_workshop_assistant.injection.paths import INJECT_FOLDER, USER_INJECT_FOLDER
+from rivals_workshop_assistant.paths import INJECT_FOLDER, USER_INJECT_FOLDER
 from rivals_workshop_assistant.injection.dependency_handling import Define
 import rivals_workshop_assistant.main as src
 

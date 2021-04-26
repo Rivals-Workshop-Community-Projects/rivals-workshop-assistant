@@ -7,6 +7,7 @@ from pathlib import Path
 from PIL import Image, ImageChops
 from testfixtures import TempDirectory
 
+import rivals_workshop_assistant.updating
 from rivals_workshop_assistant.injection import installation as src
 from rivals_workshop_assistant.script_mod import Script, Anim
 
@@ -24,14 +25,18 @@ def create_script(tmp: TempDirectory, script_with_path: ScriptWithPath):
     tmp.write(script_with_path.path.as_posix(), script_with_path.content.encode())
 
 
-def make_version(version_str: str) -> src.Version:
+def make_version(version_str: str) -> rivals_workshop_assistant.updating.Version:
     major, minor, patch = (int(char) for char in version_str.split("."))
-    return src.Version(major=major, minor=minor, patch=patch)
+    return rivals_workshop_assistant.updating.Version(
+        major=major, minor=minor, patch=patch
+    )
 
 
-def make_release(version_str: str, url: str) -> src.Release:
+def make_release(
+    version_str: str, url: str
+) -> rivals_workshop_assistant.updating.Release:
     version = make_version(version_str)
-    return src.Release(version=version, download_url=url)
+    return rivals_workshop_assistant.updating.Release(version=version, download_url=url)
 
 
 TEST_DATE_STRING = "2019-12-04"
