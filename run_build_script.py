@@ -12,7 +12,7 @@ vscode_extension_project_path = Path(
 vscode_extension_path = vscode_extension_project_path / r"out"
 
 gmedit_extension_project_path = Path(
-    r"D:/Users/User/IdeaProjects" r"/rivals-workshop-assistant-gmedit"
+    r"D:/Users/User/IdeaProjects/rivals-workshop-assistant-gmedit"
 )
 gmedit_extension_name = Path("rivals-workshop-assistant-gmedit")
 gmedit_extension_path = gmedit_extension_project_path / gmedit_extension_name
@@ -37,9 +37,9 @@ def build_exe():
 def build_vscode():
     shutil.copy(src=exe_path, dst=vscode_extension_path)
 
-    vscode_publish_script = f"vsce publish {version_type}"
     wd = os.getcwd()
     os.chdir(vscode_extension_project_path)
+    vscode_publish_script = f"vsce publish {version_type}"
     subprocess.call(vscode_publish_script, shell=True)
     os.chdir(wd)
 
@@ -47,11 +47,10 @@ def build_vscode():
 def build_gmedit():
     shutil.copy(src=exe_path, dst=gmedit_extension_path)
 
-    zip_path = gmedit_extension_project_path / "rivals-workshop-assistant-gmedit.zip"
-
     wd = os.getcwd()
     os.chdir(vscode_extension_project_path)
 
+    zip_path = gmedit_extension_project_path / "rivals-workshop-assistant-gmedit.zip"
     with zipfile.ZipFile(zip_path, "w") as release_zip:
         for path in gmedit_extension_path.glob("*"):
             release_zip.write(path, arcname=gmedit_extension_name / path.name)
@@ -68,5 +67,5 @@ def build_gmedit():
 
 if __name__ == "__main__":
     build_exe()
-    build_vscode()
-    build_gmedit()
+    # build_vscode()
+    # build_gmedit()
