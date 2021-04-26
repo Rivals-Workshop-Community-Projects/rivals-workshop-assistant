@@ -73,7 +73,12 @@ def get_root_dir(given_dir: Path) -> Path:
     if "config.ini" in [path.name for path in given_dir.glob("*")]:
         return given_dir
     else:
-        raise FileNotFoundError("Given folder does not contain config.ini. Aborting.")
+        file_names = "\n".join([path.name for path in given_dir.glob("*")])
+        raise FileNotFoundError(
+            f"""Given folder does not contain config.ini.
+Current directory is: {given_dir}
+Files in current directory are: {file_names}"""
+        )
 
 
 def get_processed_time(dotfile: dict, path: Path) -> typing.Optional[datetime.datetime]:
