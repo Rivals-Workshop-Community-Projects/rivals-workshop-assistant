@@ -36,7 +36,9 @@ def make_release(
     version_str: str, url: str
 ) -> rivals_workshop_assistant.updating.Release:
     version = make_version(version_str)
-    return rivals_workshop_assistant.updating.Release(version=version, download_url=url)
+    return rivals_workshop_assistant.updating.Release(
+        version=version, download_url=url, release_dict={}
+    )
 
 
 TEST_DATE_STRING = "2019-12-04"

@@ -17,10 +17,14 @@ def test_get_processed_time__no_register__none():
 
 def test_get_processed_time():
     dotfile = {
-        rivals_workshop_assistant.dotfile_mod.SEEN_FILES_FIELD: [PATH_ABSOLUTE],
+        rivals_workshop_assistant.dotfile_mod.SEEN_FILES_FIELD: [
+            PATH_ABSOLUTE.as_posix()
+        ],
         rivals_workshop_assistant.dotfile_mod.PROCESSED_TIME_FIELD: make_time(),
     }
+
     result = src.get_processed_time(dotfile=dotfile, path=PATH_ABSOLUTE)
+
     assert result == make_time()
 
 

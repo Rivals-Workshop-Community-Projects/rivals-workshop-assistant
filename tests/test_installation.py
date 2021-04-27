@@ -1,18 +1,40 @@
 import datetime
+import typing
+from pathlib import Path
 
 import pytest
 
 import rivals_workshop_assistant.assistant_config_mod
-import rivals_workshop_assistant.updating
+from rivals_workshop_assistant import dotfile_mod
+import rivals_workshop_assistant.updating as src
 from rivals_workshop_assistant.info_files import _yaml_load
-from rivals_workshop_assistant.injection import installation as src
 from tests.testing_helpers import make_version, make_release, TEST_DATE_STRING
+
+
+def make_library_updater(root_dir=Path("a"), dotfile=None, config=None):
+    return _make_updater(
+        root_dir=root_dir, dotfile=dotfile, config=config, type_=src.LibraryUpdater
+    )
+
+
+def make_assistant_updater(root_dir=Path("a"), dotfile=None, config=None):
+    return _make_updater(
+        root_dir=root_dir, dotfile=dotfile, config=config, type_=src.AssistantUpdater
+    )
+
+
+def _make_updater(root_dir, dotfile, config, type_: typing.Type):
+    if dotfile is None:
+        dotfile = {}
+    if config is None:
+        config = {}
+    return type_(root_dir=root_dir, dotfile=dotfile, config=config)
 
 
 def test__make_update_config_empty():
     config = {}
 
-    result = rivals_workshop_assistant.updating._make_update_config(config)
+    result = src._make_update_config(config)
     assert result == rivals_workshop_assistant.assistant_config_mod.UpdateConfig.PATCH
 
 
@@ -38,53 +60,79 @@ def test__make_update_config_major_level(config_value, expected):
         rivals_workshop_assistant.assistant_config_mod.UPDATE_LEVEL_FIELD: config_value
     }
 
-    result = rivals_workshop_assistant.updating._make_update_config(config)
+    result = src._make_update_config(config)
     assert result == expected
 
 
-def test__get_current_release_from_empty_dotfile():
+@pytest.mark.parametrize(
+    "make_updater",
+    [pytest.param(make_library_updater), pytest.param(make_assistant_updater)],
+)
+def test__get_current_release_from_empty_dotfile(make_updater: typing.Callable):
     dotfile = _yaml_load("")
-    result = rivals_workshop_assistant.updating.get_current_library_version(dotfile)
-    assert result is None
+
+    updater = make_updater(dotfile=dotfile)
+
+    assert updater.current_version is None
 
 
-def test__get_current_release_from_dotfile():
-    dotfile = _yaml_load("version: 3.2.1")
-    result = rivals_workshop_assistant.updating.get_current_library_version(dotfile)
-    assert result == make_version("3.2.1")
+@pytest.mark.parametrize(
+    "make_updater, version",
+    [
+        pytest.param(make_library_updater, dotfile_mod.LIBRARY_VERSION_FIELD),
+        pytest.param(make_assistant_updater, dotfile_mod.ASSISTANT_VERSION_FIELD),
+    ],
+)
+def test__get_current_release_from_dotfile(make_updater: typing.Callable, version):
+    dotfile = _yaml_load(f"{version}: 3.2.1")
+
+    updater = make_updater(dotfile=dotfile)
+
+    assert updater.current_version == make_version("3.2.1")
 
 
 def test__get_dotfile_with_new_release():
-    version = rivals_workshop_assistant.updating.Version(major=10, minor=11, patch=12)
-    dotfile = _yaml_load("version: 3.2.1")
+    assistant_version = src.Version(major=10, minor=11, patch=12)
+    library_version = src.Version(major=13, minor=14, patch=15)
+    dotfile = _yaml_load(
+        f"{dotfile_mod.LIBRARY_VERSION_FIELD}: 3.2.1\n"
+        f"{dotfile_mod.ASSISTANT_VERSION_FIELD}: 4.5.6"
+    )
 
-    result = rivals_workshop_assistant.updating.update_dotfile_after_library_update(
-        version=version,
+    result = src.update_dotfile_after_update(
+        assistant_version=assistant_version,
+        library_version=library_version,
         last_updated=datetime.date.fromisoformat(TEST_DATE_STRING),
         dotfile=dotfile,
     )
     assert result == _yaml_load(
-        f"version: 10.11.12\nlast_updated: {TEST_DATE_STRING}\n"
+        f"{dotfile_mod.ASSISTANT_VERSION_FIELD}: 10.11.12\n"
+        f"{dotfile_mod.LIBRARY_VERSION_FIELD}: 13.14.15\n"
+        f"last_updated: {TEST_DATE_STRING}\n"
     )
 
 
 def test__get_dotfile_with_new_release_with_other_data():
-    release = make_version("10.11.12")
+    library_version = make_version("13.14.15")
+    assistant_version = make_version("10.11.12")
     dotfile = _yaml_load(
-        """\
+        f"""\
 something_else: version
-version: 3.2.1"""
+{dotfile_mod.LIBRARY_VERSION_FIELD}: 3.2.1\n
+{dotfile_mod.ASSISTANT_VERSION_FIELD}: 4.5.6"""
     )
 
-    result = rivals_workshop_assistant.updating.update_dotfile_after_library_update(
-        version=release,
+    result = src.update_dotfile_after_update(
+        assistant_version=assistant_version,
+        library_version=library_version,
         last_updated=datetime.date.fromisoformat(TEST_DATE_STRING),
         dotfile=dotfile,
     )
     assert result == _yaml_load(
         f"""\
 something_else: version
-version: 10.11.12
+{dotfile_mod.LIBRARY_VERSION_FIELD}: 13.14.15
+{dotfile_mod.ASSISTANT_VERSION_FIELD}: 10.11.12
 last_updated: {TEST_DATE_STRING}
 """
     )
@@ -150,14 +198,12 @@ def test__get_release_to_install_from_config_and_releases(
 
     if current_version is not None:
         releases += [
-            rivals_workshop_assistant.updating.Release(
-                version=current_version, download_url="urla"
-            )
+            src.Release(version=current_version, download_url="urla", release_dict={})
         ]
     if expected_release is not None:
         releases += [expected_release]
 
-    result = rivals_workshop_assistant.updating._get_legal_library_release_to_install(
+    result = src._get_legal_library_release_to_install(
         update_config=update_config, releases=releases, current_version=current_version
     )
     assert result == expected_release
@@ -177,10 +223,8 @@ other: blah
 last_updated: {last_updated_string}"""
     )
 
-    should_update = (
-        rivals_workshop_assistant.updating._get_should_update_from_dotfile_and_date(
-            dotfile=dotfile, today=datetime.date.fromisoformat(today_string)
-        )
+    should_update = src._get_should_update_from_dotfile_and_date(
+        dotfile=dotfile, today=datetime.date.fromisoformat(today_string)
     )
 
     assert should_update == expected
