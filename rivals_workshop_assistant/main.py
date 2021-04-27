@@ -142,8 +142,10 @@ def save_scripts(root_dir: Path, scripts: list[Script]):
 def save_anims(
     root_dir: Path, aseprite_path: Path, anims: list[Anim], has_small_sprites: bool
 ):
-    if aseprite_path:
-        for anim in anims:
+    if not aseprite_path:
+        return
+    for anim in anims:
+        if anim.is_fresh:
             anim.save(
                 root_dir=root_dir,
                 aseprite_path=aseprite_path,
