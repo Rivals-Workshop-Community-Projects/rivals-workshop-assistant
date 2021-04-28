@@ -20,6 +20,13 @@ class UpdateConfig(enum.Enum):
 UPDATE_LEVEL_FIELD = "update_level"
 UPDATE_LEVEL_DEFAULT = UpdateConfig.PATCH
 
+ANIM_TAG_COLOR_FIELD = "anim_tag_color"
+ANIM_TAG_COLOR_DEFAULT = "blue"
+
+
+def get_anim_tag_color(config: dict) -> "TagColor":
+    return config.get(ANIM_TAG_COLOR_FIELD, ANIM_TAG_COLOR_DEFAULT)
+
 
 def read(root_dir: Path) -> dict:
     """Controller"""

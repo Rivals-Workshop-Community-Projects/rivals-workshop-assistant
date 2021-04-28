@@ -179,28 +179,33 @@ def test__make_basic_folder_structure__config_present():
         assert actual == "a"
 
 
-def test__read_anims():
+def test__read_aseprites():
     with TempDirectory() as tmp:
         supply_aseprites(tmp, TEST_ANIM_NAME)
 
-        result = src.read_aseprites(root_dir=Path(tmp.path), dotfile={})
+        result = src.read_aseprites(
+            root_dir=Path(tmp.path), dotfile={}, assistant_config={}
+        )
         assert len(result) == 1
         assert result[0].path == Path(tmp.path) / "anims" / TEST_ANIM_NAME
         assert result[0].is_fresh
 
 
 def assert_anim(
-    root_dir, filename=f"{TEST_ANIM_NAME.stem}_strip3.png", has_small_sprites=False
+    root_dir,
+    filename=f"{TEST_ANIM_NAME.stem}_strip3.png",
+    has_small_sprites=False,
+    num_frames=3,
 ):
     """Right now this assumes that the sprite is the absa dashstart anim stored in
     TEST_ANIM_NAME"""
     with Image.open(root_dir / paths.SPRITES_FOLDER / filename) as img:
         assert img.height == 66 * (int(has_small_sprites) + 1)
-        assert img.width == 76 * 3 * (int(has_small_sprites) + 1)
+        assert img.width == 76 * num_frames * (int(has_small_sprites) + 1)
 
 
 @pytest.mark.parametrize("has_small_sprites", [pytest.param(False), pytest.param(True)])
-def test__save_anims(has_small_sprites):
+def test__save_aseprites(has_small_sprites):
     aseprite_path = get_aseprite_path()
 
     with TempDirectory() as tmp:
@@ -217,18 +222,20 @@ def test__save_anims(has_small_sprites):
         assert_anim(root_dir, has_small_sprites=has_small_sprites)
 
 
-def test__save_anims__uses_subfolder_name():
+def test__save_aseprites__uses_subfolder_name():
     subfolder_name = "subfolder"
     aseprite_path = get_aseprite_path()
 
     with TempDirectory() as tmp:
         root_dir = Path(tmp.path)
-        anims = [supply_aseprites(tmp, relative_dest=Path("anims") / subfolder_name)]
+        aseprites = [
+            supply_aseprites(tmp, relative_dest=Path("anims") / subfolder_name)
+        ]
 
         src.save_aseprites(
             root_dir=root_dir,
             aseprite_path=Path(aseprite_path),
-            aseprites=anims,
+            aseprites=aseprites,
             has_small_sprites=False,
         )
 
@@ -239,12 +246,12 @@ def test__save_anims__uses_subfolder_name():
         )
 
 
-def test__save_anims__removes_old_spritesheet():
+def test__save_aseprites__removes_old_spritesheet():
     aseprite_path = get_aseprite_path()
 
     with TempDirectory() as tmp:
         root_dir = Path(tmp.path)
-        anims = [supply_aseprites(tmp)]
+        aseprites = [supply_aseprites(tmp)]
         old_filename = (
             root_dir / paths.SPRITES_FOLDER / f"{TEST_ANIM_NAME.stem}_strip2.png"
         )
@@ -255,7 +262,7 @@ def test__save_anims__removes_old_spritesheet():
         src.save_aseprites(
             root_dir=root_dir,
             aseprite_path=Path(aseprite_path),
-            aseprites=anims,
+            aseprites=aseprites,
             has_small_sprites=False,
         )
 
@@ -263,13 +270,15 @@ def test__save_anims__removes_old_spritesheet():
         assert other_filename.exists()
 
 
-def test__save_anims__removes_old_spritesheet__with_subfolder():
+def test__save_aseprites__removes_old_spritesheet__with_subfolder():
     aseprite_path = get_aseprite_path()
     subfolder_name = "subfolder"
 
     with TempDirectory() as tmp:
         root_dir = Path(tmp.path)
-        anims = [supply_aseprites(tmp, relative_dest=Path("anims") / subfolder_name)]
+        aseprites = [
+            supply_aseprites(tmp, relative_dest=Path("anims") / subfolder_name)
+        ]
         old_filename = (
             root_dir
             / paths.SPRITES_FOLDER
@@ -284,9 +293,41 @@ def test__save_anims__removes_old_spritesheet__with_subfolder():
         src.save_aseprites(
             root_dir=root_dir,
             aseprite_path=Path(aseprite_path),
-            aseprites=anims,
+            aseprites=aseprites,
             has_small_sprites=False,
         )
 
         assert not old_filename.exists()
         assert other_filename.exists()
+
+
+#
+# def test__save_aseprites__multiple_aseprites():
+#     aseprite_path = get_aseprite_path()
+#
+#     with TempDirectory() as tmp:
+#         root_dir = Path(tmp.path)
+#         aseprites = [
+#             supply_aseprites(tmp, relative_dest=Path("anims"), anim_tag_color="blue")
+#         ]
+#
+#         src.save_aseprites(
+#             root_dir=root_dir,
+#             aseprite_path=Path(aseprite_path),
+#             aseprites=aseprites,
+#             has_small_sprites=False,
+#         )
+#
+#         assert_anim(
+#             root_dir,
+#             filename=f"anim1_strip1.png",
+#             has_small_sprites=False,
+#             num_frames=1,
+#         )
+#
+#         assert_anim(
+#             root_dir,
+#             filename=f"anim2_strip2.png",
+#             has_small_sprites=False,
+#             num_frames=2,
+#         )

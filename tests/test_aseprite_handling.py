@@ -17,13 +17,18 @@ from rivals_workshop_assistant import character_config_mod
 import rivals_workshop_assistant.main as src
 
 
-def make_fake_aseprite(path=Path("a"), frames=None, tags=None) -> src.Aseprite:
+def make_fake_aseprite(
+    path=Path("a"), num_frames=1, tags=None, anim_tag_color="green"
+) -> src.Aseprite:
     # AsepriteTag('tag1', 1, 2, "red")
-    aseprite_data = AsepriteData(frames, tags)
+    aseprite_data = AsepriteData(
+        num_frames=num_frames, tags=tags, anim_tag_color=anim_tag_color
+    )
     aseprite = Aseprite(
-        path=Path("a"),
+        path=path,
         modified_time=make_time(),
         content=aseprite_data,
+        anim_tag_color=anim_tag_color,
     )
     return aseprite
 
@@ -87,6 +92,6 @@ def test_get_has_small_sprites(init_content, character_config_str, expected):
     ],
 )
 def test_aseprite_anims(tags, expected):
-    sut = make_fake_aseprite(tags=tags)
+    sut = make_fake_aseprite(tags=tags, anim_tag_color="red")
 
     assert sut.content.anims == expected

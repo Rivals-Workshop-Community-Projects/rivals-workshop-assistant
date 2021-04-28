@@ -34,7 +34,9 @@ def main(given_dir: Path):
     )
 
     scripts = read_scripts(root_dir, dotfile)
-    aseprites = read_aseprites(root_dir, dotfile)
+    aseprites = read_aseprites(
+        root_dir, dotfile=dotfile, assistant_config=assistant_config
+    )
 
     scripts = handle_codegen(scripts)
     scripts = handle_injection(
@@ -115,7 +117,9 @@ def read_scripts(root_dir: Path, dotfile: dict) -> list[Script]:
     return scripts
 
 
-def read_aseprites(root_dir: Path, dotfile: dict) -> list[Aseprite]:
+def read_aseprites(
+    root_dir: Path, dotfile: dict, assistant_config: dict
+) -> list[Aseprite]:
     ase_paths = itertools.chain(
         *[
             list((root_dir / "anims").rglob(f"*.{filetype}"))
@@ -129,6 +133,7 @@ def read_aseprites(root_dir: Path, dotfile: dict) -> list[Aseprite]:
             path=path,
             modified_time=_get_modified_time(path),
             processed_time=get_processed_time(dotfile=dotfile, path=path),
+            anim_tag_color=assistant_config_mod.get_anim_tag_color(assistant_config),
         )
         aseprites.append(aseprite)
     return aseprites

@@ -56,9 +56,14 @@ def make_time(time_str=TEST_DATETIME_STRING):
     return datetime.datetime.fromisoformat(time_str)
 
 
-def make_aseprite(path: Path, modified_time=make_time(), processed_time=None):
+def make_aseprite(
+    path: Path, modified_time=make_time(), processed_time=None, anim_tag_color="green"
+):
     return Aseprite(
-        path=path, modified_time=modified_time, processed_time=processed_time
+        path=path,
+        modified_time=modified_time,
+        processed_time=processed_time,
+        anim_tag_color=anim_tag_color,
     )
 
 
@@ -68,12 +73,16 @@ def supply_aseprites(
     modified_time=make_time(),
     processed_time=None,
     relative_dest=Path("anims"),
+    anim_tag_color="green",
 ):
     dest = Path(tmp.path) / relative_dest
     dest.mkdir(parents=True, exist_ok=True)
     shutil.copy(Path("assets" / name), dest)
     return make_aseprite(
-        path=dest / name, modified_time=modified_time, processed_time=processed_time
+        path=dest / name,
+        modified_time=modified_time,
+        processed_time=processed_time,
+        anim_tag_color=anim_tag_color,
     )
 
 
