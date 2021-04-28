@@ -13,7 +13,7 @@ from rivals_workshop_assistant import (
     character_config_mod,
 )
 from rivals_workshop_assistant.assistant_config_mod import ASEPRITE_PATH_FIELD
-from rivals_workshop_assistant.script_mod import Script, Anim, File
+from rivals_workshop_assistant.script_mod import Script, Aseprite, File
 from rivals_workshop_assistant.asset_handling import get_required_assets, save_assets
 from rivals_workshop_assistant.setup import make_basic_folder_structure
 from rivals_workshop_assistant.injection import handle_injection
@@ -33,7 +33,7 @@ def main(given_dir: Path):
     )
 
     scripts = read_scripts(root_dir, dotfile)
-    anims = read_anims(root_dir, dotfile)
+    aseprites = read_aseprites(root_dir, dotfile)
 
     scripts = handle_codegen(scripts)
     scripts = handle_injection(
@@ -43,16 +43,16 @@ def main(given_dir: Path):
 
     save_scripts(root_dir, scripts)
 
-    save_anims(
+    save_aseprites(
         root_dir,
         aseprite_path=get_aseprite_path(assistant_config),
-        anims=anims,
+        aseprites=aseprites,
         has_small_sprites=get_has_small_sprites(
             scripts=scripts, character_config=character_config
         ),
     )
     update_dotfile_after_saving(
-        now=datetime.datetime.now(), dotfile=dotfile, files=scripts + anims
+        now=datetime.datetime.now(), dotfile=dotfile, files=scripts + aseprites
     )
 
     assets = get_required_assets(scripts)
@@ -115,7 +115,7 @@ def read_scripts(root_dir: Path, dotfile: dict) -> list[Script]:
     return scripts
 
 
-def read_anims(root_dir: Path, dotfile: dict) -> list[Anim]:
+def read_aseprites(root_dir: Path, dotfile: dict) -> list[Aseprite]:
     ase_paths = itertools.chain(
         *[
             list((root_dir / "anims").rglob(f"*.{filetype}"))
@@ -123,15 +123,15 @@ def read_anims(root_dir: Path, dotfile: dict) -> list[Anim]:
         ]
     )
 
-    anims = []
+    aseprites = []
     for path in ase_paths:
-        anim = Anim(
+        aseprite = Aseprite(
             path=path,
             modified_time=_get_modified_time(path),
             processed_time=get_processed_time(dotfile=dotfile, path=path),
         )
-        anims.append(anim)
-    return anims
+        aseprites.append(aseprite)
+    return aseprites
 
 
 def save_scripts(root_dir: Path, scripts: list[Script]):
@@ -139,14 +139,17 @@ def save_scripts(root_dir: Path, scripts: list[Script]):
         script.save(root_dir)
 
 
-def save_anims(
-    root_dir: Path, aseprite_path: Path, anims: list[Anim], has_small_sprites: bool
+def save_aseprites(
+    root_dir: Path,
+    aseprite_path: Path,
+    aseprites: list[Aseprite],
+    has_small_sprites: bool,
 ):
     if not aseprite_path:
         return
-    for anim in anims:
-        if anim.is_fresh:
-            anim.save(
+    for aseprite in aseprites:
+        if aseprite.is_fresh:
+            aseprite.save(
                 root_dir=root_dir,
                 aseprite_path=aseprite_path,
                 has_small_sprites=has_small_sprites,

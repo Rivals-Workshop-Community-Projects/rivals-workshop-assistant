@@ -60,7 +60,7 @@ class Script(File):
         )
 
 
-class Anim(File):
+class Aseprite(File):
     def __init__(
         self,
         path: Path,

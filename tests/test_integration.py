@@ -183,7 +183,7 @@ def test__read_anims():
     with TempDirectory() as tmp:
         supply_anim(tmp, TEST_ANIM_NAME)
 
-        result = src.read_anims(root_dir=Path(tmp.path), dotfile={})
+        result = src.read_aseprites(root_dir=Path(tmp.path), dotfile={})
         assert len(result) == 1
         assert result[0].path == Path(tmp.path) / "anims" / TEST_ANIM_NAME
         assert result[0].is_fresh
@@ -207,10 +207,10 @@ def test__save_anims(has_small_sprites):
         root_dir = Path(tmp.path)
         anims = [supply_anim(tmp)]
 
-        src.save_anims(
+        src.save_aseprites(
             root_dir=root_dir,
             aseprite_path=Path(aseprite_path),
-            anims=anims,
+            aseprites=anims,
             has_small_sprites=has_small_sprites,
         )
 
@@ -225,10 +225,10 @@ def test__save_anims__uses_subfolder_name():
         root_dir = Path(tmp.path)
         anims = [supply_anim(tmp, relative_dest=Path("anims") / subfolder_name)]
 
-        src.save_anims(
+        src.save_aseprites(
             root_dir=root_dir,
             aseprite_path=Path(aseprite_path),
-            anims=anims,
+            aseprites=anims,
             has_small_sprites=False,
         )
 
@@ -252,10 +252,10 @@ def test__save_anims__removes_old_spritesheet():
         other_filename = root_dir / paths.SPRITES_FOLDER / f"unrelated_strip2.png"
         make_empty_file(other_filename)
 
-        src.save_anims(
+        src.save_aseprites(
             root_dir=root_dir,
             aseprite_path=Path(aseprite_path),
-            anims=anims,
+            aseprites=anims,
             has_small_sprites=False,
         )
 
@@ -281,10 +281,10 @@ def test__save_anims__removes_old_spritesheet__with_subfolder():
         )
         make_empty_file(other_filename)
 
-        src.save_anims(
+        src.save_aseprites(
             root_dir=root_dir,
             aseprite_path=Path(aseprite_path),
-            anims=anims,
+            aseprites=anims,
             has_small_sprites=False,
         )
 

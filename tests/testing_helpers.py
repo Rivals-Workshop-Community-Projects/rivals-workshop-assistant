@@ -9,7 +9,7 @@ from testfixtures import TempDirectory
 
 import rivals_workshop_assistant.updating
 from rivals_workshop_assistant.injection import installation as src
-from rivals_workshop_assistant.script_mod import Script, Anim
+from rivals_workshop_assistant.script_mod import Script, Aseprite
 
 
 @dataclass
@@ -56,7 +56,9 @@ def make_time(time_str=TEST_DATETIME_STRING):
 
 
 def make_anim(path: Path, modified_time=make_time(), processed_time=None):
-    return Anim(path=path, modified_time=modified_time, processed_time=processed_time)
+    return Aseprite(
+        path=path, modified_time=modified_time, processed_time=processed_time
+    )
 
 
 def supply_anim(
