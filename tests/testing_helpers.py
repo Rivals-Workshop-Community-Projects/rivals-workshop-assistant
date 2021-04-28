@@ -56,13 +56,13 @@ def make_time(time_str=TEST_DATETIME_STRING):
     return datetime.datetime.fromisoformat(time_str)
 
 
-def make_anim(path: Path, modified_time=make_time(), processed_time=None):
+def make_aseprite(path: Path, modified_time=make_time(), processed_time=None):
     return Aseprite(
         path=path, modified_time=modified_time, processed_time=processed_time
     )
 
 
-def supply_anim(
+def supply_aseprites(
     tmp,
     name=TEST_ANIM_NAME,
     modified_time=make_time(),
@@ -72,7 +72,7 @@ def supply_anim(
     dest = Path(tmp.path) / relative_dest
     dest.mkdir(parents=True, exist_ok=True)
     shutil.copy(Path("assets" / name), dest)
-    return make_anim(
+    return make_aseprite(
         path=dest / name, modified_time=modified_time, processed_time=processed_time
     )
 

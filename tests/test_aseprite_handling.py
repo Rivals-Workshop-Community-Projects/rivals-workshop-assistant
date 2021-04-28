@@ -7,6 +7,7 @@ from rivals_workshop_assistant.aseprite_handling import (
     Aseprite,
     AsepriteData,
     AsepriteTag,
+    Anim,
 )
 from tests.testing_helpers import (
     make_script,
@@ -16,12 +17,13 @@ from rivals_workshop_assistant import character_config_mod
 import rivals_workshop_assistant.main as src
 
 
-def make_fake_aseprite() -> src.Aseprite:
-    # AsepriteTag(1, 2, "red")
+def make_fake_aseprite(path=Path("a"), frames=None, tags=None) -> src.Aseprite:
+    # AsepriteTag('tag1', 1, 2, "red")
+    aseprite_data = AsepriteData(frames, tags)
     aseprite = Aseprite(
         path=Path("a"),
         modified_time=make_time(),
-        content=AsepriteData(),
+        content=aseprite_data,
     )
     return aseprite
 
@@ -75,7 +77,16 @@ def test_get_has_small_sprites(init_content, character_config_str, expected):
     assert result == expected
 
 
-def test_aseprite_anims():
-    sut = make_fake_aseprite()
+@pytest.mark.parametrize(
+    "tags, expected",
+    [
+        pytest.param([], []),
+        pytest.param(
+            [AsepriteTag(name="name", start=1, end=2, color="red")], [Anim(name="name")]
+        ),
+    ],
+)
+def test_aseprite_anims(tags, expected):
+    sut = make_fake_aseprite(tags=tags)
 
-    assert sut.content.anims == []
+    assert sut.content.anims == expected

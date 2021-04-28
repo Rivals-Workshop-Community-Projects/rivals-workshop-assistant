@@ -11,7 +11,7 @@ from tests.testing_helpers import (
     ScriptWithPath,
     create_script,
     make_script_from_script_with_path,
-    supply_anim,
+    supply_aseprites,
     TEST_ANIM_NAME,
     get_aseprite_path,
 )
@@ -181,7 +181,7 @@ def test__make_basic_folder_structure__config_present():
 
 def test__read_anims():
     with TempDirectory() as tmp:
-        supply_anim(tmp, TEST_ANIM_NAME)
+        supply_aseprites(tmp, TEST_ANIM_NAME)
 
         result = src.read_aseprites(root_dir=Path(tmp.path), dotfile={})
         assert len(result) == 1
@@ -205,12 +205,12 @@ def test__save_anims(has_small_sprites):
 
     with TempDirectory() as tmp:
         root_dir = Path(tmp.path)
-        anims = [supply_anim(tmp)]
+        aseprites = [supply_aseprites(tmp)]
 
         src.save_aseprites(
             root_dir=root_dir,
             aseprite_path=Path(aseprite_path),
-            aseprites=anims,
+            aseprites=aseprites,
             has_small_sprites=has_small_sprites,
         )
 
@@ -223,7 +223,7 @@ def test__save_anims__uses_subfolder_name():
 
     with TempDirectory() as tmp:
         root_dir = Path(tmp.path)
-        anims = [supply_anim(tmp, relative_dest=Path("anims") / subfolder_name)]
+        anims = [supply_aseprites(tmp, relative_dest=Path("anims") / subfolder_name)]
 
         src.save_aseprites(
             root_dir=root_dir,
@@ -244,7 +244,7 @@ def test__save_anims__removes_old_spritesheet():
 
     with TempDirectory() as tmp:
         root_dir = Path(tmp.path)
-        anims = [supply_anim(tmp)]
+        anims = [supply_aseprites(tmp)]
         old_filename = (
             root_dir / paths.SPRITES_FOLDER / f"{TEST_ANIM_NAME.stem}_strip2.png"
         )
@@ -269,7 +269,7 @@ def test__save_anims__removes_old_spritesheet__with_subfolder():
 
     with TempDirectory() as tmp:
         root_dir = Path(tmp.path)
-        anims = [supply_anim(tmp, relative_dest=Path("anims") / subfolder_name)]
+        anims = [supply_aseprites(tmp, relative_dest=Path("anims") / subfolder_name)]
         old_filename = (
             root_dir
             / paths.SPRITES_FOLDER

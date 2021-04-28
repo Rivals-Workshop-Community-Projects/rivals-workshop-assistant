@@ -16,6 +16,7 @@ from .chunks import (
     UserDataChunk,
     SliceChunk,
 )
+import rivals_workshop_assistant.aseprite_handling.types
 
 
 class RawAsepriteFile:
@@ -42,6 +43,44 @@ class RawAsepriteFile:
 
             if isinstance(layer, LayerGroupChunk):
                 stack.append(layer)
+
+    def get_tags(self):
+        if not self.frames:
+            return []
+        frame_0_chunks = self.frames[0].chunks
+        tag_chunks = [
+            chunk for chunk in frame_0_chunks if isinstance(chunk, FrameTagsChunk)
+        ]
+        if not tag_chunks:
+            return []
+        if len(tag_chunks) > 1:
+            assert False
+        tag_dicts = tag_chunks[0].tags
+        tags = [
+            rivals_workshop_assistant.aseprite_handling.types.AsepriteTag(
+                name=tag_dict["name"],
+                start=tag_dict["from"],
+                end=tag_dict["to"],
+                color=rgb_to_color_name(
+                    r=tag_dict["color"]["red"],
+                    g=tag_dict["color"]["green"],
+                    b=tag_dict["color"]["blue"],
+                ),
+            )
+            for tag_dict in tag_dicts
+        ]
+        return tags
+
+    def get_num_frames(self):
+        return len(self.frames)
+
+
+RGB_TO_COLOR_NAME = {(87, 185, 242): "blue"}
+
+
+def rgb_to_color_name(r, g, b) -> str:
+    return RGB_TO_COLOR_NAME.get((r, g, b), (r, g, b))
+
 
 def parse_data(data):
     head = Header(data)

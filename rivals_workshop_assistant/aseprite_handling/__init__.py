@@ -5,25 +5,22 @@ from datetime import datetime
 from pathlib import Path
 
 from rivals_workshop_assistant import paths
-from rivals_workshop_assistant.aseprite_handling import _aseprite_loading
 from ._aseprite_loading import RawAsepriteFile
 from rivals_workshop_assistant.script_mod import File
+from .types import AsepriteTag
 
 
 class Anim:
     def __init__(self, name: str):
         self.name = name
 
-
-class AsepriteTag:
-    def __init__(self, start, end, color):
-        self.start = start
-        self.end = end
-        self.color = color
+    def __eq__(self, other):
+        return self.name == other.name
 
 
 class AsepriteData:
-    def __init__(self, tags: list[AsepriteTag] = None):
+    def __init__(self, num_frames, tags: list[AsepriteTag] = None):
+        self.num_frames = num_frames
         if tags is None:
             tags = []
         self.tags = tags
@@ -34,12 +31,13 @@ class AsepriteData:
         with open(path, "rb") as f:
             contents = f.read()
             raw_aseprite_file = RawAsepriteFile(contents)
-        tags = raw_aseprite_file.get_tags()  # todd
-        return cls(tags=tags)
+        tags = raw_aseprite_file.get_tags()
+        num_frames = raw_aseprite_file.get_num_frames()
+        return cls(tags=tags, num_frames=num_frames)
 
 
 def get_anims(tags: list[AsepriteTag]):
-    return []  # todo
+    return [Anim(name=tag.name) for tag in tags]  # todo
 
 
 class Aseprite(File):
@@ -74,8 +72,9 @@ class Aseprite(File):
     def save(self, root_dir: Path, aseprite_path: Path, has_small_sprites: bool):
         self._delete_old_save(root_dir)
 
-        num_frames = len(self.content.frames)
-        dest_name = f"{self.get_sprite_base_name(root_dir)}_strip{num_frames}.png"
+        dest_name = (
+            f"{self.get_sprite_base_name(root_dir)}_strip{self.content.num_frames}.png"
+        )
         dest = root_dir / paths.SPRITES_FOLDER / dest_name
 
         dest.parent.mkdir(parents=True, exist_ok=True)
