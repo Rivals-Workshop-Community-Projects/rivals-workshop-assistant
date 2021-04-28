@@ -13,7 +13,8 @@ from rivals_workshop_assistant import (
     character_config_mod,
 )
 from rivals_workshop_assistant.assistant_config_mod import ASEPRITE_PATH_FIELD
-from rivals_workshop_assistant.script_mod import Script, Aseprite, File
+from rivals_workshop_assistant.script_mod import Script, File
+from rivals_workshop_assistant.aseprite_handling import Aseprite
 from rivals_workshop_assistant.asset_handling import get_required_assets, save_assets
 from rivals_workshop_assistant.setup import make_basic_folder_structure
 from rivals_workshop_assistant.injection import handle_injection

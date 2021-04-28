@@ -9,7 +9,8 @@ from testfixtures import TempDirectory
 
 import rivals_workshop_assistant.updating
 from rivals_workshop_assistant.injection import installation as src
-from rivals_workshop_assistant.script_mod import Script, Aseprite
+from rivals_workshop_assistant.script_mod import Script
+from rivals_workshop_assistant.aseprite_handling import Aseprite
 
 
 @dataclass
