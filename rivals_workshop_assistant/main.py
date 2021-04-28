@@ -106,7 +106,6 @@ def read_scripts(root_dir: Path, dotfile: dict) -> list[Script]:
     for path in gml_paths:
         script = Script(
             path=path,
-            original_content=path.read_text(encoding="UTF8", errors="surrogateescape"),
             modified_time=_get_modified_time(path),
             processed_time=get_processed_time(dotfile=dotfile, path=path),
         )

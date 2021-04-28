@@ -4,8 +4,7 @@ import subprocess
 from pathlib import Path
 from datetime import datetime
 
-from rivals_workshop_assistant import paths
-from rivals_workshop_assistant import aseprite_loading
+from rivals_workshop_assistant import paths, aseprite_loading
 
 
 def _get_is_fresh(processed_time: datetime, modified_time: datetime):
@@ -30,16 +29,33 @@ class Script(File):
         self,
         path: Path,
         modified_time: datetime,
-        original_content: str,
+        original_content: str = None,
         working_content: str = None,
         processed_time: datetime = None,
     ):
         super().__init__(path, modified_time, processed_time)
-        self.original_content = original_content
+        self._original_content = original_content
+        self._working_content = working_content
 
-        if working_content is None:
-            working_content = original_content
         self.working_content = working_content
+
+    @functools.cached_property
+    def original_content(self):
+        if self._original_content is None:
+            self._original_content = self.path.read_text(
+                encoding="UTF8", errors="surrogateescape"
+            )
+        return self._original_content
+
+    @property
+    def working_content(self):
+        if self._working_content is None:
+            self._working_content = self.original_content
+        return self._working_content
+
+    @working_content.setter
+    def working_content(self, value):
+        self._working_content = value
 
     def save(self, root_dir: Path):
         with open(
