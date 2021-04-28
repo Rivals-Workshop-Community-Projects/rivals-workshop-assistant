@@ -6,7 +6,40 @@ from pathlib import Path
 
 from rivals_workshop_assistant import paths
 from rivals_workshop_assistant.aseprite_handling import _aseprite_loading
+from ._aseprite_loading import RawAsepriteFile
 from rivals_workshop_assistant.script_mod import File
+
+
+class Anim:
+    def __init__(self, name: str):
+        self.name = name
+
+
+class AsepriteTag:
+    def __init__(self, start, end, color):
+        self.start = start
+        self.end = end
+        self.color = color
+
+
+class AsepriteData:
+    def __init__(self, tags: list[AsepriteTag] = None):
+        if tags is None:
+            tags = []
+        self.tags = tags
+        self.anims = get_anims(tags)
+
+    @classmethod
+    def from_path(cls, path):
+        with open(path, "rb") as f:
+            contents = f.read()
+            raw_aseprite_file = RawAsepriteFile(contents)
+        tags = raw_aseprite_file.get_tags()  # todd
+        return cls(tags=tags)
+
+
+def get_anims(tags: list[AsepriteTag]):
+    return []  # todo
 
 
 class Aseprite(File):
@@ -21,11 +54,9 @@ class Aseprite(File):
         self._content = content
 
     @property
-    def content(self):
+    def content(self) -> AsepriteData:
         if self._content is None:
-            with open(self.path, "rb") as f:
-                file_contents = f.read()
-                self._content = _aseprite_loading.AsepriteFile(file_contents)
+            self._content = AsepriteData.from_path(self.path)
         return self._content
 
     @property

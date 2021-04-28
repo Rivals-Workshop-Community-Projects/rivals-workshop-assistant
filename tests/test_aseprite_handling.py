@@ -3,7 +3,11 @@ from configparser import ConfigParser
 from pathlib import Path
 
 from rivals_workshop_assistant import paths
-from rivals_workshop_assistant.aseprite_handling import Aseprite
+from rivals_workshop_assistant.aseprite_handling import (
+    Aseprite,
+    AsepriteData,
+    AsepriteTag,
+)
 from tests.testing_helpers import (
     make_script,
     make_time,
@@ -12,13 +16,14 @@ from rivals_workshop_assistant import character_config_mod
 import rivals_workshop_assistant.main as src
 
 
-# def make_fake_aseprite() -> src.Aseprite:
-#     aseprite = Aseprite(
-#         path=Path("a"),
-#         modified_time=make_time(),
-#         content=fake_content
-#     )
-#     return aseprite
+def make_fake_aseprite() -> src.Aseprite:
+    # AsepriteTag(1, 2, "red")
+    aseprite = Aseprite(
+        path=Path("a"),
+        modified_time=make_time(),
+        content=AsepriteData(),
+    )
+    return aseprite
 
 
 @pytest.mark.parametrize(
@@ -70,7 +75,7 @@ def test_get_has_small_sprites(init_content, character_config_str, expected):
     assert result == expected
 
 
-# def test_aseprite_anims():
-#     sut = make_fake_aseprite()
-#
-#     assert sut.anims == [Anim]
+def test_aseprite_anims():
+    sut = make_fake_aseprite()
+
+    assert sut.content.anims == []
