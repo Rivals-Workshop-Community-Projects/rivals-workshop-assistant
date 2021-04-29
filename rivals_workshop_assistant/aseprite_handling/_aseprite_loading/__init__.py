@@ -75,7 +75,16 @@ class RawAsepriteFile:
         return len(self.frames)
 
 
-RGB_TO_COLOR_NAME = {(87, 185, 242): "blue"}
+RGB_TO_COLOR_NAME = {
+    (0, 0, 0): "black",
+    (254, 91, 89): "red",
+    (247, 165, 71): "orange",
+    (243, 206, 82): "yellow",
+    (106, 205, 92): "green",
+    (87, 185, 242): "blue",
+    (209, 134, 223): "purple",
+    (165, 165, 167): "gray",
+}
 
 
 def rgb_to_color_name(r, g, b) -> str:

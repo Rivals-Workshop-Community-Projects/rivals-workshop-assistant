@@ -54,5 +54,10 @@ DEFAULT_CONFIG = f"""\
     # This is needed for the assistant to automatically export your animations to spritesheets.
     # If you use Steam for Aseprite, you can find the path with:
     #   The aseprite page of your library, The gear icon at the top right,
-    #   Manage, Browse Local Files, Copy the path of Aseprite.exe to the config.    
+    #   Manage, Browse Local Files, Copy the path of Aseprite.exe to the config.
+    
+{ANIM_TAG_COLOR_FIELD}: {ANIM_TAG_COLOR_DEFAULT}
+    # The color of Aseprite tag representing an animation. 
+    # If you keep multiple aseprite animations in a file, put each in a tag with this 
+    # color, and the assistant will export them under that tag's name.    
 """
