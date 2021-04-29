@@ -1,4 +1,5 @@
 import re
+import typing
 
 from .dependency_handling import GmlInjection
 from rivals_workshop_assistant.script_mod import Script
@@ -39,10 +40,7 @@ def _apply_injection_to_script(
     if _should_inject(script.working_content):
         needed_gmls = _get_inject_gmls_needed_in_gml(
             script.working_content, injection_library
-        )
-        #               + _get_anim_data_gmls_needed_in_gml(
-        #     script, anims
-        # )
+        ) + _get_anim_data_gmls_needed_in_gml(script, anims)
         script.working_content = _add_inject_gmls_in_script(
             script.working_content, needed_gmls
         )
@@ -52,8 +50,18 @@ def _should_inject(script: str):
     return "NO-INJECT" not in _get_script_contents(script)  # Performance problem?
 
 
-def _get_anim_data_gmls_needed_in_gml(script: str, anims: list[Anim]):
-    raise NotImplementedError
+def _get_anim_data_gmls_needed_in_gml(script: Script, anims: list[Anim]):
+    anim = _get_anim_for_script(script, anims)
+    if anim is None:
+        return []
+    window_gmls = [window.gml for window in anim.windows]
+    return window_gmls
+
+
+def _get_anim_for_script(script: Script, anims: list[Anim]) -> typing.Optional[Anim]:
+    if script.path.parent.name != "attacks":
+        return None
+    return next((anim for anim in anims if anim.name == script.path.stem), None)
 
 
 def _get_inject_gmls_needed_in_gml(

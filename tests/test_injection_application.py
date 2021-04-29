@@ -3,10 +3,14 @@ from pathlib import Path
 import pytest
 
 import rivals_workshop_assistant.injection.application as application
+from rivals_workshop_assistant.aseprite_handling import Anim, Window
 from rivals_workshop_assistant.injection.dependency_handling import Define, Macro
-from tests.testing_helpers import make_script, make_time, TEST_LATER_DATETIME_STRING
-
-PATH_A = Path("a")
+from tests.testing_helpers import (
+    make_script,
+    make_time,
+    TEST_LATER_DATETIME_STRING,
+    PATH_A,
+)
 
 
 def test_apply_injection_no_injections():
@@ -289,6 +293,29 @@ define1()"""
     assert result_scripts == []
 
 
-# def test_get_anim_data_gmls_needed_in_gml():
-#     script = None
-#     assert False
+def test_get_anim_data_gmls_needed_in_gml():
+    path = Path("scripts/attacks/dattack.gml")
+    orig_content = "content"
+    script = make_script(path=path, original_content=orig_content)
+    scripts = [script]
+
+    anim = Anim(name="dattack", start=0, end=4)
+    anim.windows = [Window("window", 2, 3)]
+    anims = [anim]
+
+    result_scripts = application.apply_injection(
+        scripts=scripts, injection_library=[], anims=anims
+    )
+
+    assert result_scripts == [
+        make_script(
+            path=path,
+            original_content=orig_content,
+            working_content=f"""\
+{orig_content}
+
+{application.INJECTION_START_HEADER}
+{anim.windows[0].gml}
+{application.INJECTION_END_HEADER}""",
+        )
+    ]

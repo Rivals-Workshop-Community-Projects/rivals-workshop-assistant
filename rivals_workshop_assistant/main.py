@@ -14,7 +14,7 @@ from rivals_workshop_assistant import (
 )
 from rivals_workshop_assistant.assistant_config_mod import ASEPRITE_PATH_FIELD
 from rivals_workshop_assistant.script_mod import Script, File
-from rivals_workshop_assistant.aseprite_handling import Aseprite
+from rivals_workshop_assistant.aseprite_handling import Aseprite, Anim
 from rivals_workshop_assistant.asset_handling import get_required_assets, save_assets
 from rivals_workshop_assistant.setup import make_basic_folder_structure
 from rivals_workshop_assistant.injection import handle_injection
@@ -40,8 +40,7 @@ def main(given_dir: Path):
 
     scripts = handle_codegen(scripts)
     scripts = handle_injection(
-        root_dir=root_dir,
-        scripts=scripts,
+        root_dir=root_dir, scripts=scripts, anims=get_anims(aseprites)
     )
 
     save_scripts(root_dir, scripts)
@@ -137,6 +136,10 @@ def read_aseprites(
         )
         aseprites.append(aseprite)
     return aseprites
+
+
+def get_anims(aseprites: list[Aseprite]) -> list[Anim]:
+    raise NotImplementedError
 
 
 def save_scripts(root_dir: Path, scripts: list[Script]):

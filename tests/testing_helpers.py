@@ -8,9 +8,11 @@ from PIL import Image, ImageChops
 from testfixtures import TempDirectory
 
 import rivals_workshop_assistant.updating
-from rivals_workshop_assistant.injection import installation as src
 from rivals_workshop_assistant.script_mod import Script
 from rivals_workshop_assistant.aseprite_handling import Aseprite
+
+
+PATH_A = Path("a")
 
 
 @dataclass
@@ -111,8 +113,8 @@ def assert_images_equal(img1, img2):
 
 
 def make_script(
-    path: Path,
-    original_content: str,
+    path: Path = PATH_A,
+    original_content: str = "",
     working_content: str = None,
     modified_time=make_time(),
     processed_time=None,

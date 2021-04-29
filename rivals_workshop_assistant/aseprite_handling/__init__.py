@@ -9,14 +9,37 @@ from rivals_workshop_assistant.script_mod import File
 from .types import AsepriteTag, TagColor
 
 
-class Anim:
+class TagObject:
     def __init__(self, name: str, start: int, end: int):
-        """A part of an aseprite file representing a single spritesheet.
-        An Aseprite file may contain multiple anims.
-        """
         self.name = name
         self.start = start
         self.end = end
+
+
+class Window(TagObject):
+    """An attack window in an anim.
+    Start and end are relative to the anim, not the aseprite file."""
+
+    def __init__(self, name: str, start: int, end: int):
+        super().__init__(name, start, end)
+        self.gml = self._make_gml()
+
+    def _make_gml(self):
+        return f"""\
+#macro {self.name.upper()}_FRAMES = {self.end-self.start + 1}
+#macro {self.name.upper()}_FRAME_START = {self.start}
+        """
+
+
+class Anim(TagObject):
+    def __init__(self, name: str, start: int, end: int, windows: list[Window] = None):
+        """A part of an aseprite file representing a single spritesheet.
+        An Aseprite file may contain multiple anims.
+        """
+        super().__init__(name, start, end)
+        if windows is None:
+            windows = []
+        self.windows = windows
 
     @property
     def num_frames(self):
