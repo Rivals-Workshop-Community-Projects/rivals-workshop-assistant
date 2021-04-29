@@ -2,10 +2,10 @@ import re
 from pathlib import Path
 
 import rivals_workshop_assistant.paths
-from . import dependency_handling
+from .dependency_handling import GmlInjection, INJECT_TYPES
 
 
-def read_injection_library(root_dir: Path) -> dependency_handling.InjectionLibrary:
+def read_injection_library(root_dir: Path) -> list[GmlInjection]:
     """Controller"""
     inject_gml_paths = list(
         (root_dir / rivals_workshop_assistant.paths.INJECT_FOLDER).rglob("*.gml")
@@ -17,13 +17,13 @@ def read_injection_library(root_dir: Path) -> dependency_handling.InjectionLibra
     return get_injection_library_from_gml(full_inject_gml)
 
 
-def get_injection_library_from_gml(gml: str) -> dependency_handling.InjectionLibrary:
+def get_injection_library_from_gml(gml: str) -> list[GmlInjection]:
     dependencies = []
     dependency_strings = gml.split("#")[1:]
     for dependency_string in dependency_strings:
         inject_type, name, content = _get_inject_components(dependency_string)
 
-        for possible_inject_type in dependency_handling.INJECT_TYPES:
+        for possible_inject_type in INJECT_TYPES:
             if inject_type == possible_inject_type.IDENTIFIER_STRING:
                 injection = possible_inject_type.from_gml(name, content)
                 break

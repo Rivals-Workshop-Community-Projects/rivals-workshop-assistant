@@ -25,9 +25,6 @@ class GmlInjection(abc.ABC):
         return hash(self.name)
 
 
-InjectionLibrary = t.List[GmlInjection]
-
-
 class GmlDeclaration(GmlInjection, abc.ABC):
     IDENTIFIER_STRING = NotImplemented
 

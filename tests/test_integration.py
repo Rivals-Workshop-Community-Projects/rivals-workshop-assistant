@@ -112,7 +112,9 @@ def test_full_injection():
 
         scripts = src.read_scripts(Path(tmp.path), {})
         library = injection.read_injection_library(Path(tmp.path))
-        result_scripts = apply_injection(scripts=scripts, injection_library=library)
+        result_scripts = apply_injection(
+            scripts=scripts, injection_library=library, anims=[]
+        )
 
         expected_script_1 = f"""\
 {script_1.content}

@@ -40,7 +40,9 @@ def test_define_gml_parameters():
 
 
 def test_apply_injection_nothing():
-    result_scripts = application.apply_injection(scripts=[], injection_library=[])
+    result_scripts = application.apply_injection(
+        scripts=[], injection_library=[], anims=[]
+    )
     assert result_scripts == []
 
 
