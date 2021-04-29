@@ -301,33 +301,32 @@ def test__save_aseprites__removes_old_spritesheet__with_subfolder():
         assert other_filename.exists()
 
 
-#
-# def test__save_aseprites__multiple_aseprites():
-#     aseprite_path = get_aseprite_path()
-#
-#     with TempDirectory() as tmp:
-#         root_dir = Path(tmp.path)
-#         aseprites = [
-#             supply_aseprites(tmp, relative_dest=Path("anims"), anim_tag_color="blue")
-#         ]
-#
-#         src.save_aseprites(
-#             root_dir=root_dir,
-#             aseprite_path=Path(aseprite_path),
-#             aseprites=aseprites,
-#             has_small_sprites=False,
-#         )
-#
-#         assert_anim(
-#             root_dir,
-#             filename=f"anim1_strip1.png",
-#             has_small_sprites=False,
-#             num_frames=1,
-#         )
-#
-#         assert_anim(
-#             root_dir,
-#             filename=f"anim2_strip2.png",
-#             has_small_sprites=False,
-#             num_frames=2,
-#         )
+def test__save_aseprites__multiple_aseprites():
+    aseprite_path = get_aseprite_path()
+
+    with TempDirectory() as tmp:
+        root_dir = Path(tmp.path)
+        aseprites = [
+            supply_aseprites(tmp, relative_dest=Path("anims"), anim_tag_color="blue")
+        ]
+
+        src.save_aseprites(
+            root_dir=root_dir,
+            aseprite_path=Path(aseprite_path),
+            aseprites=aseprites,
+            has_small_sprites=False,
+        )
+
+        assert_anim(
+            root_dir,
+            filename=f"anim1_strip1.png",
+            has_small_sprites=False,
+            num_frames=1,
+        )
+
+        assert_anim(
+            root_dir,
+            filename=f"anim2_strip2.png",
+            has_small_sprites=False,
+            num_frames=2,
+        )

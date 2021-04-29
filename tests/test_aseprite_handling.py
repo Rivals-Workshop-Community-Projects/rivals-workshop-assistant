@@ -18,11 +18,11 @@ import rivals_workshop_assistant.main as src
 
 
 def make_fake_aseprite(
-    path=Path("a"), num_frames=1, tags=None, anim_tag_color="green"
+    name="name", path=Path("a"), num_frames=1, tags=None, anim_tag_color="green"
 ) -> src.Aseprite:
     # AsepriteTag('tag1', 1, 2, "red")
     aseprite_data = AsepriteData(
-        num_frames=num_frames, tags=tags, anim_tag_color=anim_tag_color
+        name=name, num_frames=num_frames, tags=tags, anim_tag_color=anim_tag_color
     )
     aseprite = Aseprite(
         path=path,
@@ -85,9 +85,10 @@ def test_get_has_small_sprites(init_content, character_config_str, expected):
 @pytest.mark.parametrize(
     "tags, expected",
     [
-        pytest.param([], []),
+        pytest.param([], [Anim(name="name", start=1, end=1)]),
         pytest.param(
-            [AsepriteTag(name="name", start=1, end=2, color="red")], [Anim(name="name")]
+            [AsepriteTag(name="name", start=1, end=2, color="red")],
+            [Anim(name="name", start=1, end=2)],
         ),
     ],
 )
