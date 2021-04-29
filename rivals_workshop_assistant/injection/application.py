@@ -2,6 +2,7 @@ import re
 
 from .dependency_handling import InjectionLibrary, GmlInjection
 from rivals_workshop_assistant.script_mod import Script
+from ..aseprite_handling import Anim
 
 INJECTION_START_MARKER = "// vvv LIBRARY DEFINES AND MACROS vvv\n"
 INJECTION_START_WARNING = (
@@ -24,26 +25,34 @@ def apply_injection(
     supplied dependencies."""
     result_scripts = []
     for script in scripts:
-        if script.is_fresh:
-            script.working_content = _apply_injection_to_script(
-                script.working_content, injection_library
-            )
+        if script.is_fresh:  # todo or relevant anim is_fresh
+            _apply_injection_to_script(script, injection_library)
             result_scripts.append(script)
 
     return result_scripts
 
 
-def _apply_injection_to_script(script: str, injection_library: InjectionLibrary) -> str:
+def _apply_injection_to_script(script: Script, injection_library: InjectionLibrary):
+    # , anims: list[Anim]
     """Updates the dependencies supplied to the script."""
-    if _should_inject(script):
-        needed_gmls = _get_inject_gmls_needed_in_gml(script, injection_library)
-        return _add_inject_gmls_in_script(script, needed_gmls)
-    else:
-        return script
+    if _should_inject(script.working_content):
+        needed_gmls = _get_inject_gmls_needed_in_gml(
+            script.working_content, injection_library
+        )
+        # _get_anim_data_gmls_needed_in_gml(
+        #     script, anims
+        # )
+        script.working_content = _add_inject_gmls_in_script(
+            script.working_content, needed_gmls
+        )
 
 
-def _should_inject(script):
-    return "NO-INJECT" not in _get_script_contents(script)
+def _should_inject(script: str):
+    return "NO-INJECT" not in _get_script_contents(script)  # Performance problem?
+
+
+def _get_anim_data_gmls_needed_in_gml(script: str, anims: list[Anim]):
+    raise NotImplementedError
 
 
 def _get_inject_gmls_needed_in_gml(

@@ -285,3 +285,8 @@ define1()"""
         scripts=scripts, injection_library=[define]
     )
     assert result_scripts == []
+
+
+# def test_get_anim_data_gmls_needed_in_gml():
+#     script = None
+#     assert False

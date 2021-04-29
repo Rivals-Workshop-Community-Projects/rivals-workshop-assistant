@@ -208,6 +208,7 @@ class AssistantUpdater(Updater):
             current_exe_path_as_bak = current_exe_path.with_name(
                 current_exe_path.stem + ".bak"
             )
+            os.remove(path=current_exe_path_as_bak)
             os.rename(src=current_exe_path, dst=current_exe_path_as_bak)
 
             # Move new exe in as .exe
