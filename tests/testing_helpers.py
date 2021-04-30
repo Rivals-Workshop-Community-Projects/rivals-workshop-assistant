@@ -8,9 +8,9 @@ from PIL import Image, ImageChops
 from testfixtures import TempDirectory
 
 import rivals_workshop_assistant.updating
+from rivals_workshop_assistant import assistant_config_mod
 from rivals_workshop_assistant.script_mod import Script
 from rivals_workshop_assistant.aseprite_handling import Aseprite
-
 
 PATH_A = Path("a")
 
@@ -100,6 +100,22 @@ def make_empty_file(path: Path):
     except FileExistsError:
         pass
     assert path.exists()
+
+
+def make_file(path: Path, content: str):
+    make_empty_file(path)
+    path.write_text(content)
+
+
+def make_test_config(root_dir: Path):
+    make_file(
+        root_dir / assistant_config_mod.PATH,
+        content=f"""\
+{assistant_config_mod.LIBRARY_UPDATE_LEVEL_FIELD}: none
+{assistant_config_mod.ASSISTANT_SELF_UPDATE_FIELD}: false
+{assistant_config_mod.ASEPRITE_PATH_FIELD}: {get_aseprite_path()}
+""",
+    )
 
 
 def assert_script_with_path(tmp, script: ScriptWithPath):

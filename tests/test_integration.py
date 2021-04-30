@@ -5,6 +5,7 @@ import pytest
 from testfixtures import TempDirectory
 
 import rivals_workshop_assistant.assistant_config_mod
+from tests import testing_helpers
 from tests.testing_helpers import (
     make_empty_file,
     make_script,
@@ -14,6 +15,7 @@ from tests.testing_helpers import (
     supply_aseprites,
     TEST_ANIM_NAME,
     get_aseprite_path,
+    make_test_config,
 )
 from rivals_workshop_assistant import paths, injection
 from rivals_workshop_assistant.setup import make_basic_folder_structure
@@ -40,6 +42,11 @@ script_subfolder = ScriptWithPath(
     content="""\
 script in subfolder
 func()""",
+)
+
+bair = ScriptWithPath(
+    path=Path("scripts/attacks/bair.gml"),
+    content="""// previous content""",
 )
 
 injection_at_root = ScriptWithPath(
@@ -72,6 +79,7 @@ injection_in_subfolder = ScriptWithPath(
 """,
 )
 
+
 func = Define(name="func", docs="some docs\nsome more docs", content="func content")
 another_func = Define(name="another_func", content="another func\ncontent")
 needs_other = Define(name="needs_other", content="other()")
@@ -89,9 +97,6 @@ def test_read_scripts():
             make_script_from_script_with_path(tmp, script_1),
             make_script_from_script_with_path(tmp, script_subfolder),
         ]
-
-
-# TODO create test for correct times
 
 
 def test_read_injection_library():
@@ -328,7 +333,49 @@ def test__save_aseprites__multiple_aseprites():
 
         assert_anim(
             root_dir,
-            filename=f"anim2_strip2.png",
+            filename=f"bair_strip2.png",
             has_small_sprites=False,
             num_frames=2,
+        )
+
+
+def test__aseprites_set_window_data():
+    with TempDirectory() as tmp:
+        root_dir = Path(tmp.path)
+
+        # setup, make config.ini, make anim and bair
+        testing_helpers.make_empty_file(root_dir / "config.ini")
+
+        make_test_config(root_dir)
+        create_script(tmp, bair)
+        supply_aseprites(tmp, TEST_ANIM_NAME)
+
+        src.main(given_dir=root_dir, guarantee_root_dir=True)
+
+        assert_anim(
+            root_dir,
+            filename=f"anim1_strip1.png",
+            has_small_sprites=False,
+            num_frames=1,
+        )
+
+        assert_anim(
+            root_dir,
+            filename=f"bair_strip2.png",
+            has_small_sprites=False,
+            num_frames=2,
+        )
+
+        assert (
+            tmp.read(bair.path.as_posix(), encoding="utf8")
+            == f"""\
+{bair.content}
+
+{injection.application.INJECTION_START_HEADER}
+#macro WINDOW1_FRAMES = 1
+#macro WINDOW1_FRAME_START = 1
+
+#macro WINDOW2_FRAMES = 1
+#macro WINDOW2_FRAME_START = 2
+{injection.application.INJECTION_END_HEADER}"""
         )

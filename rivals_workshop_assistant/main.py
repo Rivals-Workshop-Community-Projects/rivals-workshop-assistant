@@ -21,9 +21,12 @@ from rivals_workshop_assistant.injection import handle_injection
 from rivals_workshop_assistant.code_generation import handle_codegen
 
 
-def main(given_dir: Path):
+def main(given_dir: Path, guarantee_root_dir: bool = False):
     """Runs all processes on scripts in the root_dir"""
-    root_dir = get_root_dir(given_dir)
+    if guarantee_root_dir:
+        root_dir = given_dir
+    else:
+        root_dir = get_root_dir(given_dir)
     make_basic_folder_structure(root_dir)
     dotfile = dotfile_mod.read(root_dir)
     assistant_config = assistant_config_mod.read(root_dir)
@@ -142,7 +145,10 @@ def read_aseprites(
 
 
 def get_anims(aseprites: list[Aseprite]) -> list[Anim]:
-    raise NotImplementedError
+    return list(itertools.chain(*[aseprite.content.anims for aseprite in aseprites]))
+    # Unfortunately this involves reading every aseprite file...
+    # If we demand that multi-anim files have a name prefix,
+    # we could get away with reading fewer files.
 
 
 def save_scripts(root_dir: Path, scripts: list[Script]):
