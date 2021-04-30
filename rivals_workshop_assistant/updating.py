@@ -79,6 +79,8 @@ def update(root_dir: Path, dotfile: dict, config: dict):
     """Runs all self-updates.
     Controller"""
     if should_update(dotfile):
+        update_backup(root_dir)
+
         assistant_updater = AssistantUpdater(
             root_dir=root_dir, dotfile=dotfile, config=config
         )
@@ -111,6 +113,26 @@ def _get_should_update_from_dotfile_and_date(
 
     days_passed = (today - last_update_day).days
     return days_passed > 0
+
+
+def update_backup(root_dir: Path):
+    backup_path = root_dir / paths.BACKUP_FOLDER
+    shutil.rmtree(backup_path, ignore_errors=True)
+
+    try:
+        backup_path.mkdir()
+        for path in paths.PATHS_TO_BACK_UP:
+            try:
+                shutil.copytree(src=root_dir / path, dst=backup_path / path)
+            except FileNotFoundError:
+                pass
+    except Exception as e:
+        print(
+            f"""\
+WARN: Error encountered when creating backup.\n
+Error log is:
+ {e}"""
+        )
 
 
 class Updater(abc.ABC):

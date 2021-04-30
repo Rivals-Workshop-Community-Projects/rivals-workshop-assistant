@@ -1,3 +1,5 @@
+import os
+import shutil
 from pathlib import Path
 
 from PIL import Image
@@ -203,10 +205,11 @@ def assert_anim(
     filename=f"{TEST_ANIM_NAME.stem}_strip3.png",
     has_small_sprites=False,
     num_frames=3,
+    sprites_folder=paths.SPRITES_FOLDER,
 ):
     """Right now this assumes that the sprite is the absa dashstart anim stored in
     TEST_ANIM_NAME"""
-    with Image.open(root_dir / paths.SPRITES_FOLDER / filename) as img:
+    with Image.open(root_dir / sprites_folder / filename) as img:
         assert img.height == 66 * (int(has_small_sprites) + 1)
         assert img.width == 76 * num_frames * (int(has_small_sprites) + 1)
 
@@ -378,4 +381,37 @@ def test__aseprites_set_window_data():
 #macro WINDOW2_FRAMES 1
 #macro WINDOW2_FRAME_START 2
 {injection.application.INJECTION_END_HEADER}"""
+        )
+
+
+def test__backup_made():
+    with TempDirectory() as tmp:
+        root_dir = Path(tmp.path)
+
+        testing_helpers.make_empty_file(root_dir / "config.ini")
+
+        make_test_config(root_dir)
+        create_script(tmp, bair)
+        supply_aseprites(tmp, TEST_ANIM_NAME)
+
+        os.mkdir(root_dir / paths.SPRITES_FOLDER)
+        shutil.copy(
+            Path("assets/sprites/anim1_strip1.png"), root_dir / paths.SPRITES_FOLDER
+        )
+
+        src.main(given_dir=root_dir, guarantee_root_dir=True)
+        assert_anim(
+            root_dir,
+            filename=f"anim1_strip1.png",
+            has_small_sprites=False,
+            num_frames=1,
+            sprites_folder=paths.BACKUP_FOLDER / paths.SPRITES_FOLDER,
+        )
+
+        assert (
+            tmp.read(
+                (paths.BACKUP_FOLDER / paths.ATTACKS_FOLDER / "bair.gml").as_posix(),
+                encoding="utf8",
+            )
+            == f"""{bair.content}"""
         )
