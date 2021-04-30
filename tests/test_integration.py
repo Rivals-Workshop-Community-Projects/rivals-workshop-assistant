@@ -372,10 +372,10 @@ def test__aseprites_set_window_data():
 {bair.content}
 
 {injection.application.INJECTION_START_HEADER}
-#macro WINDOW1_FRAMES = 1
-#macro WINDOW1_FRAME_START = 1
+#macro WINDOW1_FRAMES 1
+#macro WINDOW1_FRAME_START 1
 
-#macro WINDOW2_FRAMES = 1
-#macro WINDOW2_FRAME_START = 2
+#macro WINDOW2_FRAMES 1
+#macro WINDOW2_FRAME_START 2
 {injection.application.INJECTION_END_HEADER}"""
         )
