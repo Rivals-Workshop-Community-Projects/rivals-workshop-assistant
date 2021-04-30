@@ -5,7 +5,7 @@ from pathlib import Path
 import pytest
 
 import rivals_workshop_assistant.assistant_config_mod
-from rivals_workshop_assistant import dotfile_mod
+from rivals_workshop_assistant import dotfile_mod, assistant_config_mod
 import rivals_workshop_assistant.updating as src
 from rivals_workshop_assistant.info_files import _yaml_load
 from tests.testing_helpers import make_version, make_release, TEST_DATE_STRING
@@ -31,36 +31,29 @@ def _make_updater(root_dir, dotfile, config, type_: typing.Type):
     return type_(root_dir=root_dir, dotfile=dotfile, config=config)
 
 
-def test__make_update_config_empty():
-    config = {}
-
-    result = src._make_update_config(config)
-    assert result == rivals_workshop_assistant.assistant_config_mod.UpdateConfig.PATCH
-
-
 @pytest.mark.parametrize(
     "config_value, expected",
     [
         pytest.param(
-            "major", rivals_workshop_assistant.assistant_config_mod.UpdateConfig.MAJOR
+            "major", rivals_workshop_assistant.assistant_config_mod.UpdateLevel.MAJOR
         ),
         pytest.param(
-            "minor", rivals_workshop_assistant.assistant_config_mod.UpdateConfig.MINOR
+            "minor", rivals_workshop_assistant.assistant_config_mod.UpdateLevel.MINOR
         ),
         pytest.param(
-            "patch", rivals_workshop_assistant.assistant_config_mod.UpdateConfig.PATCH
+            "patch", rivals_workshop_assistant.assistant_config_mod.UpdateLevel.PATCH
         ),
         pytest.param(
-            "none", rivals_workshop_assistant.assistant_config_mod.UpdateConfig.NONE
+            "none", rivals_workshop_assistant.assistant_config_mod.UpdateLevel.NONE
         ),
     ],
 )
 def test__make_update_config_major_level(config_value, expected):
     config = {
-        rivals_workshop_assistant.assistant_config_mod.UPDATE_LEVEL_FIELD: config_value
+        rivals_workshop_assistant.assistant_config_mod.LIBRARY_UPDATE_LEVEL_FIELD: config_value
     }
 
-    result = src._make_update_config(config)
+    result = assistant_config_mod.get_library_update_level(config)
     assert result == expected
 
 
@@ -142,49 +135,49 @@ last_updated: {TEST_DATE_STRING}
     "update_config, current_version, other_releases, expected_release",
     [
         pytest.param(
-            rivals_workshop_assistant.assistant_config_mod.UpdateConfig.MAJOR,
+            rivals_workshop_assistant.assistant_config_mod.UpdateLevel.MAJOR,
             make_version("1.2.3"),
             [make_release("2.3.4", "urlb")],
             make_release("5.0.1", "urlc"),
         ),
         pytest.param(
-            rivals_workshop_assistant.assistant_config_mod.UpdateConfig.MAJOR,
+            rivals_workshop_assistant.assistant_config_mod.UpdateLevel.MAJOR,
             make_version("3.0.2"),
             [make_release("3.0.3", "urlb")],
             make_release("3.0.4", "urlnew"),
         ),
         pytest.param(
-            rivals_workshop_assistant.assistant_config_mod.UpdateConfig.MINOR,
+            rivals_workshop_assistant.assistant_config_mod.UpdateLevel.MINOR,
             make_version("3.0.2"),
             [make_release("4.0.3", "urlb"), make_release("4.0.4", "urlc")],
             None,
         ),
         pytest.param(
-            rivals_workshop_assistant.assistant_config_mod.UpdateConfig.MINOR,
+            rivals_workshop_assistant.assistant_config_mod.UpdateLevel.MINOR,
             make_version("3.0.2"),
             [make_release("3.0.3", "urlb")],
             make_release("3.0.4", "urlc"),
         ),
         pytest.param(
-            rivals_workshop_assistant.assistant_config_mod.UpdateConfig.MINOR,
+            rivals_workshop_assistant.assistant_config_mod.UpdateLevel.MINOR,
             None,
             [make_release("3.0.3", "urlb"), make_release("3.0.4", "urlc")],
             make_release("3.0.5", "urld"),
         ),
         pytest.param(
-            rivals_workshop_assistant.assistant_config_mod.UpdateConfig.PATCH,
+            rivals_workshop_assistant.assistant_config_mod.UpdateLevel.PATCH,
             make_version("3.0.2"),
             [make_release("4.1.3", "urlb"), make_release("3.2.3", "urlc")],
             make_release("3.0.8", "urld"),
         ),
         pytest.param(
-            rivals_workshop_assistant.assistant_config_mod.UpdateConfig.NONE,
+            rivals_workshop_assistant.assistant_config_mod.UpdateLevel.NONE,
             make_version("3.0.2"),
             [make_release("3.0.3", "urlb"), make_release("3.0.4", "urlc")],
             None,
         ),
         pytest.param(
-            rivals_workshop_assistant.assistant_config_mod.UpdateConfig.NONE,
+            rivals_workshop_assistant.assistant_config_mod.UpdateLevel.NONE,
             None,
             [make_release("3.0.3", "urlb"), make_release("3.0.4", "urlc")],
             make_release("3.0.5", "urld"),
@@ -204,7 +197,7 @@ def test__get_release_to_install_from_config_and_releases(
         releases += [expected_release]
 
     result = src._get_legal_library_release_to_install(
-        update_config=update_config, releases=releases, current_version=current_version
+        update_level=update_config, releases=releases, current_version=current_version
     )
     assert result == expected_release
 

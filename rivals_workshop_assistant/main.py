@@ -133,6 +133,9 @@ def read_aseprites(
             modified_time=_get_modified_time(path),
             processed_time=get_processed_time(dotfile=dotfile, path=path),
             anim_tag_color=assistant_config_mod.get_anim_tag_color(assistant_config),
+            window_tag_color=assistant_config_mod.get_window_tag_color(
+                assistant_config
+            ),
         )
         aseprites.append(aseprite)
     return aseprites

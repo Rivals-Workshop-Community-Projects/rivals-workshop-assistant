@@ -55,35 +55,66 @@ class AsepriteData:
         name: str,
         num_frames: int,
         anim_tag_color: TagColor,
+        window_tag_color: TagColor,
         tags: list[AsepriteTag] = None,
     ):
         self.num_frames = num_frames
         if tags is None:
             tags = []
         self.tags = tags
-        self.anims = self.get_anims(name, tags, anim_tag_color)
+        self.anim_tag_color = anim_tag_color
+        self.window_tag_color = window_tag_color
+        self.anims = self.get_anims(name)
 
     @classmethod
-    def from_path(cls, name: str, path: Path, anim_tag_color: TagColor):
+    def from_path(
+        cls, name: str, path: Path, anim_tag_color: TagColor, window_tag_color: TagColor
+    ):
         with open(path, "rb") as f:
             contents = f.read()
             raw_aseprite_file = RawAsepriteFile(contents)
         tags = raw_aseprite_file.get_tags()
         num_frames = raw_aseprite_file.get_num_frames()
         return cls(
-            name=name, tags=tags, num_frames=num_frames, anim_tag_color=anim_tag_color
+            name=name,
+            tags=tags,
+            num_frames=num_frames,
+            anim_tag_color=anim_tag_color,
+            window_tag_color=window_tag_color,
         )
 
-    def get_anims(self, name: str, tags: list[AsepriteTag], anim_tag_color: TagColor):
+    def get_anims(self, name: str):
         tag_anims = [
-            Anim(name=tag.name, start=tag.start, end=tag.end)
-            for tag in tags
-            if tag.color == anim_tag_color
+            self.make_anim(name=tag.name, start=tag.start, end=tag.end)
+            for tag in self.tags
+            if tag.color == self.anim_tag_color
         ]
         if tag_anims:
             return tag_anims
         else:
-            return [Anim(name=name, start=0, end=self.num_frames - 1)]
+            return [self.make_anim(name=name, start=0, end=self.num_frames - 1)]
+
+    def make_anim(self, name: str, start: int, end: int):
+        return Anim(
+            name=name,
+            start=start,
+            end=end,
+            windows=self.get_windows_in_frame_range(start=start, end=end),
+        )
+
+    def get_windows_in_frame_range(self, start: int, end: int):
+        tags_in_frame_range = [
+            window
+            for window in self.tags
+            if window.color == self.window_tag_color
+            and start <= window.start <= end
+            and start <= window.end <= end
+        ]
+        windows = [
+            Window(name=tag.name, start=tag.start - start + 1, end=tag.end - start + 1)
+            for tag in tags_in_frame_range
+        ]
+        return windows
 
 
 class Aseprite(File):
@@ -91,19 +122,24 @@ class Aseprite(File):
         self,
         path: Path,
         anim_tag_color: TagColor,
+        window_tag_color: TagColor,
         modified_time: datetime,
         processed_time: datetime = None,
         content=None,
     ):
         super().__init__(path, modified_time, processed_time)
         self.anim_tag_color = anim_tag_color
+        self.window_tag_color = window_tag_color
         self._content = content
 
     @property
     def content(self) -> AsepriteData:
         if self._content is None:
             self._content = AsepriteData.from_path(
-                name=self.path.stem, path=self.path, anim_tag_color=self.anim_tag_color
+                name=self.path.stem,
+                path=self.path,
+                anim_tag_color=self.anim_tag_color,
+                window_tag_color=self.window_tag_color,
             )
         return self._content
 

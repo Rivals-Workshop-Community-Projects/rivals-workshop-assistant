@@ -26,21 +26,22 @@ def apply_injection(
     supplied dependencies."""
     result_scripts = []
     for script in scripts:
-        if script.is_fresh:  # todo or relevant anim is_fresh
-            _apply_injection_to_script(script, injection_library, anims)
+        anim = _get_anim_for_script(script, anims)
+        if script.is_fresh or (anim is not None and anim.is_fresh):
+            _apply_injection_to_script(script, injection_library, anim)
             result_scripts.append(script)
 
     return result_scripts
 
 
 def _apply_injection_to_script(
-    script: Script, injection_library: list[GmlInjection], anims: list[Anim]
+    script: Script, injection_library: list[GmlInjection], anim: Anim
 ):
     """Updates the dependencies supplied to the script."""
     if _should_inject(script.working_content):
         needed_gmls = _get_inject_gmls_needed_in_gml(
             script.working_content, injection_library
-        ) + _get_anim_data_gmls_needed_in_gml(script, anims)
+        ) + _get_anim_data_gmls_needed_in_gml(anim)
         script.working_content = _add_inject_gmls_in_script(
             script.working_content, needed_gmls
         )
@@ -50,8 +51,7 @@ def _should_inject(script: str):
     return "NO-INJECT" not in _get_script_contents(script)  # Performance problem?
 
 
-def _get_anim_data_gmls_needed_in_gml(script: Script, anims: list[Anim]):
-    anim = _get_anim_for_script(script, anims)
+def _get_anim_data_gmls_needed_in_gml(anim: Anim):
     if anim is None:
         return []
     window_gmls = [window.gml for window in anim.windows]

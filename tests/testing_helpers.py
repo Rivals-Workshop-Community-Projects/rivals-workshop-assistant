@@ -59,13 +59,18 @@ def make_time(time_str=TEST_DATETIME_STRING):
 
 
 def make_aseprite(
-    path: Path, modified_time=make_time(), processed_time=None, anim_tag_color="green"
+    path: Path,
+    modified_time=make_time(),
+    processed_time=None,
+    anim_tag_color="green",
+    window_tag_color="orange",
 ):
     return Aseprite(
         path=path,
         modified_time=modified_time,
         processed_time=processed_time,
         anim_tag_color=anim_tag_color,
+        window_tag_color=window_tag_color,
     )
 
 

@@ -8,6 +8,7 @@ from rivals_workshop_assistant.aseprite_handling import (
     AsepriteData,
     AsepriteTag,
     Anim,
+    Window,
 )
 from tests.testing_helpers import (
     make_script,
@@ -18,17 +19,26 @@ import rivals_workshop_assistant.main as src
 
 
 def make_fake_aseprite(
-    name="name", path=Path("a"), num_frames=1, tags=None, anim_tag_color="green"
+    name="name",
+    path=Path("a"),
+    num_frames=1,
+    tags=None,
+    anim_tag_color="green",
+    window_tag_color="orange",
 ) -> src.Aseprite:
-    # AsepriteTag('tag1', 1, 2, "red")
     aseprite_data = AsepriteData(
-        name=name, num_frames=num_frames, tags=tags, anim_tag_color=anim_tag_color
+        name=name,
+        num_frames=num_frames,
+        tags=tags,
+        anim_tag_color=anim_tag_color,
+        window_tag_color=window_tag_color,
     )
     aseprite = Aseprite(
         path=path,
         modified_time=make_time(),
         content=aseprite_data,
         anim_tag_color=anim_tag_color,
+        window_tag_color=window_tag_color,
     )
     return aseprite
 
@@ -90,9 +100,23 @@ def test_get_has_small_sprites(init_content, character_config_str, expected):
             [AsepriteTag(name="name", start=1, end=2, color="red")],
             [Anim(name="name", start=1, end=2)],
         ),
+        pytest.param(
+            [
+                AsepriteTag(name="anim_name", start=2, end=3, color="red"),
+                AsepriteTag(name="window_name", start=2, end=2, color="orange"),
+            ],
+            [
+                Anim(
+                    name="anim_name",
+                    start=1,
+                    end=1,
+                    windows=[Window(name="window_name", start=1, end=1)],
+                )
+            ],
+        ),
     ],
 )
 def test_aseprite_anims(tags, expected):
-    sut = make_fake_aseprite(tags=tags, anim_tag_color="red")
+    sut = make_fake_aseprite(tags=tags, anim_tag_color="red", window_tag_color="orange")
 
     assert sut.content.anims == expected

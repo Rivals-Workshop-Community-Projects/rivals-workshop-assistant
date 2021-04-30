@@ -12,8 +12,8 @@ from pathlib import Path
 import requests
 
 import rivals_workshop_assistant.paths
-from rivals_workshop_assistant import paths as paths
-from rivals_workshop_assistant.assistant_config_mod import UpdateConfig
+from rivals_workshop_assistant import paths as paths, assistant_config_mod
+from rivals_workshop_assistant.assistant_config_mod import UpdateLevel
 from rivals_workshop_assistant.dotfile_mod import (
     LAST_UPDATED_FIELD,
     get_library_version_string,
@@ -172,6 +172,9 @@ class AssistantUpdater(Updater):
     def update(
         self,
     ) -> typing.Optional[Version]:
+        if not assistant_config_mod.get_assistant_self_update(self.config):
+            return
+
         current_exe_path = paths.get_exe_path()
         if current_exe_path.name != paths.ASSISTANT_EXE_NAME:
             print(
@@ -222,10 +225,10 @@ class LibraryUpdater(Updater):
         super().__init__(root_dir, dotfile, config)
 
     def _get_release_to_install(self):
-        update_config = _make_update_config(self.config)
+        update_level = assistant_config_mod.get_library_update_level(self.config)
         library_releases = self.get_releases()
         release_to_install = _get_legal_library_release_to_install(
-            update_config, library_releases, self.current_version
+            update_level, library_releases, self.current_version
         )
         return release_to_install
 
@@ -237,12 +240,8 @@ class LibraryUpdater(Updater):
         _download_and_unzip_library_release(self.root_dir, release)
 
 
-def _make_update_config(config: dict) -> UpdateConfig:
-    return UpdateConfig(config.get("update_level", UpdateConfig.PATCH))
-
-
 def _get_legal_library_release_to_install(
-    update_config: UpdateConfig,
+    update_level: UpdateLevel,
     releases: list[Release],
     current_version: typing.Optional[Version],
 ) -> typing.Optional[Release]:
@@ -250,7 +249,7 @@ def _get_legal_library_release_to_install(
         candidates = releases.copy()
     else:
         candidates = _get_legal_library_releases(
-            update_config=update_config,
+            update_config=update_level,
             releases=releases,
             current_version=current_version,
         )
@@ -262,15 +261,15 @@ def _get_legal_library_release_to_install(
 
 
 def _get_legal_library_releases(
-    update_config: UpdateConfig, releases: list[Release], current_version: Version
+    update_config: UpdateLevel, releases: list[Release], current_version: Version
 ) -> list[Release]:
     """Releases are constrained based on config and current version."""
-    if update_config == UpdateConfig.NONE:
+    if update_config == UpdateLevel.NONE:
         return []
 
     candidates = releases.copy()
 
-    if update_config == UpdateConfig.MINOR:
+    if update_config == UpdateLevel.MINOR:
         candidates = [
             candidate
             for candidate in candidates
@@ -278,7 +277,7 @@ def _get_legal_library_releases(
             and candidate.version > current_version
         ]
 
-    elif update_config == UpdateConfig.PATCH:
+    elif update_config == UpdateLevel.PATCH:
         candidates = [
             candidate
             for candidate in candidates
