@@ -2,22 +2,11 @@ import functools
 from pathlib import Path
 from datetime import datetime
 
-
-def _get_is_fresh(processed_time: datetime, modified_time: datetime):
-    if processed_time is None:
-        return True
-    return processed_time < modified_time
-
-
-class File:
-    def __init__(
-        self,
-        path: Path,
-        modified_time: datetime,
-        processed_time: datetime = None,
-    ):
-        self.path = path
-        self.is_fresh = _get_is_fresh(processed_time, modified_time)
+from rivals_workshop_assistant.file_handling import (
+    File,
+    _get_modified_time,
+)
+from rivals_workshop_assistant.dotfile_mod import get_processed_time
 
 
 class Script(File):
@@ -70,3 +59,19 @@ class Script(File):
             and self.working_content == other.working_content
             and self.is_fresh == other.is_fresh
         )
+
+
+def read_scripts(root_dir: Path, dotfile: dict) -> list[Script]:
+    """Returns all Scripts in the scripts directory."""
+    gml_paths = list((root_dir / "scripts").rglob("*.gml"))
+
+    scripts = []
+    for path in gml_paths:
+        script = Script(
+            path=path,
+            modified_time=_get_modified_time(path),
+            processed_time=get_processed_time(dotfile=dotfile, path=path),
+        )
+        scripts.append(script)
+
+    return scripts

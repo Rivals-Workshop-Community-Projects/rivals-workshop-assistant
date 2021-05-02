@@ -1,20 +1,23 @@
-import re
-from configparser import ConfigParser
 import datetime
-import itertools
 import sys
-import typing
 from pathlib import Path
 
-import rivals_workshop_assistant.updating
 from rivals_workshop_assistant import (
+    updating,
     assistant_config_mod,
     dotfile_mod,
     character_config_mod,
 )
-from rivals_workshop_assistant.assistant_config_mod import ASEPRITE_PATH_FIELD
-from rivals_workshop_assistant.script_mod import Script, File
-from rivals_workshop_assistant.aseprite_handling import Aseprite, Anim
+from rivals_workshop_assistant.assistant_config_mod import get_has_small_sprites
+from rivals_workshop_assistant.dotfile_mod import update_dotfile_after_saving
+from rivals_workshop_assistant.script_mod import read_scripts
+from rivals_workshop_assistant.aseprite_handling import (
+    get_aseprite_path,
+    read_aseprites,
+    get_anims,
+    save_scripts,
+    save_aseprites,
+)
 from rivals_workshop_assistant.asset_handling import get_required_assets, save_assets
 from rivals_workshop_assistant.setup import make_basic_folder_structure
 from rivals_workshop_assistant.injection import handle_injection
@@ -32,9 +35,7 @@ def main(given_dir: Path, guarantee_root_dir: bool = False):
     assistant_config = assistant_config_mod.read(root_dir)
     character_config = character_config_mod.read(root_dir)
 
-    rivals_workshop_assistant.updating.update(
-        root_dir=root_dir, dotfile=dotfile, config=assistant_config
-    )
+    updating.update(root_dir=root_dir, dotfile=dotfile, config=assistant_config)
 
     scripts = read_scripts(root_dir, dotfile)
     aseprites = read_aseprites(
@@ -66,14 +67,6 @@ def main(given_dir: Path, guarantee_root_dir: bool = False):
     dotfile_mod.save_dotfile(root_dir, dotfile)
 
 
-def get_aseprite_path(assistant_config: dict) -> typing.Optional[Path]:
-    path_string = assistant_config.get(ASEPRITE_PATH_FIELD, None)
-    if path_string:
-        return Path(path_string)
-    else:
-        return None
-
-
 def get_root_dir(given_dir: Path) -> Path:
     """Return the absolute path to the character's root directory, containing
     their config file.
@@ -87,116 +80,6 @@ def get_root_dir(given_dir: Path) -> Path:
 Current directory is: {given_dir}
 Files in current directory are: {file_names}"""
         )
-
-
-def get_processed_time(dotfile: dict, path: Path) -> typing.Optional[datetime.datetime]:
-    seen_files = dotfile.get(dotfile_mod.SEEN_FILES_FIELD, [])
-    if seen_files is None:
-        seen_files = []
-    if path.as_posix() in seen_files:
-        return dotfile.get(dotfile_mod.PROCESSED_TIME_FIELD, None)
-    else:
-        return None
-
-
-def _get_modified_time(path: Path) -> datetime.datetime:
-    return datetime.datetime.fromtimestamp(path.stat().st_mtime)
-
-
-def read_scripts(root_dir: Path, dotfile: dict) -> list[Script]:
-    """Returns all Scripts in the scripts directory."""
-    gml_paths = list((root_dir / "scripts").rglob("*.gml"))
-
-    scripts = []
-    for path in gml_paths:
-        script = Script(
-            path=path,
-            modified_time=_get_modified_time(path),
-            processed_time=get_processed_time(dotfile=dotfile, path=path),
-        )
-        scripts.append(script)
-
-    return scripts
-
-
-def read_aseprites(
-    root_dir: Path, dotfile: dict, assistant_config: dict
-) -> list[Aseprite]:
-    ase_paths = itertools.chain(
-        *[
-            list((root_dir / "anims").rglob(f"*.{filetype}"))
-            for filetype in ("ase", "aseprite")
-        ]
-    )
-
-    aseprites = []
-    for path in ase_paths:
-        aseprite = Aseprite(
-            path=path,
-            modified_time=_get_modified_time(path),
-            processed_time=get_processed_time(dotfile=dotfile, path=path),
-            anim_tag_color=assistant_config_mod.get_anim_tag_color(assistant_config),
-            window_tag_color=assistant_config_mod.get_window_tag_color(
-                assistant_config
-            ),
-        )
-        aseprites.append(aseprite)
-    return aseprites
-
-
-def get_anims(aseprites: list[Aseprite]) -> list[Anim]:
-    return list(itertools.chain(*[aseprite.content.anims for aseprite in aseprites]))
-    # Unfortunately this involves reading every aseprite file...
-    # If we demand that multi-anim files have a name prefix,
-    # we could get away with reading fewer files.
-
-
-def save_scripts(root_dir: Path, scripts: list[Script]):
-    for script in scripts:
-        script.save(root_dir)
-
-
-def save_aseprites(
-    root_dir: Path,
-    aseprite_path: Path,
-    aseprites: list[Aseprite],
-    has_small_sprites: bool,
-):
-    if not aseprite_path:
-        return
-    for aseprite in aseprites:
-        if aseprite.is_fresh:
-            aseprite.save(
-                root_dir=root_dir,
-                aseprite_path=aseprite_path,
-                has_small_sprites=has_small_sprites,
-            )
-
-
-def update_dotfile_after_saving(
-    dotfile: dict, now: datetime.datetime, files: list[File]
-):
-    dotfile[dotfile_mod.PROCESSED_TIME_FIELD] = now
-    dotfile[dotfile_mod.SEEN_FILES_FIELD] = [file.path.as_posix() for file in files]
-
-
-def get_has_small_sprites(scripts: list[Script], character_config: ConfigParser):
-    in_character_config = character_config.get(
-        "general", character_config_mod.SMALL_SPRITES_FIELD, fallback=None
-    )
-
-    try:
-        init_gml = [
-            script.working_content
-            for script in scripts
-            if script.path.name == "init.gml"
-        ][0]
-    except IndexError:
-        init_gml = ""
-    match = re.search(pattern=r"small_sprites\s*=\s*(1|true)", string=init_gml)
-    return bool(in_character_config) or bool(match)
-    # Get character config. Search for 'small_sprites="1"'
-    # get init.gml. Search for small_sprites assignment to 1 or true.
 
 
 if __name__ == "__main__":

@@ -1,8 +1,12 @@
 import enum
+import re
+from configparser import ConfigParser
 from pathlib import Path
 
 import rivals_workshop_assistant.info_files as info_files
+from rivals_workshop_assistant import character_config_mod
 from rivals_workshop_assistant.paths import ASSISTANT_FOLDER
+from rivals_workshop_assistant.script_mod import Script
 
 FILENAME = "assistant_config.yaml"
 PATH = ASSISTANT_FOLDER / FILENAME
@@ -95,3 +99,22 @@ DEFAULT_CONFIG = f"""\
 {ASSISTANT_SELF_UPDATE_FIELD}: {ASSISTANT_SELF_UPDATE_DEFAULT}
     # If the assistant should automatically receive behavior updates.
 """
+
+
+def get_has_small_sprites(scripts: list[Script], character_config: ConfigParser):
+    in_character_config = character_config.get(
+        "general", character_config_mod.SMALL_SPRITES_FIELD, fallback=None
+    )
+
+    try:
+        init_gml = [
+            script.working_content
+            for script in scripts
+            if script.path.name == "init.gml"
+        ][0]
+    except IndexError:
+        init_gml = ""
+    match = re.search(pattern=r"small_sprites\s*=\s*(1|true)", string=init_gml)
+    return bool(in_character_config) or bool(match)
+    # Get character config. Search for 'small_sprites="1"'
+    # get init.gml. Search for small_sprites assignment to 1 or true.

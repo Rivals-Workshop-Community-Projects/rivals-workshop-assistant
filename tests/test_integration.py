@@ -6,7 +6,9 @@ from PIL import Image
 import pytest
 from testfixtures import TempDirectory
 
+import rivals_workshop_assistant.aseprite_handling
 import rivals_workshop_assistant.assistant_config_mod
+import rivals_workshop_assistant.script_mod
 from tests import testing_helpers
 from tests.testing_helpers import (
     make_empty_file,
@@ -93,7 +95,7 @@ def test_read_scripts():
         create_script(tmp, script_1)
         create_script(tmp, script_subfolder)
 
-        result = src.read_scripts(Path(tmp.path), {})
+        result = rivals_workshop_assistant.script_mod.read_scripts(Path(tmp.path), {})
 
         assert result == [
             make_script_from_script_with_path(tmp, script_1),
@@ -117,7 +119,7 @@ def test_full_injection():
         create_script(tmp, injection_at_root)
         create_script(tmp, injection_in_subfolder)
 
-        scripts = src.read_scripts(Path(tmp.path), {})
+        scripts = rivals_workshop_assistant.script_mod.read_scripts(Path(tmp.path), {})
         library = injection.read_injection_library(Path(tmp.path))
         result_scripts = apply_injection(
             scripts=scripts, injection_library=library, anims=[]
@@ -154,7 +156,9 @@ def test_full_injection():
             ),
         ]
 
-        src.save_scripts(root_dir=Path(tmp.path), scripts=result_scripts)
+        rivals_workshop_assistant.aseprite_handling.save_scripts(
+            root_dir=Path(tmp.path), scripts=result_scripts
+        )
 
         actual_script_1 = tmp.read(script_1.path.as_posix(), encoding="utf8")
         assert actual_script_1 == expected_script_1
@@ -192,7 +196,7 @@ def test__read_aseprites():
     with TempDirectory() as tmp:
         supply_aseprites(tmp, TEST_ANIM_NAME)
 
-        result = src.read_aseprites(
+        result = rivals_workshop_assistant.aseprite_handling.read_aseprites(
             root_dir=Path(tmp.path), dotfile={}, assistant_config={}
         )
         assert len(result) == 1
@@ -222,7 +226,7 @@ def test__save_aseprites(has_small_sprites):
         root_dir = Path(tmp.path)
         aseprites = [supply_aseprites(tmp)]
 
-        src.save_aseprites(
+        rivals_workshop_assistant.aseprite_handling.save_aseprites(
             root_dir=root_dir,
             aseprite_path=Path(aseprite_path),
             aseprites=aseprites,
@@ -242,7 +246,7 @@ def test__save_aseprites__uses_subfolder_name():
             supply_aseprites(tmp, relative_dest=Path("anims") / subfolder_name)
         ]
 
-        src.save_aseprites(
+        rivals_workshop_assistant.aseprite_handling.save_aseprites(
             root_dir=root_dir,
             aseprite_path=Path(aseprite_path),
             aseprites=aseprites,
@@ -269,7 +273,7 @@ def test__save_aseprites__removes_old_spritesheet():
         other_filename = root_dir / paths.SPRITES_FOLDER / f"unrelated_strip2.png"
         make_empty_file(other_filename)
 
-        src.save_aseprites(
+        rivals_workshop_assistant.aseprite_handling.save_aseprites(
             root_dir=root_dir,
             aseprite_path=Path(aseprite_path),
             aseprites=aseprites,
@@ -300,7 +304,7 @@ def test__save_aseprites__removes_old_spritesheet__with_subfolder():
         )
         make_empty_file(other_filename)
 
-        src.save_aseprites(
+        rivals_workshop_assistant.aseprite_handling.save_aseprites(
             root_dir=root_dir,
             aseprite_path=Path(aseprite_path),
             aseprites=aseprites,
@@ -320,7 +324,7 @@ def test__save_aseprites__multiple_aseprites():
             supply_aseprites(tmp, relative_dest=Path("anims"), anim_tag_color="blue")
         ]
 
-        src.save_aseprites(
+        rivals_workshop_assistant.aseprite_handling.save_aseprites(
             root_dir=root_dir,
             aseprite_path=Path(aseprite_path),
             aseprites=aseprites,

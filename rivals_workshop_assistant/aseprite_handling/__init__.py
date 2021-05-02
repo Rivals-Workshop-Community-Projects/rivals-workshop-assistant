@@ -1,12 +1,17 @@
+import itertools
 import os
 import subprocess
+import typing
 from datetime import datetime
 from pathlib import Path
 
-from rivals_workshop_assistant import paths
+from rivals_workshop_assistant import paths, assistant_config_mod
 from ._aseprite_loading import RawAsepriteFile
-from rivals_workshop_assistant.script_mod import File
+from ..file_handling import File, _get_modified_time
+from ..dotfile_mod import get_processed_time
 from .types import AsepriteTag, TagColor
+from ..assistant_config_mod import ASEPRITE_PATH_FIELD
+from ..script_mod import Script
 
 
 class TagObject:
@@ -193,3 +198,65 @@ class Aseprite(File):
         path_parts = [path.name for path in reversed(subfolders)] + [name]
         base_name = "_".join(path_parts)
         return base_name
+
+
+def get_aseprite_path(assistant_config: dict) -> typing.Optional[Path]:
+    path_string = assistant_config.get(ASEPRITE_PATH_FIELD, None)
+    if path_string:
+        return Path(path_string)
+    else:
+        return None
+
+
+def read_aseprites(
+    root_dir: Path, dotfile: dict, assistant_config: dict
+) -> list[Aseprite]:
+    ase_paths = itertools.chain(
+        *[
+            list((root_dir / "anims").rglob(f"*.{filetype}"))
+            for filetype in ("ase", "aseprite")
+        ]
+    )
+
+    aseprites = []
+    for path in ase_paths:
+        aseprite = Aseprite(
+            path=path,
+            modified_time=_get_modified_time(path),
+            processed_time=get_processed_time(dotfile=dotfile, path=path),
+            anim_tag_color=assistant_config_mod.get_anim_tag_color(assistant_config),
+            window_tag_color=assistant_config_mod.get_window_tag_color(
+                assistant_config
+            ),
+        )
+        aseprites.append(aseprite)
+    return aseprites
+
+
+def get_anims(aseprites: list[Aseprite]) -> list[Anim]:
+    return list(itertools.chain(*[aseprite.content.anims for aseprite in aseprites]))
+    # Unfortunately this involves reading every aseprite file...
+    # If we demand that multi-anim files have a name prefix,
+    # we could get away with reading fewer files.
+
+
+def save_scripts(root_dir: Path, scripts: list[Script]):
+    for script in scripts:
+        script.save(root_dir)
+
+
+def save_aseprites(
+    root_dir: Path,
+    aseprite_path: Path,
+    aseprites: list[Aseprite],
+    has_small_sprites: bool,
+):
+    if not aseprite_path:
+        return
+    for aseprite in aseprites:
+        if aseprite.is_fresh:
+            aseprite.save(
+                root_dir=root_dir,
+                aseprite_path=aseprite_path,
+                has_small_sprites=has_small_sprites,
+            )

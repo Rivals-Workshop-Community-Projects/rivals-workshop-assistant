@@ -2,6 +2,7 @@ import pytest
 from configparser import ConfigParser
 from pathlib import Path
 
+import rivals_workshop_assistant.assistant_config_mod
 from rivals_workshop_assistant import paths
 from rivals_workshop_assistant.aseprite_handling import (
     Aseprite,
@@ -25,7 +26,7 @@ def make_fake_aseprite(
     tags=None,
     anim_tag_color="green",
     window_tag_color="orange",
-) -> src.Aseprite:
+) -> Aseprite:
     aseprite_data = AsepriteData(
         name=name,
         num_frames=num_frames,
@@ -85,7 +86,7 @@ def test_get_has_small_sprites(init_content, character_config_str, expected):
     character_config = ConfigParser()
     character_config.read_string(character_config_str)
 
-    result = src.get_has_small_sprites(
+    result = rivals_workshop_assistant.assistant_config_mod.get_has_small_sprites(
         scripts=scripts, character_config=character_config
     )
 
