@@ -1,3 +1,5 @@
+from copy import deepcopy
+
 import rivals_workshop_assistant.injection.application as application
 from rivals_workshop_assistant.injection.dependency_handling import Define, Macro
 
@@ -40,10 +42,10 @@ def test_define_gml_parameters():
 
 
 def test_apply_injection_nothing():
-    result_scripts = application.apply_injection(
-        scripts=[], injection_library=[], anims=[]
-    )
-    assert result_scripts == []
+    orig_scripts = []
+    scripts = deepcopy(orig_scripts)
+    application.apply_injection(scripts=scripts, injection_library=[], anims=[])
+    assert scripts == orig_scripts
 
 
 def test_define_no_docs():

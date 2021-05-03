@@ -59,9 +59,9 @@ for (var thing_i=0; thing_i<array_length(things); thing_i++) {
 def test_handle_codegen__for_loop(original_content, expected_content):
     scripts = [make_script(PATH_A, original_content=original_content)]
 
-    result = src.handle_codegen(scripts)
+    src.handle_codegen(scripts)
 
-    assert result == [
+    assert scripts == [
         make_script(
             PATH_A, original_content=original_content, working_content=expected_content
         )
@@ -78,6 +78,6 @@ def test_already_processed_file__nothing_happens():
         )
     ]
 
-    result = src.handle_codegen(scripts)
+    src.handle_codegen(scripts)
 
-    assert result == []
+    assert scripts == scripts

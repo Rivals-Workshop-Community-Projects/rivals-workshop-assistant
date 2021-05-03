@@ -36,7 +36,14 @@ class Window(TagObject):
 
 
 class Anim(TagObject):
-    def __init__(self, name: str, start: int, end: int, windows: list[Window] = None):
+    def __init__(
+        self,
+        name: str,
+        start: int,
+        end: int,
+        windows: list[Window] = None,
+        is_fresh=False,
+    ):
         """A part of an aseprite file representing a single spritesheet.
         An Aseprite file may contain multiple anims.
         """
@@ -44,6 +51,7 @@ class Anim(TagObject):
         if windows is None:
             windows = []
         self.windows = windows
+        self.is_fresh = is_fresh
 
     @property
     def num_frames(self):
@@ -61,6 +69,7 @@ class AsepriteData:
         anim_tag_color: TagColor,
         window_tag_color: TagColor,
         tags: list[AsepriteTag] = None,
+        is_fresh: bool = False,
     ):
         self.num_frames = num_frames
         if tags is None:
@@ -68,11 +77,18 @@ class AsepriteData:
         self.tags = tags
         self.anim_tag_color = anim_tag_color
         self.window_tag_color = window_tag_color
+        self.is_fresh = is_fresh
+
         self.anims = self.get_anims(name)
 
     @classmethod
     def from_path(
-        cls, name: str, path: Path, anim_tag_color: TagColor, window_tag_color: TagColor
+        cls,
+        name: str,
+        path: Path,
+        anim_tag_color: TagColor,
+        window_tag_color: TagColor,
+        is_fresh: bool,
     ):
         with open(path, "rb") as f:
             contents = f.read()
@@ -85,20 +101,27 @@ class AsepriteData:
             num_frames=num_frames,
             anim_tag_color=anim_tag_color,
             window_tag_color=window_tag_color,
+            is_fresh=is_fresh,
         )
 
     def get_anims(self, name: str):
         tag_anims = [
-            self.make_anim(name=tag.name, start=tag.start, end=tag.end)
+            self.make_anim(
+                name=tag.name, start=tag.start, end=tag.end, is_fresh=self.is_fresh
+            )
             for tag in self.tags
             if tag.color == self.anim_tag_color
         ]
         if tag_anims:
             return tag_anims
         else:
-            return [self.make_anim(name=name, start=0, end=self.num_frames - 1)]
+            return [
+                self.make_anim(
+                    name=name, start=0, end=self.num_frames - 1, is_fresh=self.is_fresh
+                )
+            ]
 
-    def make_anim(self, name: str, start: int, end: int):
+    def make_anim(self, name: str, start: int, end: int, is_fresh: bool):
         return Anim(
             name=name,
             start=start,
@@ -144,6 +167,7 @@ class Aseprite(File):
                 path=self.path,
                 anim_tag_color=self.anim_tag_color,
                 window_tag_color=self.window_tag_color,
+                is_fresh=self.is_fresh,
             )
         return self._content
 
@@ -245,7 +269,7 @@ def save_scripts(root_dir: Path, scripts: list[Script]):
         script.save(root_dir)
 
 
-def save_aseprites(
+def save_anims(
     root_dir: Path,
     aseprite_path: Path,
     aseprites: list[Aseprite],

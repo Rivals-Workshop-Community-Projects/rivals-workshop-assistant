@@ -9,5 +9,4 @@ from ..aseprite_handling import Anim
 def handle_injection(root_dir: Path, scripts: list[Script], anims: list[Anim]):
     """Controller"""
     injection_library = read_injection_library(root_dir)
-    result_scripts = apply_injection(scripts, injection_library, anims)
-    return result_scripts
+    apply_injection(scripts, injection_library, anims)

@@ -121,9 +121,8 @@ def test_full_injection():
 
         scripts = rivals_workshop_assistant.script_mod.read_scripts(Path(tmp.path), {})
         library = injection.read_injection_library(Path(tmp.path))
-        result_scripts = apply_injection(
-            scripts=scripts, injection_library=library, anims=[]
-        )
+
+        apply_injection(scripts=scripts, injection_library=library, anims=[])
 
         expected_script_1 = f"""\
 {script_1.content}
@@ -143,7 +142,7 @@ def test_full_injection():
 {func.gml}
 {injection.application.INJECTION_END_HEADER}"""
 
-        assert result_scripts == [
+        assert scripts == [
             make_script(
                 script_1.absolute_path(tmp),
                 original_content=script_1.content,
@@ -157,7 +156,7 @@ def test_full_injection():
         ]
 
         rivals_workshop_assistant.aseprite_handling.save_scripts(
-            root_dir=Path(tmp.path), scripts=result_scripts
+            root_dir=Path(tmp.path), scripts=scripts
         )
 
         actual_script_1 = tmp.read(script_1.path.as_posix(), encoding="utf8")
@@ -226,7 +225,7 @@ def test__save_aseprites(has_small_sprites):
         root_dir = Path(tmp.path)
         aseprites = [supply_aseprites(tmp)]
 
-        rivals_workshop_assistant.aseprite_handling.save_aseprites(
+        rivals_workshop_assistant.aseprite_handling.save_anims(
             root_dir=root_dir,
             aseprite_path=Path(aseprite_path),
             aseprites=aseprites,
@@ -246,7 +245,7 @@ def test__save_aseprites__uses_subfolder_name():
             supply_aseprites(tmp, relative_dest=Path("anims") / subfolder_name)
         ]
 
-        rivals_workshop_assistant.aseprite_handling.save_aseprites(
+        rivals_workshop_assistant.aseprite_handling.save_anims(
             root_dir=root_dir,
             aseprite_path=Path(aseprite_path),
             aseprites=aseprites,
@@ -273,7 +272,7 @@ def test__save_aseprites__removes_old_spritesheet():
         other_filename = root_dir / paths.SPRITES_FOLDER / f"unrelated_strip2.png"
         make_empty_file(other_filename)
 
-        rivals_workshop_assistant.aseprite_handling.save_aseprites(
+        rivals_workshop_assistant.aseprite_handling.save_anims(
             root_dir=root_dir,
             aseprite_path=Path(aseprite_path),
             aseprites=aseprites,
@@ -304,7 +303,7 @@ def test__save_aseprites__removes_old_spritesheet__with_subfolder():
         )
         make_empty_file(other_filename)
 
-        rivals_workshop_assistant.aseprite_handling.save_aseprites(
+        rivals_workshop_assistant.aseprite_handling.save_anims(
             root_dir=root_dir,
             aseprite_path=Path(aseprite_path),
             aseprites=aseprites,
@@ -324,7 +323,7 @@ def test__save_aseprites__multiple_aseprites():
             supply_aseprites(tmp, relative_dest=Path("anims"), anim_tag_color="blue")
         ]
 
-        rivals_workshop_assistant.aseprite_handling.save_aseprites(
+        rivals_workshop_assistant.aseprite_handling.save_anims(
             root_dir=root_dir,
             aseprite_path=Path(aseprite_path),
             aseprites=aseprites,

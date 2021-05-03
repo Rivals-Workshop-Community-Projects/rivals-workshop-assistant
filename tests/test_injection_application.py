@@ -1,3 +1,4 @@
+from copy import deepcopy
 from pathlib import Path
 
 import pytest
@@ -14,22 +15,20 @@ from tests.testing_helpers import (
 
 
 def test_apply_injection_no_injections():
-    scripts = [make_script(PATH_A, "content")]
+    orig_scripts = [make_script(PATH_A, "content")]
+    scripts = deepcopy(orig_scripts)
 
-    result_scripts = application.apply_injection(
-        scripts=scripts, injection_library=[], anims=[]
-    )
-    assert result_scripts == scripts
+    application.apply_injection(scripts=scripts, injection_library=[], anims=[])
+    assert scripts == orig_scripts
 
 
 def test_apply_injection_irrelevant_injection():
-    scripts = [make_script(PATH_A, "content")]
+    orig_scripts = [make_script(PATH_A, "content")]
+    scripts = deepcopy(orig_scripts)
     define = Define(name="", version=0, docs="", content="")
 
-    result_scripts = application.apply_injection(
-        scripts=scripts, injection_library=[define], anims=[]
-    )
-    assert result_scripts == scripts
+    application.apply_injection(scripts=scripts, injection_library=[define], anims=[])
+    assert orig_scripts == scripts
 
 
 define1 = Define(
@@ -60,10 +59,8 @@ define2()""",
 def test_apply_injection_makes_injection(script, define):
     scripts = [make_script(PATH_A, script)]
 
-    result_scripts = application.apply_injection(
-        scripts=scripts, injection_library=[define], anims=[]
-    )
-    assert result_scripts == [
+    application.apply_injection(scripts=scripts, injection_library=[define], anims=[])
+    assert scripts == [
         make_script(
             PATH_A,
             original_content=script,
@@ -87,10 +84,8 @@ content"""
     scripts = [make_script(PATH_A, script)]
     library = [define1, define2]
 
-    result_scripts = application.apply_injection(
-        scripts=scripts, injection_library=library, anims=[]
-    )
-    assert result_scripts == [
+    application.apply_injection(scripts=scripts, injection_library=library, anims=[])
+    assert scripts == [
         make_script(
             PATH_A,
             original_content=script,
@@ -118,10 +113,8 @@ def test_replace_existing_library_dependencies():
     scripts = [make_script(PATH_A, script)]
     library = [define1]
 
-    result_scripts = application.apply_injection(
-        scripts=scripts, injection_library=library, anims=[]
-    )
-    assert result_scripts == [
+    application.apply_injection(scripts=scripts, injection_library=library, anims=[])
+    assert scripts == [
         make_script(
             PATH_A,
             original_content=script,
@@ -148,10 +141,8 @@ def test_removes_injection_when_not_needed():
 {application.INJECTION_END_HEADER}"""
 
     scripts = [make_script(PATH_A, script)]
-    result_scripts = application.apply_injection(
-        scripts=scripts, injection_library=[define1], anims=[]
-    )
-    assert result_scripts == [
+    application.apply_injection(scripts=scripts, injection_library=[define1], anims=[])
+    assert scripts == [
         make_script(PATH_A, original_content=script, working_content=script_content)
     ]
 
@@ -170,8 +161,8 @@ define1()
 """
 
     scripts = [make_script(PATH_A, script)]
-    result_scripts = application.apply_injection(scripts, [define1], anims=[])
-    assert result_scripts == scripts
+    application.apply_injection(scripts, [define1], anims=[])
+    assert scripts == scripts
 
 
 def test_recursive_dependencies():
@@ -184,8 +175,9 @@ define_recursive()"""
     )
     library = [recursive_define, define1]
 
-    result_scripts = application.apply_injection(scripts, library, anims=[])
-    assert result_scripts == [
+    application.apply_injection(scripts, library, anims=[])
+
+    assert scripts == [
         make_script(
             PATH_A,
             original_content=script,
@@ -211,8 +203,8 @@ blah"""
     some_macro = Macro(name="some_macro", value="value")
     library = [some_macro]
 
-    result_scripts = application.apply_injection(scripts, library, anims=[])
-    assert result_scripts == [
+    application.apply_injection(scripts, library, anims=[])
+    assert scripts == [
         make_script(
             PATH_A,
             original_content=script,
@@ -239,8 +231,8 @@ my_define()
     my_define_library_version = Define(name="my_define", content="library version")
     library = [my_define_library_version]
 
-    result_scripts = application.apply_injection(scripts, library, anims=[])
-    assert result_scripts == [
+    application.apply_injection(scripts, library, anims=[])
+    assert scripts == [
         make_script(PATH_A, original_content=script, working_content=script.rstrip())
     ]
 
@@ -252,11 +244,12 @@ define1()
 {application.INJECTION_START_HEADER}
 {define1.gml}
 {application.INJECTION_END_HEADER}"""
-    scripts = [make_script(PATH_A, script)]
+    orig_scripts = [make_script(PATH_A, script)]
+    scripts = deepcopy(orig_scripts)
 
     library = [define1]
-    result_scripts = application.apply_injection(scripts, library, anims=[])
-    assert result_scripts == scripts
+    application.apply_injection(scripts, library, anims=[])
+    assert scripts == orig_scripts
 
 
 def test_doesnt_provide_user_supplied_macro():
@@ -269,8 +262,8 @@ print(my_macro)
     my_macro_library_version = Macro(name="my_macro", value="3")
     library = [my_macro_library_version]
 
-    result_scripts = application.apply_injection(scripts, library, anims=[])
-    assert result_scripts == [
+    application.apply_injection(scripts, library, anims=[])
+    assert scripts == [
         make_script(PATH_A, original_content=script, working_content=script.rstrip())
     ]
 
@@ -281,16 +274,15 @@ content
 define1()"""
     define = define1
 
-    scripts = [
+    orig_scripts = [
         make_script(
             PATH_A, script, processed_time=make_time(TEST_LATER_DATETIME_STRING)
         )
     ]
+    scripts = deepcopy(orig_scripts)
 
-    result_scripts = application.apply_injection(
-        scripts=scripts, injection_library=[define], anims=[]
-    )
-    assert result_scripts == []
+    application.apply_injection(scripts=scripts, injection_library=[define], anims=[])
+    assert scripts == orig_scripts
 
 
 def test_get_anim_data_gmls_needed_in_gml():
@@ -303,11 +295,9 @@ def test_get_anim_data_gmls_needed_in_gml():
     anim.windows = [Window("window", 2, 3)]
     anims = [anim]
 
-    result_scripts = application.apply_injection(
-        scripts=scripts, injection_library=[], anims=anims
-    )
+    application.apply_injection(scripts=scripts, injection_library=[], anims=anims)
 
-    assert result_scripts == [
+    assert scripts == [
         make_script(
             path=path,
             original_content=orig_content,

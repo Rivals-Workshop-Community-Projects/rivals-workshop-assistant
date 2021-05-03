@@ -16,12 +16,13 @@ from rivals_workshop_assistant.aseprite_handling import (
     read_aseprites,
     get_anims,
     save_scripts,
-    save_aseprites,
+    save_anims,
 )
 from rivals_workshop_assistant.asset_handling import get_required_assets, save_assets
 from rivals_workshop_assistant.setup import make_basic_folder_structure
 from rivals_workshop_assistant.injection import handle_injection
 from rivals_workshop_assistant.code_generation import handle_codegen
+from rivals_workshop_assistant.warning_handling import handle_warning
 
 
 def main(given_dir: Path, guarantee_root_dir: bool = False):
@@ -42,14 +43,13 @@ def main(given_dir: Path, guarantee_root_dir: bool = False):
         root_dir, dotfile=dotfile, assistant_config=assistant_config
     )
 
-    scripts = handle_codegen(scripts)
-    scripts = handle_injection(
-        root_dir=root_dir, scripts=scripts, anims=get_anims(aseprites)
-    )
+    handle_warning(assistant_config=assistant_config, scripts=scripts)
+    handle_codegen(scripts)
+    handle_injection(root_dir=root_dir, scripts=scripts, anims=get_anims(aseprites))
 
     save_scripts(root_dir, scripts)
 
-    save_aseprites(
+    save_anims(
         root_dir,
         aseprite_path=get_aseprite_path(assistant_config),
         aseprites=aseprites,

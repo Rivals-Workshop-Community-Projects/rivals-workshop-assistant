@@ -21,17 +21,12 @@ INJECTION_END_HEADER = (
 
 def apply_injection(
     scripts: list[Script], injection_library: list[GmlInjection], anims: list[Anim]
-) -> list[Script]:
-    """Creates a new scripts collection where each script has updated
-    supplied dependencies."""
-    result_scripts = []
+):
+    """Updates scripts with supplied dependencies."""
     for script in scripts:
         anim = _get_anim_for_script(script, anims)
         if script.is_fresh or (anim is not None and anim.is_fresh):
             _apply_injection_to_script(script, injection_library, anim)
-            result_scripts.append(script)
-
-    return result_scripts
 
 
 def _apply_injection_to_script(
@@ -61,7 +56,8 @@ def _get_anim_data_gmls_needed_in_gml(anim: Anim):
 def _get_anim_for_script(script: Script, anims: list[Anim]) -> typing.Optional[Anim]:
     if script.path.parent.name != "attacks":
         return None
-    return next((anim for anim in anims if anim.name == script.path.stem), None)
+    anim = next((anim for anim in anims if anim.name == script.path.stem), None)
+    return anim
 
 
 def _get_inject_gmls_needed_in_gml(
