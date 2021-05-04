@@ -4,7 +4,7 @@ from pathlib import Path
 
 from rivals_workshop_assistant.script_mod import Script
 
-WARNING_PREFIX = "// WARN: "
+WARNING_PREFIX = " // WARN: "
 
 
 def handle_warning(assistant_config: dict, scripts: list[Script]):
@@ -15,7 +15,7 @@ def handle_warning(assistant_config: dict, scripts: list[Script]):
 
 
 class WarningType(abc.ABC):
-    warning_text = NotImplemented
+    warning_content = NotImplemented
 
     def _should_warn_for_line(self, script: Script, line: str) -> bool:
         raise NotImplementedError
@@ -36,15 +36,17 @@ class WarningType(abc.ABC):
     def write_warning(self, detection_lines: list[int], gml: str) -> str:
         lines = gml.split("\n")
         for line_num in detection_lines:
-            lines[line_num] += self.make_warning_text()
+            lines[line_num] += self.warning_text
         return "\n".join(lines)
 
-    def make_warning_text(self) -> str:
-        return WARNING_PREFIX + self.warning_text
+    @classmethod
+    @property
+    def warning_text(cls) -> str:
+        return WARNING_PREFIX + cls.warning_content
 
 
 class PossibleDesyncWarning(WarningType):
-    warning_text = "Possible Desync. Non-local var set in draw script."
+    warning_content = "Possible Desync. Non-local var set in draw script."
 
     def get_detection_lines(self, script: Script):
         if not is_draw_script(script.path):
@@ -63,7 +65,9 @@ class PossibleDesyncWarning(WarningType):
 
     def _should_warn_for_line(self, local_vars: list[str], line: str) -> bool:
         # A variable is set without 'var', and it is not in the list of local_vars
-        pattern = fr'^\s*(?!(?:{"|".join(local_vars)}))\w+\s*(=|\+=|-=|\*=|\/=)\s*\S'
+        pattern = (
+            fr'^\s*(?!(?:{"|".join(["var"]+local_vars)}))\w+\s*(=|\+=|-=|\*=|\/=)\s*\S'
+        )
         return re.match(pattern=pattern, string=line) is not None
 
 
