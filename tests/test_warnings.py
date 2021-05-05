@@ -57,6 +57,11 @@ def test_get_warning_types():
             "a += 3",
             f"a += 3{src.ObjectVarSetInDrawScript.warning_text}",
         ),
+        pytest.param(
+            "post_draw",
+            "a += 3   // NO-WARN",
+            "a += 3   // NO-WARN",
+        ),
     ],
 )
 def test_handle_warn_setting_nonlocal_var_in_draw_script(

@@ -30,7 +30,9 @@ class WarningType(abc.ABC):
     def get_detection_lines(self, script: Script):
         detection_lines = []
         for number, line in enumerate(script.working_content.splitlines()):
-            if self._should_warn_for_line(script, line):
+            if not is_line_suppressed(line) and self._should_warn_for_line(
+                script, line
+            ):
                 detection_lines.append(number)
         return detection_lines
 
@@ -52,6 +54,10 @@ class WarningType(abc.ABC):
         return hash(self.__class__)
 
 
+def is_line_suppressed(line: str):
+    return "NO-WARN" in line.upper()
+
+
 class ObjectVarSetInDrawScript(WarningType):
     warning_content = (
         "Possible Desync. Object var set in draw script."
@@ -67,7 +73,9 @@ class ObjectVarSetInDrawScript(WarningType):
             local_vars_in_line = re.findall(pattern=r"(?<=var )\w+", string=line)
             local_vars += local_vars_in_line
 
-            if self._should_warn_for_line(local_vars=local_vars, line=line):
+            if not is_line_suppressed(line) and self._should_warn_for_line(
+                local_vars=local_vars, line=line
+            ):
                 detection_lines.append(number)
         return detection_lines
 
@@ -116,7 +124,7 @@ def get_warning_types(assistant_config: dict) -> set[WarningType]:
             *(
                 types
                 for key, types in warning_names_to_types.items()
-                if key in assistant_config.get(config_mod.WARNINGS_FIELD)
+                if key in assistant_config.get(config_mod.WARNINGS_FIELD, [])
             )
         )
     )
