@@ -174,7 +174,7 @@ class Updater(abc.ABC):
 
     def _get_current_version(self) -> typing.Optional[Version]:
         version_string = self._get_current_version_string()
-        if version_string is None:
+        if version_string is None or version_string.lower() == "none":
             return None
         return get_version_from_version_string(version_string)
 
@@ -311,7 +311,10 @@ def _get_legal_library_releases(
 
 
 def get_version_from_version_string(version_string: str):
-    major, minor, patch = (int(val) for val in version_string.split("."))
+    try:
+        major, minor, patch = (int(val) for val in version_string.split("."))
+    except (ValueError, IndexError):
+        major, minor, patch = (0, 0, 0)
     return Version(major=major, minor=minor, patch=patch)
 
 
