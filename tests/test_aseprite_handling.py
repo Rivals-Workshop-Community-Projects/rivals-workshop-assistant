@@ -3,6 +3,7 @@ from configparser import ConfigParser
 from pathlib import Path
 
 import rivals_workshop_assistant.assistant_config_mod
+import rivals_workshop_assistant.character_config_mod
 from rivals_workshop_assistant import paths
 from rivals_workshop_assistant.aseprite_handling import (
     Aseprite,
@@ -86,7 +87,7 @@ def test_get_has_small_sprites(init_content, character_config_str, expected):
     character_config = ConfigParser()
     character_config.read_string(character_config_str)
 
-    result = rivals_workshop_assistant.assistant_config_mod.get_has_small_sprites(
+    result = rivals_workshop_assistant.character_config_mod.get_has_small_sprites(
         scripts=scripts, character_config=character_config
     )
 

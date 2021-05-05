@@ -8,7 +8,7 @@ from rivals_workshop_assistant import (
     dotfile_mod,
     character_config_mod,
 )
-from rivals_workshop_assistant.assistant_config_mod import get_has_small_sprites
+from rivals_workshop_assistant.character_config_mod import get_has_small_sprites
 from rivals_workshop_assistant.dotfile_mod import update_dotfile_after_saving
 from rivals_workshop_assistant.script_mod import read_scripts
 from rivals_workshop_assistant.aseprite_handling import (
