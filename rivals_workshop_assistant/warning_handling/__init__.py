@@ -1,11 +1,8 @@
 import re
 
 from rivals_workshop_assistant.script_mod import Script
-from rivals_workshop_assistant.warning_handling.warnings import (
-    WarningType,
-    get_warning_types,
-    WARNING_PREFIX,
-)
+from rivals_workshop_assistant.warning_handling.warnings import get_warning_types
+from rivals_workshop_assistant.warning_handling.base import WARNING_PREFIX, WarningType
 
 
 def handle_warning(assistant_config: dict, scripts: list[Script]):
