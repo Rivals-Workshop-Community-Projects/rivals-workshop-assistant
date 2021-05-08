@@ -63,6 +63,7 @@ WARNING_DESYNC_UNSAFE_CAMERA_READ_VALUE = "desync_unsafe_camera_read"
 WARNING_CHECK_WINDOW_TIMER_WITHOUT_CHECK_HITPAUSE = (
     "check_window_timer_without_check_hitpause"
 )
+WARNING_RECURSIVE_SET_ATTACK = "recursive_set_attack"
 
 DEFAULT_CONFIG = f"""\
 # Format is <key name>: <value> (with a space after the : )
@@ -108,6 +109,7 @@ DEFAULT_CONFIG = f"""\
   - {WARNING_DESYNC_OBJECT_VAR_SET_IN_DRAW_SCRIPT_VALUE}
   - {WARNING_DESYNC_UNSAFE_CAMERA_READ_VALUE}
   - {WARNING_CHECK_WINDOW_TIMER_WITHOUT_CHECK_HITPAUSE}
+  - {WARNING_RECURSIVE_SET_ATTACK}
     # Comment out any warnings you want to disable with `#`.
-    # TODO - link to warnings documentation
+    # Learn more about warnings at https://rivalslib.com/assistant/warnings/
 """

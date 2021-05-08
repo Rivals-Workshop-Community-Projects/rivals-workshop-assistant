@@ -13,10 +13,14 @@ class WarningType(abc.ABC):
         raise NotImplementedError
 
     def apply(self, script: Script):
+        if not self._should_apply_to_script(script):
+            return []
+
         detection_lines = self.get_detection_lines(script)
         script.working_content = self.write_warning(
             detection_lines=detection_lines, gml=script.working_content
         )
+
         # This is just for debugging purposes
         return [
             line
@@ -49,6 +53,9 @@ class WarningType(abc.ABC):
 
     def __hash__(self):
         return hash(self.__class__)
+
+    def _should_apply_to_script(self, script: Script):
+        return True
 
 
 def is_line_suppressed(line: str):

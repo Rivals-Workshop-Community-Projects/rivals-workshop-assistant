@@ -2,7 +2,7 @@ import itertools
 
 from rivals_workshop_assistant import assistant_config_mod as config_mod
 from rivals_workshop_assistant.warning_handling.base import WarningType
-from rivals_workshop_assistant.warning_handling import desync
+from rivals_workshop_assistant.warning_handling import desync, set_attack
 from rivals_workshop_assistant.warning_handling import hitpause
 
 warning_names_to_types = {
@@ -17,6 +17,7 @@ warning_names_to_types = {
         hitpause.CheckWindowTimerEqualsWithoutCheckHitpause(),
         hitpause.CheckWindowTimerModuloWithoutCheckHitpause(),
     ],
+    config_mod.WARNING_RECURSIVE_SET_ATTACK: [set_attack.RecursiveSetAttack()],
 }
 
 
