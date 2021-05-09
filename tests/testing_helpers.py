@@ -84,7 +84,7 @@ def supply_aseprites(
 ):
     dest = Path(tmp.path) / relative_dest
     dest.mkdir(parents=True, exist_ok=True)
-    shutil.copy(Path("assets" / name), dest)
+    shutil.copy(Path("tests/assets" / name), dest)
     return make_aseprite(
         path=dest / name,
         modified_time=modified_time,
@@ -160,6 +160,6 @@ def make_script_from_script_with_path(tmp, script_with_path: ScriptWithPath) -> 
 
 def get_aseprite_path():
     config = configparser.ConfigParser()
-    config.read("dev_config.ini")
+    config.read("tests/dev_config.ini")
     aseprite_path = config["aseprite"]["path"]
     return aseprite_path

@@ -399,7 +399,8 @@ def test__backup_made():
 
         os.mkdir(root_dir / paths.SPRITES_FOLDER)
         shutil.copy(
-            Path("assets/sprites/anim1_strip1.png"), root_dir / paths.SPRITES_FOLDER
+            Path("tests/assets/sprites/anim1_strip1.png"),
+            root_dir / paths.SPRITES_FOLDER,
         )
 
         src.main(given_dir=root_dir, guarantee_root_dir=True)
