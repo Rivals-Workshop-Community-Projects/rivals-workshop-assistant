@@ -4,7 +4,6 @@ from pathlib import Path
 
 import rivals_workshop_assistant.assistant_config_mod
 import rivals_workshop_assistant.character_config_mod
-from rivals_workshop_assistant import paths
 from rivals_workshop_assistant.aseprite_handling import (
     Aseprite,
     AsepriteData,
@@ -17,7 +16,6 @@ from tests.testing_helpers import (
     make_time,
 )
 from rivals_workshop_assistant import character_config_mod
-import rivals_workshop_assistant.main as src
 
 
 def make_fake_aseprite(

@@ -1,7 +1,5 @@
 import rivals_workshop_assistant.dotfile_mod
 import rivals_workshop_assistant.file_handling
-import rivals_workshop_assistant.info_files as dotfile_mod
-from rivals_workshop_assistant import main as src
 from tests.testing_helpers import (
     PATH_ABSOLUTE,
     make_time,
