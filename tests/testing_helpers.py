@@ -161,5 +161,8 @@ def make_script_from_script_with_path(tmp, script_with_path: ScriptWithPath) -> 
 def get_aseprite_path():
     config = configparser.ConfigParser()
     config.read("tests/dev_config.ini")
-    aseprite_path = config["aseprite"]["path"]
-    return aseprite_path
+    aseprite_path = Path(config["aseprite"]["path"])
+    if aseprite_path.exists():
+        return aseprite_path
+    else:
+        assert False, 'Aseprite is not found. Run with -v -m "not aseprite"'

@@ -217,6 +217,7 @@ def assert_anim(
         assert img.width == 76 * num_frames * (int(has_small_sprites) + 1)
 
 
+@pytest.mark.aseprite
 @pytest.mark.parametrize("has_small_sprites", [pytest.param(False), pytest.param(True)])
 def test__save_aseprites(has_small_sprites):
     aseprite_path = get_aseprite_path()
@@ -235,6 +236,7 @@ def test__save_aseprites(has_small_sprites):
         assert_anim(root_dir, has_small_sprites=has_small_sprites)
 
 
+@pytest.mark.aseprite
 def test__save_aseprites__uses_subfolder_name():
     subfolder_name = "subfolder"
     aseprite_path = get_aseprite_path()
@@ -259,6 +261,7 @@ def test__save_aseprites__uses_subfolder_name():
         )
 
 
+@pytest.mark.aseprite
 def test__save_aseprites__removes_old_spritesheet():
     aseprite_path = get_aseprite_path()
 
@@ -314,6 +317,7 @@ def test__save_aseprites__removes_old_spritesheet__with_subfolder():
         assert other_filename.exists()
 
 
+@pytest.mark.aseprite
 def test__save_aseprites__multiple_aseprites():
     aseprite_path = get_aseprite_path()
 
