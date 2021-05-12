@@ -350,6 +350,7 @@ def test__save_aseprites__multiple_aseprites():
         )
 
 
+@pytest.mark.aseprite
 def test__aseprites_set_window_data():
     with TempDirectory() as tmp:
         root_dir = Path(tmp.path)

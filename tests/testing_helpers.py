@@ -15,6 +15,14 @@ from rivals_workshop_assistant.aseprite_handling import Aseprite
 PATH_A = Path("a")
 
 
+def pytest_configure(config):
+    config.addinivalue_line("markers", "slow: integration tests")
+    config.addinivalue_line(
+        "markers",
+        "aseprite: require a path to a working aseprite.exe in dev_config.ini",
+    )
+
+
 @dataclass
 class ScriptWithPath:
     path: Path
