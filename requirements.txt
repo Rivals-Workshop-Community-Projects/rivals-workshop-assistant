@@ -1,0 +1,7 @@
+Inflector
+Pillow
+requests
+retrying
+ruamel.yaml
+testfixtures
+parse
