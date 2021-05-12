@@ -108,12 +108,19 @@ def make_file(path: Path, content: str):
 
 
 def make_test_config(root_dir: Path):
+    try:
+        aseprite_path = (
+            f"{assistant_config_mod.ASEPRITE_PATH_FIELD}: {get_aseprite_path()}"
+        )
+    except AssertionError:
+        aseprite_path = ""
+
     make_file(
         root_dir / assistant_config_mod.PATH,
         content=f"""\
 {assistant_config_mod.LIBRARY_UPDATE_LEVEL_FIELD}: none
 {assistant_config_mod.ASSISTANT_SELF_UPDATE_FIELD}: false
-{assistant_config_mod.ASEPRITE_PATH_FIELD}: {get_aseprite_path()}
+{aseprite_path}
 """,
     )
 
