@@ -159,10 +159,11 @@ define1()
 {define2.gml}
 {application.INJECTION_END_HEADER}
 """
+    orig_scripts = [make_script(PATH_A, script)]
+    scripts = deepcopy(orig_scripts)
 
-    scripts = [make_script(PATH_A, script)]
     application.apply_injection(scripts, [define1], anims=[])
-    assert scripts == scripts
+    assert scripts == orig_scripts
 
 
 def test_recursive_dependencies():

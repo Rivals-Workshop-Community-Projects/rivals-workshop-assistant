@@ -1,3 +1,4 @@
+from copy import deepcopy
 from pathlib import Path
 
 import pytest
@@ -70,14 +71,15 @@ def test_handle_codegen__for_loop(original_content, expected_content):
 
 def test_already_processed_file__nothing_happens():
     original_content = "$foreach blah$"
-    scripts = [
+    orig_scripts = [
         make_script(
             PATH_A,
             original_content=original_content,
             processed_time=make_time(TEST_LATER_DATETIME_STRING),
         )
     ]
+    scripts = deepcopy(orig_scripts)
 
     src.handle_codegen(scripts)
 
-    assert scripts == scripts
+    assert scripts == orig_scripts
