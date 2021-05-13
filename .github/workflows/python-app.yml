@@ -59,12 +59,12 @@ jobs:
       uses: peter-evans/repository-dispatch@v1
       with:
         token: ${{ secrets.REPO_ACCESS_TOKEN }}
-        repository: https://github.com/Rivals-Workshop-Community-Projects/rivals-workshop-assistant-vscode
+        repository: Rivals-Workshop-Community-Projects/rivals-workshop-assistant-vscode
         event-type: exe-push
 
     - name: GMEdit Dispatch
       uses: peter-evans/repository-dispatch@v1
       with:
         token: ${{ secrets.REPO_ACCESS_TOKEN }}
-        repository: https://github.com/Rivals-Workshop-Community-Projects/rivals-workshop-assistant-gmedit
+        repository: Rivals-Workshop-Community-Projects/rivals-workshop-assistant-gmedit
         event-type: exe-push
