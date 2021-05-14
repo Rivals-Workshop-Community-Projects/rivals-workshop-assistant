@@ -31,8 +31,8 @@ jobs:
 
     - uses: actions/upload-artifact@v2
       with:
-        name: dist/rivals_workshop_assistant.exe
-        path: src/dist/windows
+        name: rivals_workshop_assistant.exe
+        path: rivals_workshop_assistant/dist/rivals_workshop_assistant.exe
 
     - name: VSCode Dispatch
       uses: peter-evans/repository-dispatch@v1
