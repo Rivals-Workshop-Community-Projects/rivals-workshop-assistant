@@ -5,9 +5,6 @@ on:
     branches: [ main ]
   pull_request:
     branches: [ main ]
-  create:
-    tags:
-      - v*
 
 jobs:
   build:
@@ -37,39 +34,3 @@ jobs:
     - name: Test with pytest
       run: |
         pytest -v -m "not aseprite"
-
-    - name: PyInstaller Windows
-      uses: JackMcKew/pyinstaller-action-windows@v0.1.2
-      if: startsWith(github.ref, 'refs/tags/')
-      with:
-          path: .
-    
-    - name: Release
-      uses: softprops/action-gh-release@v1
-      if: startsWith(github.ref, 'refs/tags/')
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        files: "dist/**"
-
-    - uses: actions/upload-artifact@v2
-      if: startsWith(github.ref, 'refs/tags/')
-      with:
-        name: dist/rivals_workshop_assistant.exe
-        path: src/dist/windows
-
-    - name: VSCode Dispatch
-      uses: peter-evans/repository-dispatch@v1
-      if: startsWith(github.ref, 'refs/tags/')
-      with:
-        token: ${{ secrets.REPO_ACCESS_TOKEN }}
-        repository: Rivals-Workshop-Community-Projects/rivals-workshop-assistant-vscode
-        event-type: exe-push
-
-    - name: GMEdit Dispatch
-      uses: peter-evans/repository-dispatch@v1
-      if: startsWith(github.ref, 'refs/tags/')
-      with:
-        token: ${{ secrets.REPO_ACCESS_TOKEN }}
-        repository: Rivals-Workshop-Community-Projects/rivals-workshop-assistant-gmedit
-        event-type: exe-push
