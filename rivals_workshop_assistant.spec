@@ -1,5 +1,5 @@
 a = Analysis(['rivals_workshop_assistant/main.py'],
-             pathex=['D:\\Users\\User\\PycharmProjects\\rivals-workshop-assistant/rivals_workshop_assistant'],
+             pathex=['D:\\Users\\User\\PycharmProjects\\rivals-workshop-assistant\\rivals_workshop_assistant'],
              binaries=[],
              datas=[],
              hiddenimports=[],
