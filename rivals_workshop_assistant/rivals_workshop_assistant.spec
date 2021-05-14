@@ -1,5 +1,10 @@
+# -*- mode: python ; coding: utf-8 -*-
+
+block_cipher = None
+
+
 a = Analysis(['main.py'],
-             pathex=['D:\\Users\\User\\PycharmProjects\\rivals-workshop-assistant'],
+             pathex=['D:\\Users\\User\\PycharmProjects\\rivals-workshop-assistant\\rivals_workshop_assistant'],
              binaries=[],
              datas=[],
              hiddenimports=[],
