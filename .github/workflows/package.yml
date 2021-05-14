@@ -18,7 +18,8 @@ jobs:
     - name: PyInstaller Windows
       uses: JackMcKew/pyinstaller-action-windows@v0.1.2
       with:
-          path: ../
+          path: rivals_workshop_assistant
+          spec: rivals_workshop_assistant/build.spec
     
     - name: Release
       uses: softprops/action-gh-release@v1
