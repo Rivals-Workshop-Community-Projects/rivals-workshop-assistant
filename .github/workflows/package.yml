@@ -1,0 +1,50 @@
+name: Package and Release
+
+on: 
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Tag to create revision'
+        required: true
+        
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: PyInstaller Windows
+      uses: JackMcKew/pyinstaller-action-windows@v0.1.2
+      with:
+          path: .
+    
+    - name: Release
+      uses: softprops/action-gh-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        files: "dist/**"
+        tag_name: ${{ github.event.inputs.tag }}
+
+    - uses: actions/upload-artifact@v2
+      with:
+        name: dist/rivals_workshop_assistant.exe
+        path: src/dist/windows
+
+    - name: VSCode Dispatch
+      uses: peter-evans/repository-dispatch@v1
+      with:
+        token: ${{ secrets.REPO_ACCESS_TOKEN }}
+        repository: Rivals-Workshop-Community-Projects/rivals-workshop-assistant-vscode
+        event-type: exe-push
+        client-payload: '{"tag": "${{ github.event.inputs.tag }}"}'
+
+    - name: GMEdit Dispatch
+      uses: peter-evans/repository-dispatch@v1
+      with:
+        token: ${{ secrets.REPO_ACCESS_TOKEN }}
+        repository: Rivals-Workshop-Community-Projects/rivals-workshop-assistant-gmedit
+        event-type: exe-push
+        client-payload: '{"tag": "${{ github.event.inputs.tag }}"}'
