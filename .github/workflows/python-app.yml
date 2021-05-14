@@ -57,6 +57,7 @@ jobs:
 
     - name: VSCode Dispatch
       uses: peter-evans/repository-dispatch@v1
+      if: startsWith(github.ref, 'refs/tags/')
       with:
         token: ${{ secrets.REPO_ACCESS_TOKEN }}
         repository: Rivals-Workshop-Community-Projects/rivals-workshop-assistant-vscode
@@ -64,6 +65,7 @@ jobs:
 
     - name: GMEdit Dispatch
       uses: peter-evans/repository-dispatch@v1
+      if: startsWith(github.ref, 'refs/tags/')
       with:
         token: ${{ secrets.REPO_ACCESS_TOKEN }}
         repository: Rivals-Workshop-Community-Projects/rivals-workshop-assistant-gmedit
