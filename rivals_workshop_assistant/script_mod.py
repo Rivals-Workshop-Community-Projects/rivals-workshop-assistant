@@ -43,14 +43,18 @@ class Script(File):
         self._working_content = value
 
     def save(self, root_dir: Path):
-        with open(
-            (root_dir / self.path),
-            "w",
-            encoding="UTF8",
-            errors="surrogateescape",
-            newline="\n",
-        ) as f:
-            f.write(self.working_content)
+        if self.working_content == "":
+            print(f"WARN: Trying to save an empty file {self.path}")
+            return
+        if self.working_content != self.original_content:
+            with open(
+                (root_dir / self.path),
+                "w",
+                encoding="UTF8",
+                errors="surrogateescape",
+                newline="\n",
+            ) as f:
+                f.write(self.working_content)
 
     def __eq__(self, other: "Script"):
         return (
