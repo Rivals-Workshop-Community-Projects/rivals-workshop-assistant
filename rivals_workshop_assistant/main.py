@@ -37,10 +37,10 @@ def main(given_dir: Path, guarantee_root_dir: bool = False):
 
     lock = FileLock(root_dir / paths.LOCKFILE_PATH)
     with lock.acquire(timeout=1):
-        update_files()
+        update_files(root_dir)
 
 
-def update_files():
+def update_files(root_dir):
     dotfile = dotfile_mod.read(root_dir)
     assistant_config = assistant_config_mod.read(root_dir)
     character_config = character_config_mod.read(root_dir)
