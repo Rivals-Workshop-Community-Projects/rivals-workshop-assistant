@@ -22,3 +22,4 @@ def make_basic_folder_structure(root_dir: Path):
         path=(root_dir / rivals_workshop_assistant.assistant_config_mod.PATH),
         content=DEFAULT_CONFIG,
     )
+    create_file(path=(root_dir / paths.LOCKFILE_PATH), content="")

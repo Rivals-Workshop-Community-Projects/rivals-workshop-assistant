@@ -1,3 +1,4 @@
+from filelock import Timeout, FileLock
 import datetime
 import sys
 from pathlib import Path
@@ -7,6 +8,7 @@ from rivals_workshop_assistant import (
     assistant_config_mod,
     dotfile_mod,
     character_config_mod,
+    paths,
 )
 from rivals_workshop_assistant.character_config_mod import get_has_small_sprites
 from rivals_workshop_assistant.dotfile_mod import update_dotfile_after_saving
@@ -32,6 +34,13 @@ def main(given_dir: Path, guarantee_root_dir: bool = False):
     else:
         root_dir = get_root_dir(given_dir)
     make_basic_folder_structure(root_dir)
+
+    lock = FileLock(root_dir / paths.LOCKFILE_PATH)
+    with lock.acquire(timeout=1):
+        update_files()
+
+
+def update_files():
     dotfile = dotfile_mod.read(root_dir)
     assistant_config = assistant_config_mod.read(root_dir)
     character_config = character_config_mod.read(root_dir)
