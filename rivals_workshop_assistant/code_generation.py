@@ -26,6 +26,9 @@ def handle_codegen_for_line(line: str) -> str:
     else:
         return line
 
+    if "{" in seed:  # Avoids false alarms on `` format strings.
+        return line
+
     code = handle_codegen_for_seed(seed)
     if code:
         if before.isspace():
