@@ -1,13 +1,11 @@
 # -*- mode: python ; coding: utf-8 -*-
-from PyInstaller.utils.hooks import collect_submodules
-
 block_cipher = None
 
 a = Analysis(['main.py'],
              pathex=['Z:\\github\\workspace\\rivals_workshop_assistant'],
              binaries=[],
              datas=[],
-             hiddenimports=['filelock'],
+             hiddenimports=[],
              hookspath=[],
              runtime_hooks=[],
              excludes=[],
