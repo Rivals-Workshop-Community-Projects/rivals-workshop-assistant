@@ -5,4 +5,3 @@ retrying
 ruamel.yaml
 testfixtures
 parse
-filelock

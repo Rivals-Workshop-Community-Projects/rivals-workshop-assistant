@@ -1,4 +1,4 @@
-from filelock import Timeout, FileLock
+from rivals_workshop_assistant.filelock import FileLock
 import datetime
 import sys
 from pathlib import Path
