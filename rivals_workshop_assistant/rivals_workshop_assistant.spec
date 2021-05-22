@@ -3,12 +3,11 @@ from PyInstaller.utils.hooks import collect_submodules
 
 block_cipher = None
 
-
 a = Analysis(['main.py'],
-             pathex=['D:\\Users\\User\\PycharmProjects\\rivals-workshop-assistant\\rivals_workshop_assistant'],
+             pathex=['Z:\\github\\workspace\\rivals_workshop_assistant'],
              binaries=[],
              datas=[],
-             hiddenimports=collect_submodules('filelock'),
+             hiddenimports=['filelock'],
              hookspath=[],
              runtime_hooks=[],
              excludes=[],
