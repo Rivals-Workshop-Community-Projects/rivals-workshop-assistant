@@ -20,7 +20,7 @@ jobs:
       with:
           path: rivals_workshop_assistant
           spec: rivals_workshop_assistant.spec
-          requirements: requirements.txt
+#           requirements: requirements.txt
    
     - name: Release
       uses: softprops/action-gh-release@v1
