@@ -8,7 +8,7 @@ import tempfile
 import typing
 import zipfile
 from pathlib import Path
-
+from typing import List
 import requests
 
 import rivals_workshop_assistant.paths
@@ -267,7 +267,7 @@ class LibraryUpdater(Updater):
 
 def _get_legal_library_release_to_install(
     update_level: UpdateLevel,
-    releases: list[Release],
+    releases: List[Release],
     current_version: typing.Optional[Version],
 ) -> typing.Optional[Release]:
     if current_version is None:
@@ -286,8 +286,8 @@ def _get_legal_library_release_to_install(
 
 
 def _get_legal_library_releases(
-    update_config: UpdateLevel, releases: list[Release], current_version: Version
-) -> list[Release]:
+    update_config: UpdateLevel, releases: List[Release], current_version: Version
+) -> List[Release]:
     """Releases are constrained based on config and current version."""
     if update_config == UpdateLevel.NONE:
         return []

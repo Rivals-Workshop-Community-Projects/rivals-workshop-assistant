@@ -1,6 +1,7 @@
 import functools
 from pathlib import Path
 from datetime import datetime
+from typing import List
 
 from rivals_workshop_assistant.file_handling import (
     File,
@@ -65,7 +66,7 @@ class Script(File):
         )
 
 
-def read_scripts(root_dir: Path, dotfile: dict) -> list[Script]:
+def read_scripts(root_dir: Path, dotfile: dict) -> List[Script]:
     """Returns all Scripts in the scripts directory."""
     gml_paths = list((root_dir / "scripts").rglob("*.gml"))
 

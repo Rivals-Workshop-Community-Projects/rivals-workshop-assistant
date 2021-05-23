@@ -1,5 +1,6 @@
 import abc
 from pathlib import Path
+from typing import List
 
 from rivals_workshop_assistant.script_mod import Script
 
@@ -37,7 +38,7 @@ class WarningType(abc.ABC):
                 detection_lines.append(number)
         return detection_lines
 
-    def write_warning(self, detection_lines: list[int], gml: str) -> str:
+    def write_warning(self, detection_lines: List[int], gml: str) -> str:
         lines = gml.split("\n")
         for line_num in detection_lines:
             lines[line_num] += self.warning_text

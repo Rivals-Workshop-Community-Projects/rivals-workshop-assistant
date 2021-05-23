@@ -13,10 +13,6 @@ PATH_A = Path("a")
     "original_content, expected_content",
     [
         pytest.param("nothing to do", "nothing to do"),
-        pytest.param(
-            "before$bad$after",
-            "before$bad$after // ERROR: No code injection match found",
-        ),
         pytest.param("before$foreach things", "before$foreach things"),
         pytest.param("foreach things$", "foreach things$"),
         pytest.param("a//$foreach things$b", "a//$foreach things$b"),

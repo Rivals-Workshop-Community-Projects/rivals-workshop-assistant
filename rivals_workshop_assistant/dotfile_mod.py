@@ -39,7 +39,7 @@ def save_dotfile(root_dir: Path, content: dict):
     info_files.save(path=root_dir / PATH, content=content)
 
 
-def update_dotfile_after_saving(dotfile: dict, now: datetime, files: list[File]):
+def update_dotfile_after_saving(dotfile: dict, now: datetime, files: typing.List[File]):
     dotfile[PROCESSED_TIME_FIELD] = now
     dotfile[SEEN_FILES_FIELD] = [file.path.as_posix() for file in files]
 

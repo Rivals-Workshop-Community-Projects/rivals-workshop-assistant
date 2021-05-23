@@ -12,6 +12,7 @@ from ..dotfile_mod import get_processed_time
 from .types import AsepriteTag, TagColor
 from ..assistant_config_mod import ASEPRITE_PATH_FIELD
 from ..script_mod import Script
+from typing import List
 
 
 class TagObject:
@@ -41,7 +42,7 @@ class Anim(TagObject):
         name: str,
         start: int,
         end: int,
-        windows: list[Window] = None,
+        windows: List[Window] = None,
         is_fresh=False,
     ):
         """A part of an aseprite file representing a single spritesheet.
@@ -68,7 +69,7 @@ class AsepriteData:
         num_frames: int,
         anim_tag_color: TagColor,
         window_tag_color: TagColor,
-        tags: list[AsepriteTag] = None,
+        tags: List[AsepriteTag] = None,
         is_fresh: bool = False,
     ):
         self.num_frames = num_frames
@@ -234,7 +235,7 @@ def get_aseprite_path(assistant_config: dict) -> typing.Optional[Path]:
 
 def read_aseprites(
     root_dir: Path, dotfile: dict, assistant_config: dict
-) -> list[Aseprite]:
+) -> List[Aseprite]:
     ase_paths = itertools.chain(
         *[
             list((root_dir / "anims").rglob(f"*.{filetype}"))
@@ -257,14 +258,14 @@ def read_aseprites(
     return aseprites
 
 
-def get_anims(aseprites: list[Aseprite]) -> list[Anim]:
+def get_anims(aseprites: List[Aseprite]) -> List[Anim]:
     return list(itertools.chain(*[aseprite.content.anims for aseprite in aseprites]))
     # Unfortunately this involves reading every aseprite file...
     # If we demand that multi-anim files have a name prefix,
     # we could get away with reading fewer files.
 
 
-def save_scripts(root_dir: Path, scripts: list[Script]):
+def save_scripts(root_dir: Path, scripts: List[Script]):
     for script in scripts:
         script.save(root_dir)
 
@@ -272,7 +273,7 @@ def save_scripts(root_dir: Path, scripts: list[Script]):
 def save_anims(
     root_dir: Path,
     aseprite_path: Path,
-    aseprites: list[Aseprite],
+    aseprites: List[Aseprite],
     has_small_sprites: bool,
 ):
     if not aseprite_path:

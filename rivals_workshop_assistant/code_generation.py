@@ -5,9 +5,10 @@ import parse
 from inflector import English
 
 from rivals_workshop_assistant.script_mod import Script
+from typing import List
 
 
-def handle_codegen(scripts: list[Script]):
+def handle_codegen(scripts: List[Script]):
     for script in scripts:
         if script.is_fresh:
             script.working_content = handle_codegen_for_script(script.working_content)
@@ -37,7 +38,9 @@ def handle_codegen_for_line(line: str) -> str:
         else:
             return f"{before}{code}{after}"
     else:
-        return f"{line} // ERROR: No code injection match found"
+        return line
+        # return f"{line} // ERROR: No code injection match found"
+        # temporarily disabled because of false alarms when $ is used as a color indicator.
 
 
 def handle_codegen_for_seed(seed: str) -> str:

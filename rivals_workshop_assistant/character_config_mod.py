@@ -1,6 +1,7 @@
 import re
 from pathlib import Path
 from configparser import ConfigParser
+from typing import List
 
 from rivals_workshop_assistant.script_mod import Script
 
@@ -17,7 +18,7 @@ def read(root_dir: Path) -> ConfigParser:
     return config
 
 
-def get_has_small_sprites(scripts: list[Script], character_config: ConfigParser):
+def get_has_small_sprites(scripts: List[Script], character_config: ConfigParser):
     in_character_config = character_config.get(
         "general", SMALL_SPRITES_FIELD, fallback=None
     )

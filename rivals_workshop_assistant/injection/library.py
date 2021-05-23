@@ -1,11 +1,12 @@
 import re
 from pathlib import Path
+from typing import List, Tuple
 
 import rivals_workshop_assistant.paths
 from .dependency_handling import GmlInjection, INJECT_TYPES
 
 
-def read_injection_library(root_dir: Path) -> list[GmlInjection]:
+def read_injection_library(root_dir: Path) -> List[GmlInjection]:
     """Controller"""
     inject_gml_paths = list(
         (root_dir / rivals_workshop_assistant.paths.INJECT_FOLDER).rglob("*.gml")
@@ -17,7 +18,7 @@ def read_injection_library(root_dir: Path) -> list[GmlInjection]:
     return get_injection_library_from_gml(full_inject_gml)
 
 
-def get_injection_library_from_gml(gml: str) -> list[GmlInjection]:
+def get_injection_library_from_gml(gml: str) -> List[GmlInjection]:
     dependencies = []
     dependency_strings = gml.split("#")[1:]
     for dependency_string in dependency_strings:
@@ -34,7 +35,7 @@ def get_injection_library_from_gml(gml: str) -> list[GmlInjection]:
     return dependencies
 
 
-def _get_inject_components(gml: str) -> tuple[str, str, str]:
+def _get_inject_components(gml: str) -> Tuple[str, str, str]:
     inject_type, after_inject_type = gml.split(" ", maxsplit=1)
     if "(" in after_inject_type:
         pattern = r"(\n|{)"

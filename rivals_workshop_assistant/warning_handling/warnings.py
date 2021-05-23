@@ -1,4 +1,5 @@
 import itertools
+from typing import Set
 
 from rivals_workshop_assistant import assistant_config_mod as config_mod
 from rivals_workshop_assistant.warning_handling.base import WarningType
@@ -21,7 +22,7 @@ warning_names_to_types = {
 }
 
 
-def get_warning_types(assistant_config: dict) -> set[WarningType]:
+def get_warning_types(assistant_config: dict) -> Set[WarningType]:
     return set(
         itertools.chain(
             *(

@@ -4,6 +4,7 @@ import typing
 from .dependency_handling import GmlInjection
 from rivals_workshop_assistant.script_mod import Script
 from ..aseprite_handling import Anim
+from typing import List
 
 INJECTION_START_MARKER = "// vvv LIBRARY DEFINES AND MACROS vvv\n"
 INJECTION_START_WARNING = (
@@ -20,7 +21,7 @@ INJECTION_END_HEADER = (
 
 
 def apply_injection(
-    scripts: list[Script], injection_library: list[GmlInjection], anims: list[Anim]
+    scripts: List[Script], injection_library: List[GmlInjection], anims: List[Anim]
 ):
     """Updates scripts with supplied dependencies."""
     for script in scripts:
@@ -30,7 +31,7 @@ def apply_injection(
 
 
 def _apply_injection_to_script(
-    script: Script, injection_library: list[GmlInjection], anim: Anim
+    script: Script, injection_library: List[GmlInjection], anim: Anim
 ):
     """Updates the dependencies supplied to the script."""
     if _should_inject(script.working_content):
@@ -53,7 +54,7 @@ def _get_anim_data_gmls_needed_in_gml(anim: Anim):
     return window_gmls
 
 
-def _get_anim_for_script(script: Script, anims: list[Anim]) -> typing.Optional[Anim]:
+def _get_anim_for_script(script: Script, anims: List[Anim]) -> typing.Optional[Anim]:
     if script.path.parent.name != "attacks":
         return None
     anim = next((anim for anim in anims if anim.name == script.path.stem), None)
@@ -61,13 +62,13 @@ def _get_anim_for_script(script: Script, anims: list[Anim]) -> typing.Optional[A
 
 
 def _get_inject_gmls_needed_in_gml(
-    gml: str, injection_library: list[GmlInjection]
-) -> list[str]:
+    gml: str, injection_library: List[GmlInjection]
+) -> List[str]:
     needed_injects = _get_injects_needed_in_gml(gml, injection_library)
     return [injection.gml for injection in needed_injects]
 
 
-def _get_injects_needed_in_gml(gml: str, injection_library: list[GmlInjection]):
+def _get_injects_needed_in_gml(gml: str, injection_library: List[GmlInjection]):
     used_injects = _get_injects_used_in_gml(gml, injection_library)
     needed_injects = [
         inject for inject in used_injects if not _gml_supplies_inject(gml, inject)
@@ -77,9 +78,9 @@ def _get_injects_needed_in_gml(gml: str, injection_library: list[GmlInjection]):
 
 def _get_injects_used_in_gml(
     gml: str,
-    injection_library: list[GmlInjection],
-    existing_injections: list[GmlInjection] = None,
-) -> list[GmlInjection]:
+    injection_library: List[GmlInjection],
+    existing_injections: List[GmlInjection] = None,
+) -> List[GmlInjection]:
     if existing_injections is None:
         injections = []
     else:
@@ -113,7 +114,7 @@ def _gml_supplies_inject(gml: str, inject: GmlInjection):
     )
 
 
-def _add_inject_gmls_in_script(script: str, dependency_gmls: list[str]) -> str:
+def _add_inject_gmls_in_script(script: str, dependency_gmls: List[str]) -> str:
     """Returns the script after supplying dependencies."""
     script_content = _get_script_contents(script)
     new_script = script_content

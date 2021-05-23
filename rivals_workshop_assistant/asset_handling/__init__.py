@@ -2,9 +2,10 @@ from pathlib import Path
 
 from rivals_workshop_assistant.script_mod import Script
 from .asset_types import Asset, ASSET_TYPES
+from typing import List, Set
 
 
-def get_required_assets(scripts: list[Script]) -> set[Asset]:
+def get_required_assets(scripts: List[Script]) -> Set[Asset]:
     """Gets all assets the scripts use, including things that aren't the
     assistant's responsibility.
     Those assets are filtered out in the supply step, after this."""
@@ -16,14 +17,14 @@ def get_required_assets(scripts: list[Script]) -> set[Asset]:
     return required_assets_for_scripts
 
 
-def _get_required_assets_for_script(script: Script) -> set[Asset]:
+def _get_required_assets_for_script(script: Script) -> Set[Asset]:
     assets = set()
     for asset_type in ASSET_TYPES:
         assets.update(asset_type.get_from_text(script.working_content))
     return assets
 
 
-def save_assets(root_dir: Path, assets: set[Asset]):
+def save_assets(root_dir: Path, assets: Set[Asset]):
     """Controller"""
     for asset in assets:
         asset.supply(root_dir)

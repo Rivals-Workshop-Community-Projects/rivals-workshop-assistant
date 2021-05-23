@@ -1,4 +1,5 @@
 import re
+from typing import List
 
 from rivals_workshop_assistant.script_mod import Script
 from rivals_workshop_assistant.warning_handling.base import (
@@ -29,7 +30,7 @@ class ObjectVarSetInDrawScript(WarningType):
                 detection_lines.append(number)
         return detection_lines
 
-    def _should_warn_for_line(self, local_vars: list[str], line: str) -> bool:
+    def _should_warn_for_line(self, local_vars: List[str], line: str) -> bool:
         # A variable is set without 'var', and it is not in the list of local_vars
         pattern = fr'^\s*(?!(?:{"|".join(["var"] + local_vars)}))\w+\s*(=|\+=|-=|\*=|\/=)\s*\S'
         return re.search(pattern=pattern, string=line) is not None

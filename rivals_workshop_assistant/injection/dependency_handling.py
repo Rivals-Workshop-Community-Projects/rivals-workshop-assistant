@@ -99,7 +99,7 @@ def _remove_brackets(content):
     return content
 
 
-def _split_docs_and_gml(content: str) -> tuple[str, str]:
+def _split_docs_and_gml(content: str) -> t.Tuple[str, str]:
     lines = content.split("\n")
     non_docs_found = False
 
@@ -120,7 +120,7 @@ def _split_docs_and_gml(content: str) -> tuple[str, str]:
     return "\n".join(doc_lines), "\n".join(gml_lines)
 
 
-def _split_name_and_params(name: str) -> tuple[str, list[str]]:
+def _split_name_and_params(name: str) -> t.Tuple[str, t.List[str]]:
     name = name.strip()
     if "(" not in name:
         return name, []
