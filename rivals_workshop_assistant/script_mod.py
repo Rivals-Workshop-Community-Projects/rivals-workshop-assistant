@@ -1,4 +1,4 @@
-import functools
+from backports.cached_property import cached_property
 from pathlib import Path
 from datetime import datetime
 from typing import List
@@ -25,7 +25,7 @@ class Script(File):
 
         self.working_content = working_content
 
-    @functools.cached_property
+    @cached_property
     def original_content(self):
         if self._original_content is None:
             self._original_content = self.path.read_text(

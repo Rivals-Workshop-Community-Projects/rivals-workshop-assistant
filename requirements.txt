@@ -1,4 +1,5 @@
 Inflector
+backports.cached_property
 Pillow
 requests
 retrying
