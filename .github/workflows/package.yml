@@ -20,15 +20,7 @@ jobs:
       with:
           path: rivals_workshop_assistant
           spec: rivals_workshop_assistant.spec
-    - uses: actions/upload-artifact@v2
-      with:
-        name: warnings_file
-        path: /tmp\rivals_workshop_assistant\warn-rivals_workshop_assistant.txt
-    - uses: actions/upload-artifact@v2
-      with:
-        name: warnings_file2
-        path: rivals_workshop_assistant/warn-rivals_workshop_assistant.txt
-    
+   
     - name: Release
       uses: softprops/action-gh-release@v1
       env:
