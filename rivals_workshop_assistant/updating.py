@@ -209,7 +209,7 @@ class AssistantUpdater(Updater):
 
     def _get_release_to_install(self):
         assistant_releases = self.get_releases()
-        return assistant_releases[-1]
+        return max(assistant_releases)
 
     def _get_current_version_string(self) -> typing.Optional[str]:
         return get_assistant_version_string(self.dotfile)
