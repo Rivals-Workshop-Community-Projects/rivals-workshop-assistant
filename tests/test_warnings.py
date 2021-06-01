@@ -29,12 +29,12 @@ def test_get_warning_types():
         pytest.param(
             "post_draw",
             "global = 3",
-            f"global = 3{rivals_workshop_assistant.warning_handling.desync.ObjectVarSetInDrawScript.warning_text}",
+            f"global = 3{rivals_workshop_assistant.warning_handling.desync.ObjectVarSetInDrawScript.get_warning_text()}",
         ),
         pytest.param(
             "post_draw",
             "okay line\nglobal = 3\nalso fine",
-            f"okay line\nglobal = 3{rivals_workshop_assistant.warning_handling.desync.ObjectVarSetInDrawScript.warning_text}\nalso fine",
+            f"okay line\nglobal = 3{rivals_workshop_assistant.warning_handling.desync.ObjectVarSetInDrawScript.get_warning_text()}\nalso fine",
         ),
         pytest.param(
             "post_draw",
@@ -59,7 +59,7 @@ def test_get_warning_types():
         pytest.param(
             "post_draw",
             "a += 3",
-            f"a += 3{rivals_workshop_assistant.warning_handling.desync.ObjectVarSetInDrawScript.warning_text}",
+            f"a += 3{rivals_workshop_assistant.warning_handling.desync.ObjectVarSetInDrawScript.get_warning_text()}",
         ),
         pytest.param(
             "post_draw",
@@ -89,22 +89,22 @@ def test_handle_warn_setting_nonlocal_var_in_draw_script(
         pytest.param(
             "post_draw",
             f"if window_timer == 3",
-            f"if window_timer == 3{rivals_workshop_assistant.warning_handling.hitpause.CheckWindowTimerEqualsWithoutCheckHitpause.warning_text}",
+            f"if window_timer == 3{rivals_workshop_assistant.warning_handling.hitpause.CheckWindowTimerEqualsWithoutCheckHitpause.get_warning_text()}",
         ),
         pytest.param(
             "post_draw",
             f"if window_timer = 3",
-            f"if window_timer = 3{rivals_workshop_assistant.warning_handling.hitpause.CheckWindowTimerEqualsWithoutCheckHitpause.warning_text}",
+            f"if window_timer = 3{rivals_workshop_assistant.warning_handling.hitpause.CheckWindowTimerEqualsWithoutCheckHitpause.get_warning_text()}",
         ),
         pytest.param(
             "post_draw",
             f"if (window_timer == 3)",
-            f"if (window_timer == 3){rivals_workshop_assistant.warning_handling.hitpause.CheckWindowTimerEqualsWithoutCheckHitpause.warning_text}",
+            f"if (window_timer == 3){rivals_workshop_assistant.warning_handling.hitpause.CheckWindowTimerEqualsWithoutCheckHitpause.get_warning_text()}",
         ),
         pytest.param(
             "post_draw",
             f" if   (  window_timer   ==    3  )",
-            f" if   (  window_timer   ==    3  ){rivals_workshop_assistant.warning_handling.hitpause.CheckWindowTimerEqualsWithoutCheckHitpause.warning_text}",
+            f" if   (  window_timer   ==    3  ){rivals_workshop_assistant.warning_handling.hitpause.CheckWindowTimerEqualsWithoutCheckHitpause.get_warning_text()}",
         ),
         pytest.param(
             "post_draw",
@@ -136,22 +136,22 @@ def test_handle_warn_check_window_timer_eq_without_check_hitpause(
         pytest.param(
             "post_draw",
             f"if window_timer % 3 == 0",
-            f"if window_timer % 3 == 0{rivals_workshop_assistant.warning_handling.hitpause.CheckWindowTimerModuloWithoutCheckHitpause.warning_text}",
+            f"if window_timer % 3 == 0{rivals_workshop_assistant.warning_handling.hitpause.CheckWindowTimerModuloWithoutCheckHitpause.get_warning_text()}",
         ),
         pytest.param(
             "post_draw",
             f"if window_timer % 3 = 0",
-            f"if window_timer % 3 = 0{rivals_workshop_assistant.warning_handling.hitpause.CheckWindowTimerModuloWithoutCheckHitpause.warning_text}",
+            f"if window_timer % 3 = 0{rivals_workshop_assistant.warning_handling.hitpause.CheckWindowTimerModuloWithoutCheckHitpause.get_warning_text()}",
         ),
         pytest.param(
             "post_draw",
             f"if (window_timer % 3 == 0)",
-            f"if (window_timer % 3 == 0){rivals_workshop_assistant.warning_handling.hitpause.CheckWindowTimerModuloWithoutCheckHitpause.warning_text}",
+            f"if (window_timer % 3 == 0){rivals_workshop_assistant.warning_handling.hitpause.CheckWindowTimerModuloWithoutCheckHitpause.get_warning_text()}",
         ),
         pytest.param(
             "post_draw",
             f" if   (  window_timer   %    3  == 0 )",
-            f" if   (  window_timer   %    3  == 0 ){rivals_workshop_assistant.warning_handling.hitpause.CheckWindowTimerModuloWithoutCheckHitpause.warning_text}",
+            f" if   (  window_timer   %    3  == 0 ){rivals_workshop_assistant.warning_handling.hitpause.CheckWindowTimerModuloWithoutCheckHitpause.get_warning_text()}",
         ),
         pytest.param(
             "post_draw",

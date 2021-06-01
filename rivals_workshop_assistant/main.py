@@ -36,8 +36,14 @@ def main(given_dir: Path, guarantee_root_dir: bool = False):
     make_basic_folder_structure(root_dir)
 
     lock = FileLock(root_dir / paths.LOCKFILE_PATH)
-    with lock.acquire(timeout=1):
-        update_files(root_dir)
+    try:
+        with lock.acquire(timeout=2):
+            update_files(root_dir)
+    except TimeoutError:
+        print(
+            "WARN: Attempted to run assistant while an instance was already running."
+            "\n\tConsider deleting assitant/.lock if you believe this is in error."
+        )
 
 
 def update_files(root_dir):

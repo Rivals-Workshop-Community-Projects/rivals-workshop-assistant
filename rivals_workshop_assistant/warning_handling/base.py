@@ -41,12 +41,11 @@ class WarningType(abc.ABC):
     def write_warning(self, detection_lines: List[int], gml: str) -> str:
         lines = gml.split("\n")
         for line_num in detection_lines:
-            lines[line_num] += self.warning_text
+            lines[line_num] += self.get_warning_text()
         return "\n".join(lines)
 
     @classmethod
-    @property
-    def warning_text(cls) -> str:
+    def get_warning_text(cls) -> str:
         return WARNING_PREFIX + cls.warning_content
 
     def __eq__(self, other):
