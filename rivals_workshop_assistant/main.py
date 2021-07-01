@@ -42,7 +42,7 @@ def main(given_dir: Path, guarantee_root_dir: bool = False):
     except TimeoutError:
         print(
             "WARN: Attempted to run assistant while an instance was already running."
-            "\n\tConsider deleting assitant/.lock if you believe this is in error."
+            "\n\tConsider deleting assistant/.lock if you believe this is in error."
         )
 
 
