@@ -9,6 +9,7 @@ from rivals_workshop_assistant.assistant_config_mod import (
     WARNINGS_FIELD,
     WARNING_DESYNC_OBJECT_VAR_SET_IN_DRAW_SCRIPT_VALUE,
 )
+from rivals_workshop_assistant.warning_handling import _remove_warnings
 from tests.testing_helpers import make_script
 
 
@@ -174,3 +175,26 @@ def test_handle_warn_check_window_timer_mod_without_check_hitpause(
     assert script == make_script(
         path, original_content=original_content, working_content=expected_content
     )
+
+
+@pytest.mark.parametrize(
+    "original, expected",
+    [
+        pytest.param("nothing to do", "nothing to do"),
+        pytest.param(
+            f"if window_timer % 3 == 0{rivals_workshop_assistant.warning_handling.hitpause.CheckWindowTimerModuloWithoutCheckHitpause.get_warning_text()}",
+            f"if window_timer % 3 == 0",
+        ),
+        pytest.param(
+            f"blah                {rivals_workshop_assistant.warning_handling.desync.ObjectVarSetInDrawScript.get_warning_text()}",
+            f"blah                ",
+        ),
+        pytest.param(
+            f"twice! {rivals_workshop_assistant.warning_handling.desync.ObjectVarSetInDrawScript.get_warning_text()}{rivals_workshop_assistant.warning_handling.desync.ObjectVarSetInDrawScript.get_warning_text()}",
+            f"twice! ",
+        ),
+    ],
+)
+def test__remove_warnings(original, expected):
+    actual = _remove_warnings(original)
+    assert actual == expected

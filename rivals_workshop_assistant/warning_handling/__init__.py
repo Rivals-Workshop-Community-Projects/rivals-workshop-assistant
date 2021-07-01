@@ -20,9 +20,7 @@ def _apply_warnings_to_script(script: Script, warning_types: Set[WarningType]):
 
 
 def _remove_warnings(script_content: str) -> str:
-    return re.sub(
-        pattern=fr"{WARNING_PREFIX}:.*(\n|$)", repl="\n", string=script_content
-    )
+    return re.sub(pattern=fr"{WARNING_PREFIX}.*(\n|$)", repl="", string=script_content)
 
 
 def _apply_warning_to_script(script: Script, warning_type: WarningType):
