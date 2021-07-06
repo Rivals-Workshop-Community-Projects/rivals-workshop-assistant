@@ -196,6 +196,41 @@ def test__make_basic_folder_structure__config_present():
         assert actual == "a"
 
 
+def test__make_basic_folder_structure__overwrites_config():
+    with TempDirectory() as root_dir:
+        with TempDirectory() as exe_dir:
+            # ARRANGE
+            exe_config_path = (
+                Path(exe_dir.path)
+                / rivals_workshop_assistant.assistant_config_mod.FILENAME
+            )
+
+            default_override = "field: value"
+            create_script(
+                exe_dir, ScriptWithPath(path=exe_config_path, content=default_override)
+            )
+
+            # ACT
+            make_basic_folder_structure(
+                exe_dir=Path(exe_dir.path), root_dir=Path(root_dir.path)
+            )
+
+            ## ASSERT
+            project_config_path = (
+                Path(root_dir.path)
+                / rivals_workshop_assistant.assistant_config_mod.PATH
+            )
+
+            actual = info_files.YAML_HANDLER.load(project_config_path.read_text())
+
+            expected = info_files.YAML_HANDLER.load(
+                rivals_workshop_assistant.assistant_config_mod.DEFAULT_CONFIG
+            )
+            expected.update(info_files.YAML_HANDLER.load(default_override))
+
+            assert actual == expected
+
+
 def test__read_aseprites():
     with TempDirectory() as tmp:
         supply_aseprites(tmp, TEST_ANIM_NAME)
