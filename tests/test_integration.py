@@ -215,7 +215,7 @@ def test__make_basic_folder_structure__overwrites_config():
                 exe_dir=Path(exe_dir.path), root_dir=Path(root_dir.path)
             )
 
-            ## ASSERT
+            # ASSERT
             project_config_path = (
                 Path(root_dir.path)
                 / rivals_workshop_assistant.assistant_config_mod.PATH
