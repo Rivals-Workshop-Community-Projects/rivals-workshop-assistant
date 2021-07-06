@@ -14,9 +14,26 @@ PATH = ASSISTANT_FOLDER / FILENAME
 ASEPRITE_PATH_FIELD = "aseprite_path"
 
 
-def read(root_dir: Path) -> dict:
+def read_project_config(root_dir: Path) -> dict:
     """Controller"""
     return info_files.read(root_dir / PATH)
+
+
+def make_default_override(exe_dir: Path, content: str):
+    info_files.create_file(path=(exe_dir / FILENAME), content=content)
+
+
+def read_default_override(exe_dir: Path) -> dict:
+    """Read the config from the exe directory, used to overwrite the default config"""
+    return info_files.read(exe_dir / FILENAME)
+
+
+def overwrite_default_config(
+    initial_default_config: dict, user_default_config_override: dict
+) -> dict:
+    result = initial_default_config.copy()
+    result.update(user_default_config_override)
+    return result
 
 
 class UpdateLevel(enum.Enum):
@@ -69,20 +86,28 @@ WARNING_CHECK_WINDOW_TIMER_WITHOUT_CHECK_HITPAUSE = (
 )
 WARNING_RECURSIVE_SET_ATTACK = "recursive_set_attack"
 
+
+def get_initial_default_config() -> dict:
+    return info_files.YAML_HANDLER.load(DEFAULT_CONFIG)
+
+
+def override_default_config(default_config, user_default_config_override):
+    raise NotImplementedError
+
+
 DEFAULT_CONFIG = f"""\
 # Format is <key name>: <value> (with a space after the : )
 # E.g.
 # update_level: patch
   
-# {ASEPRITE_PATH_FIELD}: <REPLACE ME, and remove # from beginning of this line>
+{ASEPRITE_PATH_FIELD}: # FILL THIS IN TO USE ASEPRITE
     # Point this to your Aseprite.exe absolute path, for example: 
     # aseprite_path: C:/Program Files/Aseprite/aseprite.exe
     # This is needed for the assistant to automatically export your animations to spritesheets.
     # If you use Steam for Aseprite, you can find the path with:
     #   The aseprite page of your library, The gear icon at the top right,
     #   Manage, Browse Local Files, Copy the path of Aseprite.exe to the config.
-    
-    
+    #
     # Aseprite Tag Color Configs
     # Legal values are:
     #   black, red, orange, yellow, green, blue, purple, gray
@@ -108,12 +133,20 @@ DEFAULT_CONFIG = f"""\
     
 {ASSISTANT_SELF_UPDATE_FIELD}: {ASSISTANT_SELF_UPDATE_DEFAULT}
     # If the assistant should automatically receive behavior updates.
-    
+    #
 {WARNINGS_FIELD}: 
-  - {WARNING_DESYNC_OBJECT_VAR_SET_IN_DRAW_SCRIPT_VALUE}
-  - {WARNING_DESYNC_UNSAFE_CAMERA_READ_VALUE}
-  - {WARNING_CHECK_WINDOW_TIMER_WITHOUT_CHECK_HITPAUSE}
-  - {WARNING_RECURSIVE_SET_ATTACK}
+- {WARNING_DESYNC_OBJECT_VAR_SET_IN_DRAW_SCRIPT_VALUE}
+- {WARNING_DESYNC_UNSAFE_CAMERA_READ_VALUE}
+- {WARNING_CHECK_WINDOW_TIMER_WITHOUT_CHECK_HITPAUSE}
+- {WARNING_RECURSIVE_SET_ATTACK}
     # Comment out any warnings you want to disable with `#`.
     # Learn more about warnings at https://rivalslib.com/assistant/warnings/
 """
+
+
+def get_aseprite_path(assistant_config: dict) -> typing.Optional[Path]:
+    path_string = assistant_config.get(ASEPRITE_PATH_FIELD, None)
+    if path_string:
+        return Path(path_string)
+    else:
+        return None

@@ -127,3 +127,4 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+/rivals_workshop_assistant/assistant_config.yaml

@@ -21,7 +21,7 @@ from tests.testing_helpers import (
     get_aseprite_path,
     make_test_config,
 )
-from rivals_workshop_assistant import paths, injection
+from rivals_workshop_assistant import paths, injection, info_files
 from rivals_workshop_assistant.setup import make_basic_folder_structure
 from rivals_workshop_assistant.injection import apply_injection
 from rivals_workshop_assistant.paths import INJECT_FOLDER, USER_INJECT_FOLDER
@@ -82,7 +82,6 @@ injection_in_subfolder = ScriptWithPath(
 
 """,
 )
-
 
 func = Define(name="func", docs="some docs\nsome more docs", content="func content")
 another_func = Define(name="another_func", content="another func\ncontent")
@@ -170,12 +169,18 @@ def test_full_injection():
 
 def test__make_basic_folder_structure__make_missing_config():
     with TempDirectory() as tmp:
-        make_basic_folder_structure(Path(tmp.path))
+        make_basic_folder_structure(Path(tmp.path), Path(tmp.path))
 
-        actual = (
-            Path(tmp.path) / rivals_workshop_assistant.assistant_config_mod.PATH
-        ).read_text()
-        assert actual == rivals_workshop_assistant.assistant_config_mod.DEFAULT_CONFIG
+        actual = info_files.YAML_HANDLER.load(
+            (
+                Path(tmp.path) / rivals_workshop_assistant.assistant_config_mod.PATH
+            ).read_text()
+        )
+
+        expected = info_files.YAML_HANDLER.load(
+            rivals_workshop_assistant.assistant_config_mod.DEFAULT_CONFIG
+        )
+        assert actual == expected
 
 
 def test__make_basic_folder_structure__config_present():
@@ -185,7 +190,7 @@ def test__make_basic_folder_structure__config_present():
         )
         create_script(tmp, ScriptWithPath(path=config_path, content="a"))
 
-        make_basic_folder_structure(Path(tmp.path))
+        make_basic_folder_structure(Path(tmp.path), Path(tmp.path))
 
         actual = config_path.read_text()
         assert actual == "a"
@@ -362,7 +367,7 @@ def test__aseprites_set_window_data():
         create_script(tmp, bair)
         supply_aseprites(tmp, TEST_ANIM_NAME)
 
-        src.main(given_dir=root_dir, guarantee_root_dir=True)
+        src.main(exe_dir=root_dir, given_dir=root_dir, guarantee_root_dir=True)
 
         assert_anim(
             root_dir,
@@ -409,7 +414,7 @@ def test__backup_made():
             root_dir / paths.SPRITES_FOLDER,
         )
 
-        src.main(given_dir=root_dir, guarantee_root_dir=True)
+        src.main(exe_dir=root_dir, given_dir=root_dir, guarantee_root_dir=True)
         assert_anim(
             root_dir,
             filename=f"anim1_strip1.png",

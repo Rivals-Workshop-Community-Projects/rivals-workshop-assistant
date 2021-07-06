@@ -1,7 +1,6 @@
 import itertools
 import os
 import subprocess
-import typing
 from datetime import datetime
 from pathlib import Path
 
@@ -10,7 +9,6 @@ from ._aseprite_loading import RawAsepriteFile
 from ..file_handling import File, _get_modified_time
 from ..dotfile_mod import get_processed_time
 from .types import AsepriteTag, TagColor
-from ..assistant_config_mod import ASEPRITE_PATH_FIELD
 from ..script_mod import Script
 from typing import List
 
@@ -223,14 +221,6 @@ class Aseprite(File):
         path_parts = [path.name for path in reversed(subfolders)] + [name]
         base_name = "_".join(path_parts)
         return base_name
-
-
-def get_aseprite_path(assistant_config: dict) -> typing.Optional[Path]:
-    path_string = assistant_config.get(ASEPRITE_PATH_FIELD, None)
-    if path_string:
-        return Path(path_string)
-    else:
-        return None
 
 
 def read_aseprites(

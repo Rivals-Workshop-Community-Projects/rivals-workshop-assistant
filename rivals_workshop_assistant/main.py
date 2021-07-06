@@ -14,12 +14,12 @@ from rivals_workshop_assistant.character_config_mod import get_has_small_sprites
 from rivals_workshop_assistant.dotfile_mod import update_dotfile_after_saving
 from rivals_workshop_assistant.script_mod import read_scripts
 from rivals_workshop_assistant.aseprite_handling import (
-    get_aseprite_path,
     read_aseprites,
     get_anims,
     save_scripts,
     save_anims,
 )
+from rivals_workshop_assistant.assistant_config_mod import get_aseprite_path
 from rivals_workshop_assistant.asset_handling import get_required_assets, save_assets
 from rivals_workshop_assistant.setup import make_basic_folder_structure
 from rivals_workshop_assistant.injection import handle_injection
@@ -27,13 +27,14 @@ from rivals_workshop_assistant.code_generation import handle_codegen
 from rivals_workshop_assistant.warning_handling import handle_warning
 
 
-def main(given_dir: Path, guarantee_root_dir: bool = False):
-    """Runs all processes on scripts in the root_dir"""
+def main(exe_dir: Path, given_dir: Path, guarantee_root_dir: bool = False):
+    """Runs all processes on scripts in the root_dir
+    If guarantee_root_dir is true, it won't backtrack to find the root directory."""
     if guarantee_root_dir:
         root_dir = given_dir
     else:
         root_dir = get_root_dir(given_dir)
-    make_basic_folder_structure(root_dir)
+    make_basic_folder_structure(exe_dir, root_dir)
 
     lock = FileLock(root_dir / paths.LOCKFILE_PATH)
     try:
@@ -48,7 +49,7 @@ def main(given_dir: Path, guarantee_root_dir: bool = False):
 
 def update_files(root_dir):
     dotfile = dotfile_mod.read(root_dir)
-    assistant_config = assistant_config_mod.read(root_dir)
+    assistant_config = assistant_config_mod.read_project_config(root_dir)
     character_config = character_config_mod.read(root_dir)
 
     updating.update(root_dir=root_dir, dotfile=dotfile, config=assistant_config)
@@ -98,5 +99,6 @@ Files in current directory are: {file_names}"""
 
 
 if __name__ == "__main__":
+    exe_dir = Path(__file__).parent
     root_dir = Path(sys.argv[1])
-    main(root_dir)
+    main(exe_dir, root_dir)
