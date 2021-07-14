@@ -3,6 +3,7 @@ import os
 import subprocess
 from datetime import datetime
 from pathlib import Path
+from typing import List
 
 from rivals_workshop_assistant import paths, assistant_config_mod
 from ._aseprite_loading import RawAsepriteFile
@@ -10,7 +11,6 @@ from ..file_handling import File, _get_modified_time
 from ..dotfile_mod import get_processed_time
 from .types import AsepriteTag, TagColor
 from ..script_mod import Script
-from typing import List
 
 
 class TagObject:
@@ -30,18 +30,18 @@ class Window(TagObject):
 
     def _make_gml(self):
         return f"""\
-#macro {self.name.upper()}_FRAMES {self.end-self.start + 1}
+#macro {self.name.upper()}_FRAMES {self.end - self.start + 1}
 #macro {self.name.upper()}_FRAME_START {self.start}"""
 
 
 class Anim(TagObject):
     def __init__(
-        self,
-        name: str,
-        start: int,
-        end: int,
-        windows: List[Window] = None,
-        is_fresh=False,
+            self,
+            name: str,
+            start: int,
+            end: int,
+            windows: List[Window] = None,
+            is_fresh=False,
     ):
         """A part of an aseprite file representing a single spritesheet.
         An Aseprite file may contain multiple anims.
@@ -59,16 +59,61 @@ class Anim(TagObject):
     def __eq__(self, other):
         return self.name == other.name
 
+    def save(
+            self, root_dir: Path, aseprite_path: Path, aseprite_file_path: Path,
+            has_small_sprites: bool
+    ):
+        self._delete_old_save(root_dir, aseprite_file_path, self.name)
+        dest_name = (
+            f"{self.get_base_name(root_dir, aseprite_file_path, self.name)}"
+            f"_strip{self.num_frames}.png"
+        )
+        dest = root_dir / paths.SPRITES_FOLDER / dest_name
+
+        dest.parent.mkdir(parents=True, exist_ok=True)
+
+        if has_small_sprites:
+            scale_param = 2  # TODO this is wrong. Only character sprites and respawn are scaled
+        else:
+            scale_param = 1
+
+        command_parts = [
+            f'"{aseprite_path}"',
+            "-b",
+            f"--frame-range {self.start},{self.end}",
+            f'"{aseprite_file_path}"',
+            f"--scale {scale_param}",
+            f'--sheet "{dest}"',
+        ]
+
+        export_command = " ".join(command_parts)
+
+        subprocess.run(export_command)
+
+    def _delete_old_save(self, root_dir: Path, aseprite_file_path: Path, name: str):
+        old_paths = (root_dir / paths.SPRITES_FOLDER).glob(
+            f"{self.get_base_name(root_dir, aseprite_file_path, name)}_strip*.png"
+        )
+        for old_path in old_paths:
+            os.remove(old_path)
+
+    def get_base_name(self, root_dir: Path, aseprite_file_path: Path, name: str):
+        relative_path = aseprite_file_path.relative_to(root_dir / paths.ANIMS_FOLDER)
+        subfolders = list(relative_path.parents)[:-1]
+        path_parts = [path.name for path in reversed(subfolders)] + [name]
+        base_name = "_".join(path_parts)
+        return base_name
+
 
 class AsepriteData:
     def __init__(
-        self,
-        name: str,
-        num_frames: int,
-        anim_tag_color: TagColor,
-        window_tag_color: TagColor,
-        tags: List[AsepriteTag] = None,
-        is_fresh: bool = False,
+            self,
+            name: str,
+            num_frames: int,
+            anim_tag_color: TagColor,
+            window_tag_color: TagColor,
+            tags: List[AsepriteTag] = None,
+            is_fresh: bool = False,
     ):
         self.num_frames = num_frames
         if tags is None:
@@ -82,12 +127,12 @@ class AsepriteData:
 
     @classmethod
     def from_path(
-        cls,
-        name: str,
-        path: Path,
-        anim_tag_color: TagColor,
-        window_tag_color: TagColor,
-        is_fresh: bool,
+            cls,
+            name: str,
+            path: Path,
+            anim_tag_color: TagColor,
+            window_tag_color: TagColor,
+            is_fresh: bool,
     ):
         with open(path, "rb") as f:
             contents = f.read()
@@ -133,8 +178,8 @@ class AsepriteData:
             window
             for window in self.tags
             if window.color == self.window_tag_color
-            and start <= window.start <= end
-            and start <= window.end <= end
+               and start <= window.start <= end
+               and start <= window.end <= end
         ]
         windows = [
             Window(name=tag.name, start=tag.start - start + 1, end=tag.end - start + 1)
@@ -145,13 +190,13 @@ class AsepriteData:
 
 class Aseprite(File):
     def __init__(
-        self,
-        path: Path,
-        anim_tag_color: TagColor,
-        window_tag_color: TagColor,
-        modified_time: datetime,
-        processed_time: datetime = None,
-        content=None,
+            self,
+            path: Path,
+            anim_tag_color: TagColor,
+            window_tag_color: TagColor,
+            modified_time: datetime,
+            processed_time: datetime = None,
+            content=None,
     ):
         super().__init__(path, modified_time, processed_time)
         self.anim_tag_color = anim_tag_color
@@ -176,55 +221,14 @@ class Aseprite(File):
 
     def save(self, root_dir: Path, aseprite_path: Path, has_small_sprites: bool):
         for anim in self.content.anims:
-            self._save_anim(
-                anim=anim,
-                root_dir=root_dir,
-                aseprite_path=aseprite_path,
-                has_small_sprites=has_small_sprites,
-            )
-
-    def _save_anim(
-        self, anim: Anim, root_dir: Path, aseprite_path: Path, has_small_sprites: bool
-    ):
-        self._delete_old_save(root_dir, anim.name)
-        dest_name = (
-            f"{self.get_anim_base_name(root_dir, anim.name)}"
-            f"_strip{anim.num_frames}.png"
-        )
-        dest = root_dir / paths.SPRITES_FOLDER / dest_name
-
-        dest.parent.mkdir(parents=True, exist_ok=True)
-
-        command_parts = [
-            f'"{aseprite_path}"',
-            "-b",
-            f"--frame-range {anim.start},{anim.end}",
-            f'"{self.path}"',
-            f"--scale {int(has_small_sprites) + 1}",
-            f'--sheet "{dest}"',
-        ]
-
-        export_command = " ".join(command_parts)
-
-        subprocess.run(export_command)
-
-    def _delete_old_save(self, root_dir: Path, name: str):
-        old_paths = (root_dir / paths.SPRITES_FOLDER).glob(
-            f"{self.get_anim_base_name(root_dir, name)}_strip*.png"
-        )
-        for old_path in old_paths:
-            os.remove(old_path)
-
-    def get_anim_base_name(self, root_dir: Path, name: str):
-        relative_path = self.path.relative_to(root_dir / paths.ANIMS_FOLDER)
-        subfolders = list(relative_path.parents)[:-1]
-        path_parts = [path.name for path in reversed(subfolders)] + [name]
-        base_name = "_".join(path_parts)
-        return base_name
+            anim.save(root_dir=root_dir,
+                      aseprite_path=aseprite_path,
+                      aseprite_file_path=self.path,
+                      has_small_sprites=has_small_sprites)
 
 
 def read_aseprites(
-    root_dir: Path, dotfile: dict, assistant_config: dict
+        root_dir: Path, dotfile: dict, assistant_config: dict
 ) -> List[Aseprite]:
     ase_paths = itertools.chain(
         *[
@@ -261,10 +265,10 @@ def save_scripts(root_dir: Path, scripts: List[Script]):
 
 
 def save_anims(
-    root_dir: Path,
-    aseprite_path: Path,
-    aseprites: List[Aseprite],
-    has_small_sprites: bool,
+        root_dir: Path,
+        aseprite_path: Path,
+        aseprites: List[Aseprite],
+        has_small_sprites: bool,
 ):
     if not aseprite_path:
         return
