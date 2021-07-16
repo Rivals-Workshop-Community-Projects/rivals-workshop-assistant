@@ -261,17 +261,20 @@ def read_aseprites(
 
     aseprites = []
     for path in ase_paths:
-        aseprite = Aseprite(
-            path=path,
-            modified_time=_get_modified_time(path),
-            processed_time=get_processed_time(dotfile=dotfile, path=path),
-            anim_tag_color=assistant_config_mod.get_anim_tag_color(assistant_config),
-            window_tag_color=assistant_config_mod.get_window_tag_color(
-                assistant_config
-            ),
-        )
+        aseprite = read_aseprite(path, dotfile, assistant_config)
         aseprites.append(aseprite)
     return aseprites
+
+
+def read_aseprite(path: Path, dotfile: dict, assistant_config: dict):
+    aseprite = Aseprite(
+        path=path,
+        modified_time=_get_modified_time(path),
+        processed_time=get_processed_time(dotfile=dotfile, path=path),
+        anim_tag_color=assistant_config_mod.get_anim_tag_color(assistant_config),
+        window_tag_color=assistant_config_mod.get_window_tag_color(assistant_config),
+    )
+    return aseprite
 
 
 def get_anims(aseprites: List[Aseprite]) -> List[Anim]:
