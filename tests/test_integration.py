@@ -243,7 +243,7 @@ def test__read_aseprites():
         assert result[0].is_fresh
 
 
-def assert_anim(
+def assert_anim_matches_test_anim(
     root_dir,
     filename=f"{TEST_ANIM_NAME.stem}_strip3.png",
     has_small_sprites=False,
@@ -273,7 +273,7 @@ def test__save_aseprites(has_small_sprites):
             has_small_sprites=has_small_sprites,
         )
 
-        assert_anim(root_dir, has_small_sprites=has_small_sprites)
+        assert_anim_matches_test_anim(root_dir, has_small_sprites=has_small_sprites)
 
 
 @pytest.mark.aseprite
@@ -294,7 +294,7 @@ def test__save_aseprites__uses_subfolder_name():
             has_small_sprites=False,
         )
 
-        assert_anim(
+        assert_anim_matches_test_anim(
             root_dir,
             filename=f"{subfolder_name}_{TEST_ANIM_NAME.stem}_strip3.png",
             has_small_sprites=False,
@@ -375,14 +375,14 @@ def test__save_aseprites__multiple_aseprites():
             has_small_sprites=False,
         )
 
-        assert_anim(
+        assert_anim_matches_test_anim(
             root_dir,
             filename=f"anim1_strip1.png",
             has_small_sprites=False,
             num_frames=1,
         )
 
-        assert_anim(
+        assert_anim_matches_test_anim(
             root_dir,
             filename=f"bair_strip2.png",
             has_small_sprites=False,
@@ -404,14 +404,14 @@ def test__aseprites_set_window_data():
 
         src.main(exe_dir=root_dir, given_dir=root_dir, guarantee_root_dir=True)
 
-        assert_anim(
+        assert_anim_matches_test_anim(
             root_dir,
             filename=f"anim1_strip1.png",
             has_small_sprites=False,
             num_frames=1,
         )
 
-        assert_anim(
+        assert_anim_matches_test_anim(
             root_dir,
             filename=f"bair_strip2.png",
             has_small_sprites=False,
@@ -450,7 +450,7 @@ def test__backup_made():
         )
 
         src.main(exe_dir=root_dir, given_dir=root_dir, guarantee_root_dir=True)
-        assert_anim(
+        assert_anim_matches_test_anim(
             root_dir,
             filename=f"anim1_strip1.png",
             has_small_sprites=False,
