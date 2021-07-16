@@ -237,16 +237,20 @@ class Aseprite(File):
     def name(self):
         return self.path.stem
 
-    def save(self, root_dir: Path, aseprite_path: Path, has_small_sprites: bool):
+    def save(
+        self, root_dir: Path, aseprite_path: Path, has_small_sprites: bool = False
+    ):
         for anim in self.content.anims:
-            anim.save(root_dir=root_dir,
-                      aseprite_path=aseprite_path,
-                      aseprite_file_path=self.path,
-                      has_small_sprites=has_small_sprites)
+            anim.save(
+                root_dir=root_dir,
+                aseprite_path=aseprite_path,
+                aseprite_file_path=self.path,
+                has_small_sprites=has_small_sprites,
+            )
 
 
 def read_aseprites(
-        root_dir: Path, dotfile: dict, assistant_config: dict
+    root_dir: Path, dotfile: dict, assistant_config: dict
 ) -> List[Aseprite]:
     ase_paths = itertools.chain(
         *[
@@ -278,15 +282,16 @@ def get_anims(aseprites: List[Aseprite]) -> List[Anim]:
 
 
 def save_scripts(root_dir: Path, scripts: List[Script]):
+    # Why is this in aseprite_handling? Move?
     for script in scripts:
         script.save(root_dir)
 
 
 def save_anims(
-        root_dir: Path,
-        aseprite_path: Path,
-        aseprites: List[Aseprite],
-        has_small_sprites: bool,
+    root_dir: Path,
+    aseprite_path: Path,
+    aseprites: List[Aseprite],
+    has_small_sprites: bool,
 ):
     if not aseprite_path:
         return
