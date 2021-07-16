@@ -143,6 +143,9 @@ def make_canvas(width, height):
 
 
 def assert_images_equal(img1, img2):
+    assert img1.height == img2.height
+    assert img1.width == img2.width
+    assert img1.mode == img2.mode
     img1 = img1.convert("RGB")
     img2 = img2.convert("RGB")
     assert not ImageChops.difference(img1, img2).getbbox()
