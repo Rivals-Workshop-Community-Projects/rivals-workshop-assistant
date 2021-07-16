@@ -110,7 +110,13 @@ class Anim(TagObject):
             os.remove(old_path)
 
     def get_base_name(self, root_dir: Path, aseprite_file_path: Path, name: str):
-        relative_path = aseprite_file_path.relative_to(root_dir / paths.ANIMS_FOLDER)
+        try:
+            relative_path = aseprite_file_path.relative_to(
+                root_dir / paths.ANIMS_FOLDER
+            )
+        except ValueError:
+            # The aseprite file path isn't in the root dir, maybe because testing.
+            return name
         subfolders = list(relative_path.parents)[:-1]
         path_parts = [path.name for path in reversed(subfolders)] + [name]
         base_name = "_".join(path_parts)
