@@ -37,12 +37,12 @@ class Window(TagObject):
 
 class Anim(TagObject):
     def __init__(
-            self,
-            name: str,
-            start: int,
-            end: int,
-            windows: List[Window] = None,
-            is_fresh=False,
+        self,
+        name: str,
+        start: int,
+        end: int,
+        windows: List[Window] = None,
+        is_fresh=False,
     ):
         """A part of an aseprite file representing a single spritesheet.
         An Aseprite file may contain multiple anims.
@@ -61,8 +61,11 @@ class Anim(TagObject):
         return self.name == other.name
 
     def save(
-            self, root_dir: Path, aseprite_path: Path, aseprite_file_path: Path,
-            has_small_sprites: bool
+        self,
+        root_dir: Path,
+        aseprite_path: Path,
+        aseprite_file_path: Path,
+        has_small_sprites: bool,
     ):
         self._delete_old_save(root_dir, aseprite_file_path, self.name)
         dest_name = (
@@ -116,13 +119,13 @@ class Anim(TagObject):
 
 class AsepriteData:
     def __init__(
-            self,
-            name: str,
-            num_frames: int,
-            anim_tag_color: TagColor,
-            window_tag_color: TagColor,
-            tags: List[AsepriteTag] = None,
-            is_fresh: bool = False,
+        self,
+        name: str,
+        num_frames: int,
+        anim_tag_color: TagColor,
+        window_tag_color: TagColor,
+        tags: List[AsepriteTag] = None,
+        is_fresh: bool = False,
     ):
         self.num_frames = num_frames
         if tags is None:
@@ -136,12 +139,12 @@ class AsepriteData:
 
     @classmethod
     def from_path(
-            cls,
-            name: str,
-            path: Path,
-            anim_tag_color: TagColor,
-            window_tag_color: TagColor,
-            is_fresh: bool,
+        cls,
+        name: str,
+        path: Path,
+        anim_tag_color: TagColor,
+        window_tag_color: TagColor,
+        is_fresh: bool,
     ):
         with open(path, "rb") as f:
             contents = f.read()
@@ -187,8 +190,8 @@ class AsepriteData:
             window
             for window in self.tags
             if window.color == self.window_tag_color
-               and start <= window.start <= end
-               and start <= window.end <= end
+            and start <= window.start <= end
+            and start <= window.end <= end
         ]
         windows = [
             Window(name=tag.name, start=tag.start - start + 1, end=tag.end - start + 1)
@@ -199,13 +202,13 @@ class AsepriteData:
 
 class Aseprite(File):
     def __init__(
-            self,
-            path: Path,
-            anim_tag_color: TagColor,
-            window_tag_color: TagColor,
-            modified_time: datetime,
-            processed_time: datetime = None,
-            content=None,
+        self,
+        path: Path,
+        anim_tag_color: TagColor,
+        window_tag_color: TagColor,
+        modified_time: datetime = None,
+        processed_time: datetime = None,
+        content=None,
     ):
         super().__init__(path, modified_time, processed_time)
         self.anim_tag_color = anim_tag_color
