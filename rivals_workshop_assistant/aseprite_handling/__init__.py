@@ -7,6 +7,7 @@ from typing import List
 
 from rivals_workshop_assistant import paths, assistant_config_mod
 from ._aseprite_loading import RawAsepriteFile
+from .constants import ANIMS_WHICH_CARE_ABOUT_SMALL_SPRITES
 from ..file_handling import File, _get_modified_time
 from ..dotfile_mod import get_processed_time
 from .types import AsepriteTag, TagColor
@@ -72,10 +73,10 @@ class Anim(TagObject):
 
         dest.parent.mkdir(parents=True, exist_ok=True)
 
-        if has_small_sprites:
-            scale_param = 2  # TODO this is wrong. Only character sprites and respawn are scaled
-        else:
+        if has_small_sprites and self._cares_about_small_sprites():
             scale_param = 1
+        else:
+            scale_param = 2
 
         command_parts = [
             f'"{aseprite_path}"',
@@ -89,6 +90,14 @@ class Anim(TagObject):
         export_command = " ".join(command_parts)
 
         subprocess.run(export_command)
+
+    def _cares_about_small_sprites(self):
+        return self.name in ANIMS_WHICH_CARE_ABOUT_SMALL_SPRITES
+
+    def _save_hurtbox(self):
+        # If this anim has a hurtbox
+        # and saving hurtboxes is enabled
+        pass
 
     def _delete_old_save(self, root_dir: Path, aseprite_file_path: Path, name: str):
         old_paths = (root_dir / paths.SPRITES_FOLDER).glob(
