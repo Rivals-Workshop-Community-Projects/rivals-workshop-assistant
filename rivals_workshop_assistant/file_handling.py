@@ -22,9 +22,12 @@ class File:
     def __init__(
         self,
         path: Path,
-        modified_time: datetime,
+        modified_time: datetime = None,
         processed_time: datetime = None,
     ):
+        if modified_time is None:
+            modified_time = _get_modified_time(path)
+
         self.path = path
         self.is_fresh = _get_is_fresh(processed_time, modified_time)
 
