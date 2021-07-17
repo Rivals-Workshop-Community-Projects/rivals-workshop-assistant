@@ -95,6 +95,14 @@ def override_default_config(default_config, user_default_config_override):
     raise NotImplementedError
 
 
+GENERATE_HURTBOXES_FIELD = "generate_hurtboxes"
+GENERATE_HURTBOXES_DEFAULT = False
+
+
+def get_hurtboxes_enabled(config: dict):
+    return config.get(GENERATE_HURTBOXES_FIELD, False)
+
+
 DEFAULT_CONFIG = f"""\
 # Format is <key name>: <value> (with a space after the : )
 # E.g.
@@ -119,6 +127,10 @@ DEFAULT_CONFIG = f"""\
     # The color of Aseprite tag representing an attack window.
     # If a tag of this color is found, it will be used to add animation meta-data to the 
     # bottom of the attack's script.
+
+{GENERATE_HURTBOXES_FIELD}: {GENERATE_HURTBOXES_DEFAULT}
+    # If the assistant should automatically generate hurtboxes from your anim files.
+    # See TODO PUT A LINK TO THE ASSISTANT. TELL QAZZQUIMBY ON DISCORD IF HE FORGETS TO REPLACE THIS!
 
 {LIBRARY_UPDATE_LEVEL_FIELD}: {LIBRARY_UPDATE_LEVEL_DEFAULT.value}
     # What kind of library updates to allow. 

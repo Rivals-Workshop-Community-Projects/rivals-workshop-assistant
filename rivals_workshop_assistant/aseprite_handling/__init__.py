@@ -70,6 +70,7 @@ class Anim(TagObject):
         aseprite_path: Path,
         aseprite_file_path: Path,
         has_small_sprites: bool,
+        hurtboxes_enabled: bool,
     ):
         self._delete_old_save(root_dir, aseprite_file_path, self.name)
         dest_name = (
@@ -244,7 +245,11 @@ class Aseprite(File):
         return self.path.stem
 
     def save(
-        self, root_dir: Path, aseprite_path: Path, has_small_sprites: bool = False
+        self,
+        root_dir: Path,
+        aseprite_path: Path,
+        has_small_sprites: bool = False,
+        hurtboxes_enabled=False,
     ):
         for anim in self.content.anims:
             anim.save(
@@ -252,6 +257,7 @@ class Aseprite(File):
                 aseprite_path=aseprite_path,
                 aseprite_file_path=self.path,
                 has_small_sprites=has_small_sprites,
+                hurtboxes_enabled=hurtboxes_enabled,
             )
 
 
@@ -301,6 +307,7 @@ def save_anims(
     aseprite_path: Path,
     aseprites: List[Aseprite],
     has_small_sprites: bool,
+    hurtboxes_enabled: bool,
 ):
     if not aseprite_path:
         return
@@ -310,4 +317,5 @@ def save_anims(
                 root_dir=root_dir,
                 aseprite_path=aseprite_path,
                 has_small_sprites=has_small_sprites,
+                hurtboxes_enabled=hurtboxes_enabled,
             )

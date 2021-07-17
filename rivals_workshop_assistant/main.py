@@ -19,7 +19,10 @@ from rivals_workshop_assistant.aseprite_handling import (
     save_scripts,
     save_anims,
 )
-from rivals_workshop_assistant.assistant_config_mod import get_aseprite_path
+from rivals_workshop_assistant.assistant_config_mod import (
+    get_aseprite_path,
+    get_hurtboxes_enabled,
+)
 from rivals_workshop_assistant.asset_handling import get_required_assets, save_assets
 from rivals_workshop_assistant.setup import make_basic_folder_structure
 from rivals_workshop_assistant.injection import handle_injection
@@ -72,6 +75,7 @@ def update_files(root_dir):
         has_small_sprites=get_has_small_sprites(
             scripts=scripts, character_config=character_config
         ),
+        hurtboxes_enabled=get_hurtboxes_enabled(config=assistant_config),
     )
     update_dotfile_after_saving(
         now=datetime.datetime.now(), dotfile=dotfile, files=scripts + aseprites
