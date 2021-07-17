@@ -7,7 +7,7 @@ from typing import List
 
 from rivals_workshop_assistant import paths, assistant_config_mod
 from ._aseprite_loading import RawAsepriteFile
-from .constants import ANIMS_WHICH_CARE_ABOUT_SMALL_SPRITES
+from .constants import ANIMS_WHICH_CARE_ABOUT_SMALL_SPRITES, HURTMASK_LAYER_NAME
 from ..file_handling import File, _get_modified_time
 from ..dotfile_mod import get_processed_time
 from .types import AsepriteTag, TagColor
@@ -85,6 +85,7 @@ class Anim(TagObject):
             f'"{aseprite_path}"',
             "-b",
             f"--frame-range {self.start},{self.end}",
+            f"--ignore-layer {HURTMASK_LAYER_NAME}",
             f'"{aseprite_file_path}"',
             f"--scale {scale_param}",
             f'--sheet "{dest}"',

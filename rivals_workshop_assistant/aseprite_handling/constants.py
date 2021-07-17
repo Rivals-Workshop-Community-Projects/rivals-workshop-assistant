@@ -1,3 +1,5 @@
+HURTMASK_LAYER_NAME = "HURTMASK"
+
 ANIMS_WHICH_CARE_ABOUT_SMALL_SPRITES = {
     "idle",
     "walk",
