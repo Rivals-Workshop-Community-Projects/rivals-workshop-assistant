@@ -85,6 +85,11 @@ def assert_aseprite_saves_right_anims(
             ["1frame_hurtmask_strip1"],
             ["1frame"],
         ),
+        pytest.param(
+            "1frame_hurtbox_layer",
+            ["1frame_hurtbox_layer_strip1"],
+            ["1frame"],
+        ),
     ],
 )
 @pytest.mark.aseprite
@@ -142,8 +147,6 @@ def test_aseprite_save__small_sprites(
     )
 
 
-# Standard export
-#   With hurtbox mask, should be hidden
 # Hurtbox export
 #       With hurtbox mask, should mask
 #       With multiple anims
