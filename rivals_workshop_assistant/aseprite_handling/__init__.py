@@ -11,6 +11,7 @@ from .constants import (
     ANIMS_WHICH_CARE_ABOUT_SMALL_SPRITES,
     HURTMASK_LAYER_NAME,
     HURTBOX_LAYER_NAME,
+    ANIMS_WHICH_GET_HURTBOXES,
 )
 from ..file_handling import File, _get_modified_time
 from ..dotfile_mod import get_processed_time
@@ -78,7 +79,6 @@ class Anim(TagObject):
             f"_strip{self.num_frames}.png"
         )
         dest = root_dir / paths.SPRITES_FOLDER / dest_name
-
         dest.parent.mkdir(parents=True, exist_ok=True)
 
         if has_small_sprites and self._cares_about_small_sprites():
@@ -96,22 +96,57 @@ class Anim(TagObject):
             f"--scale {scale_param}",
             f'--sheet "{dest}"',
         ]
-
         export_command = " ".join(command_parts)
+        subprocess.run(export_command)
 
+        # if hurtboxes_enabled and self._gets_a_hurtbox():
+        #     self._delete_old_hurtbox_save(root_dir, aseprite_file_path, self.name)
+        #     self._save_hurtbox(
+        #         root_dir,
+        #         aseprite_file_path=aseprite_file_path,
+        #         aseprite_path=aseprite_path,
+        #     )
+
+    def _save_hurtbox(self, root_dir, aseprite_file_path, aseprite_path):
+        dest_name = (
+            f"{self.get_base_name(root_dir, aseprite_file_path, self.name)}"
+            f"_hurt_strip{self.num_frames}.png"
+        )
+        dest = root_dir / paths.SPRITES_FOLDER / dest_name
+
+        scale = 2
+
+        command_parts = [
+            f'"{aseprite_path}"',
+            "-b",
+            f"--frame-range {self.start},{self.end}",
+            f"--script filename.lua",
+            f'"{aseprite_file_path}"',
+            f"--scale {2}",
+            f'--sheet "{dest}"',
+        ]
+        export_command = " ".join(command_parts)
         subprocess.run(export_command)
 
     def _cares_about_small_sprites(self):
         return self.name in ANIMS_WHICH_CARE_ABOUT_SMALL_SPRITES
 
-    def _save_hurtbox(self):
-        # If this anim has a hurtbox
-        # and saving hurtboxes is enabled
-        pass
+    def _gets_a_hurtbox(self):
+        return self.name in ANIMS_WHICH_GET_HURTBOXES
 
     def _delete_old_save(self, root_dir: Path, aseprite_file_path: Path, name: str):
         old_paths = (root_dir / paths.SPRITES_FOLDER).glob(
             f"{self.get_base_name(root_dir, aseprite_file_path, name)}_strip*.png"
+        )
+        for old_path in old_paths:
+            os.remove(old_path)
+
+    # TODO CLEAN DUPLICATION
+    def _delete_old_hurtbox_save(
+        self, root_dir: Path, aseprite_file_path: Path, name: str
+    ):
+        old_paths = (root_dir / paths.SPRITES_FOLDER).glob(
+            f"{self.get_base_name(root_dir, aseprite_file_path, name)}_hurt_strip*.png"
         )
         for old_path in old_paths:
             os.remove(old_path)

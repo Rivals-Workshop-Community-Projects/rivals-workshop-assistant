@@ -96,11 +96,11 @@ def override_default_config(default_config, user_default_config_override):
 
 
 GENERATE_HURTBOXES_FIELD = "generate_hurtboxes"
-GENERATE_HURTBOXES_DEFAULT = False
+GENERATE_HURTBOXES_DEFAULT = True
 
 
 def get_hurtboxes_enabled(config: dict):
-    return config.get(GENERATE_HURTBOXES_FIELD, False)
+    return config.get(GENERATE_HURTBOXES_FIELD, GENERATE_HURTBOXES_DEFAULT)
 
 
 DEFAULT_CONFIG = f"""\

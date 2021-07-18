@@ -1,6 +1,31 @@
 HURTMASK_LAYER_NAME = "HURTMASK"
 HURTBOX_LAYER_NAME = "HURTBOX"
 
+ANIMS_WHICH_GET_HURTBOXES = {
+    "jab",
+    "dattack",
+    "nspecial",
+    "nspecial_air",
+    "fspecial",
+    "fspecial_air",
+    "dspecial",
+    "dspecial_air",
+    "uspecial",
+    "uspecial_air",
+    "fstrong",
+    "ustrong",
+    "dstrong",
+    "ftilt",
+    "utilt",
+    "dtilt",
+    "nair",
+    "fair",
+    "bair",
+    "dair",
+    "uair",
+}
+
+
 ANIMS_WHICH_CARE_ABOUT_SMALL_SPRITES = {
     "idle",
     "walk",
