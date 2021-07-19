@@ -86,15 +86,20 @@ class Anim(TagObject):
         else:
             scale_param = 2
 
+        EXPORT_ASEPRITE_SCRIPT = Path(
+            "rivals_workshop_assistant/"
+            "aseprite_handling/_aseprite_loading/lua_scripts/"
+            "export_aseprite.lua"
+        )
         command_parts = [
             f'"{aseprite_path}"',
             "-b",
-            f"--frame-range {self.start},{self.end}",
-            f"--ignore-layer {HURTMASK_LAYER_NAME}",
-            f"--ignore-layer {HURTBOX_LAYER_NAME}",
-            f'"{aseprite_file_path}"',
-            f"--scale {scale_param}",
-            f'--sheet "{dest}"',
+            f"-script-param filename={aseprite_file_path}",
+            f"-script-param dest={dest}",
+            f"-script-param startFrame={self.start+1}",
+            f"-script-param endFrame={self.end+1}",
+            f"-script-param scale={scale_param}",
+            f"-script {EXPORT_ASEPRITE_SCRIPT}",
         ]
         export_command = " ".join(command_parts)
         subprocess.run(export_command)
