@@ -94,7 +94,7 @@ class Anim(TagObject):
                 aseprite_file_path=aseprite_file_path,
                 aseprite_path=aseprite_path,
                 base_name=f"{root_name}_hurt",
-                script_name="generate_hurtbox.lua",
+                script_name="create_hurtbox.lua",
             )
 
     def _run_lua_export(

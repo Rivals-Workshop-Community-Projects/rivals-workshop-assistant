@@ -1,18 +1,50 @@
---app.command.DeveloperConsole()
+local sprite = app.open(app.params["filename"])
 
-local start_frame = 1
-local end_frame = 3
+local startFrame = tonumber(app.params["startFrame"])
+local endFrame = tonumber(app.params["endFrame"])
+local scale = 2
 
-
-
-local sprite = app.activeSprite
-if not sprite then
-    return
+local hurtmaskLayer = nil
+local hurtboxLayer = nil
+local content_layers = {}
+for _, layer in ipairs(sprite.layers) do
+    if layer.name == "HURTMASK" then
+        hurtmaskLayer = layer
+    elseif layer.name == "HURTBOX" then
+        hurtboxLayer = layer
+    else
+        if layer.isVisible then
+            table.insert(content_layers, layer)
+        else
+            app.range.layers = { layer }
+            app.command.removeLayer()
+        end
+    end
 end
 
-local function is_hurtmask(layer)
-    return layer.name == "HURTMASK"
+local irrelevantFrames = {}
+local workingFrames = {}
+for frameIndex, frame in ipairs(sprite.frames) do
+    if startFrame <= frameIndex  and frameIndex <= endFrame then
+        table.insert(workingFrames, frame)
+    else
+        table.insert(irrelevantFrames, frame)
+    end
 end
+
+if #irrelevantFrames > 0 then
+    app.range.frames = irrelevantFrames
+    app.command.RemoveFrame()
+end
+
+
+app.activeSprite = sprite
+
+app.command.SpriteSize {
+    scaleX=scale,
+    scaleY=scale,
+}
+
 
 local function is_non_transparent(pixel)
     return pixel() > 0
@@ -28,8 +60,6 @@ local function select_content(layer, frameNumber)
 
     local points = {}
     for pixel in cel.image:pixels() do
-        --local pixelValue = pixel() -- get pixel
-        --if app.pixelColor.rgbaA(pixelValue) > 0 then
         if is_non_transparent(pixel) then
             table.insert(points, Point(pixel.x + cel.position.x, pixel.y + cel.position.y))
         end
@@ -43,43 +73,32 @@ local function select_content(layer, frameNumber)
     return select
 end
 
---app.transaction(function()
-    -- Get hurtmask_layer and content_layers
-    local hurtmask_layer = nil
-    local content_layers = {}
+if hurtmaskLayer ~= nill then
+    hurtmaskLayer.isVisible = false
+end
+if hurtboxLayer ~= nill then
+    hurtboxLayer.isVisible = false
+end
+
+
+-- Flatten content_layers.
+app.range.layers = content_layers
+app.command.FlattenLayers()
+
+for _, frame in ipairs(sprite.frames) do
+    app.activeFrame = frame
+
+    -- Get content_layer
+    local content_layer = nil
     for _, layer in ipairs(sprite.layers) do
-        if is_hurtmask(layer) then
-            hurtmask_layer = layer
-        else
-            if layer.isVisible then
-                table.insert(content_layers, layer)
-            else
-                app.range.layers = { layer }
-                app.command.removeLayer()
-            end
+        if layer.name == "Flattened" then
+            content_layer = layer
         end
     end
+    assert(content_layer ~= nil, "no layer called Flattened")
 
-    hurtmask_layer.isVisible = false
-
-    -- Flatten content_layers.
-    app.range.layers = content_layers
-    app.command.FlattenLayers()
-
-    for frame = start_frame, end_frame do
-        app.activeFrame = frame
-
-        -- Get content_layer
-        local content_layer = nil
-        for _, layer in ipairs(sprite.layers) do
-            if layer.name == "Flattened" then
-                content_layer = layer
-            end
-        end
-        assert(content_layer ~= nil, "no layer called Flattened")
-
-        sprite.selection = select_content(hurtmask_layer, frame)
-
+    if hurtmaskLayer ~= nil then
+        sprite.selection = select_content(hurtmaskLayer, frame)
         app.activeLayer = content_layer
 
         app.command.ReplaceColor {
@@ -87,30 +106,22 @@ end
             to=Color{ r=0, g=0, b=0, a=0 },
             tolerance=255
         }
-
-        print(content_layer)
-
-        sprite.selection = select_content(content_layer, frame)
-
-
-        app.command.ReplaceColor {
-            ui=false,
-            to=Color{ r=0, g=255, b=0 },
-            tolerance=255
-        }
-
-        app.command.DeselectMask()
-
     end
 
+    app.activeLayer = content_layer
+    sprite.selection = select_content(content_layer, frame)
 
+    app.command.ReplaceColor {
+        ui=false,
+        to=Color{ r=0, g=255, b=0 },
+        tolerance=255
+    }
+    app.command.DeselectMask()
+end
 
-
-    -- delete the selection from the content
-    -- delete. Then unselect
-    -- Turn green!
-    -- Edit fill with the green color
-    -- Save
-
---end
---)
+app.command.ExportSpriteSheet {
+    ui=false,
+    askOverwrite=false,
+    type=SpriteSheetType.HORIZONTAL,
+    textureFilename=app.params["dest"],
+}

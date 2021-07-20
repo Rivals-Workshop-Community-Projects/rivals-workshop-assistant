@@ -152,33 +152,32 @@ def test_aseprite_save__small_sprites(
     )
 
 
-#
-# @pytest.mark.parametrize(
-#     "aseprite_file_name, "
-#     "save_file_names, "
-#     "expected_file_names, "
-#     "expected_missing_file_names",
-#     [
-#         pytest.param("1frame", [], [], ["1frame_hurt_strip1"]),
-#         pytest.param(
-#             "1frame_1bair", ["bair_hurt_strip1"], ["bair_hurt"], ["1frame_hurt_strip1"]
-#         ),
-#     ],
-# )
-# @pytest.mark.aseprite
-# def test_aseprite_save_hurtbox(
-#     aseprite_file_name,
-#     save_file_names,
-#     expected_file_names,
-#     expected_missing_file_names,
-# ):
-#     assert_aseprite_saves_right_anims(
-#         aseprite_file_name=aseprite_file_name,
-#         save_file_names=save_file_names,
-#         expected_file_names=expected_file_names,
-#         expected_missing_file_names=expected_missing_file_names,
-#         hurtboxes_enabled=True,
-#     )
+@pytest.mark.parametrize(
+    "aseprite_file_name, "
+    "save_file_names, "
+    "expected_file_names, "
+    "expected_missing_file_names",
+    [
+        pytest.param("1frame", [], [], ["1frame_hurt_strip1"]),
+        pytest.param(
+            "1frame_1bair", ["bair_hurt_strip1"], ["bair_hurt"], ["1frame_hurt_strip1"]
+        ),
+    ],
+)
+@pytest.mark.aseprite
+def test_aseprite_save_hurtbox(
+    aseprite_file_name,
+    save_file_names,
+    expected_file_names,
+    expected_missing_file_names,
+):
+    assert_aseprite_saves_right_anims(
+        aseprite_file_name=aseprite_file_name,
+        save_file_names=save_file_names,
+        expected_file_names=expected_file_names,
+        expected_missing_file_names=expected_missing_file_names,
+        hurtboxes_enabled=True,
+    )
 
 
 # Hurtbox export
