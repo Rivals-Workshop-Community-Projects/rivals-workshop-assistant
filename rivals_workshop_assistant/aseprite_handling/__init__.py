@@ -74,7 +74,7 @@ class Anim(TagObject):
         has_small_sprites: bool,
         hurtboxes_enabled: bool,
     ):
-
+        root_name = get_anim_file_name_root(root_dir, aseprite_file_path, self.name)
         if has_small_sprites and self._cares_about_small_sprites():
             scale_param = 1
         else:
@@ -83,7 +83,7 @@ class Anim(TagObject):
             root_dir=root_dir,
             aseprite_file_path=aseprite_file_path,
             aseprite_path=aseprite_path,
-            base_name=get_anim_file_name_root(root_dir, aseprite_file_path, self.name),
+            base_name=root_name,
             script_name="export_aseprite.lua",
             lua_params={"scale": scale_param},
         )
@@ -93,7 +93,7 @@ class Anim(TagObject):
                 root_dir=root_dir,
                 aseprite_file_path=aseprite_file_path,
                 aseprite_path=aseprite_path,
-                base_name=f"{get_anim_file_name_root(root_dir, aseprite_file_path, self.name)}_hurt",
+                base_name=f"{root_name}_hurt",
                 script_name="generate_hurtbox.lua",
             )
 
@@ -109,7 +109,7 @@ class Anim(TagObject):
         if lua_params is None:
             lua_params = {}
 
-        self._delete_old_saves(
+        _delete_paths_from_glob(
             root_dir,
             f"{base_name}" + "_strip*.png",
         )
@@ -141,10 +141,12 @@ class Anim(TagObject):
     def _gets_a_hurtbox(self):
         return self.name in ANIMS_WHICH_GET_HURTBOXES
 
-    def _delete_old_saves(self, root_dir: Path, paths_glob: str):
-        old_paths = (root_dir / paths.SPRITES_FOLDER).glob(paths_glob)
-        for old_path in old_paths:
-            os.remove(old_path)
+
+def _delete_paths_from_glob(root_dir: Path, paths_glob: str):
+    """Delete paths matching the glob"""
+    old_paths = (root_dir / paths.SPRITES_FOLDER).glob(paths_glob)
+    for old_path in old_paths:
+        os.remove(old_path)
 
 
 def get_anim_file_name_root(root_dir: Path, aseprite_file_path: Path, name: str) -> str:
@@ -227,6 +229,7 @@ class AsepriteData:
             start=start,
             end=end,
             windows=self.get_windows_in_frame_range(start=start, end=end),
+            is_fresh=is_fresh,
         )
 
     def get_windows_in_frame_range(self, start: int, end: int):
