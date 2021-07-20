@@ -10,11 +10,9 @@ for _, layer in ipairs(sprite.layers) do
         app.command.removeLayer()
     end
 end
---assert(#sprite.layers == 1)
 
 local irrelevantFrames = {}
 local workingFrames = {}
---for frameIndex = startFrame, endFrame do
 for frameIndex, frame in ipairs(sprite.frames) do
     if startFrame <= frameIndex  and frameIndex <= endFrame then
         table.insert(workingFrames, frame)
@@ -40,10 +38,5 @@ app.command.ExportSpriteSheet {
     ui=false,
     askOverwrite=false,
     type=SpriteSheetType.HORIZONTAL,
-    --columns=5,
-    --rows=0,
-    --width=0,
-    --height=0,
-    --dataFilename=app.params["dest"],
     textureFilename=app.params["dest"],
 }
