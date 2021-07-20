@@ -252,9 +252,14 @@ def assert_anim_matches_test_anim(
 ):
     """Right now this assumes that the sprite is the absa dashstart anim stored in
     TEST_ANIM_NAME"""
+    if has_small_sprites:
+        scale = 1
+    else:
+        scale = 2
+
     with Image.open(root_dir / sprites_folder / filename) as img:
-        assert img.height == 66 * (int(has_small_sprites) + 1)
-        assert img.width == 76 * num_frames * (int(has_small_sprites) + 1)
+        assert img.height == 33 * scale
+        assert img.width == 38 * num_frames * scale
 
 
 @pytest.mark.parametrize("has_small_sprites", [pytest.param(False), pytest.param(True)])

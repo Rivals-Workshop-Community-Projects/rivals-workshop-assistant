@@ -341,7 +341,7 @@ def save_anims(
     aseprite_path: Path,
     aseprites: List[Aseprite],
     has_small_sprites: bool,
-    hurtboxes_enabled: bool,
+    hurtboxes_enabled: bool = False,
 ):
     if not aseprite_path:
         return

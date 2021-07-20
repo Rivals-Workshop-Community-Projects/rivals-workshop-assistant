@@ -59,7 +59,7 @@ PATH_RELATIVE = Path("scripts/script_1.gml")
 TEST_DATETIME_STRING = "2019-12-04*09:34:22"
 TEST_LATER_DATETIME_STRING = "2019-12-05*10:31:20"
 
-TEST_ANIM_NAME = Path("testsprite.aseprite")
+TEST_ANIM_NAME = Path("nair.aseprite")
 
 
 def make_time(time_str=TEST_DATETIME_STRING):
@@ -92,7 +92,7 @@ def supply_aseprites(
 ):
     dest = Path(tmp.path) / relative_dest
     dest.mkdir(parents=True, exist_ok=True)
-    shutil.copy(Path("tests/assets" / name), dest)
+    shutil.copy(Path("tests/assets/sprites" / name), dest)
     return make_aseprite(
         path=dest / name,
         modified_time=modified_time,
