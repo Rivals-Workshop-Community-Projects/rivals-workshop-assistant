@@ -152,6 +152,7 @@ def test_aseprite_save__small_sprites(
     )
 
 
+#
 # @pytest.mark.parametrize(
 #     "aseprite_file_name, "
 #     "save_file_names, "

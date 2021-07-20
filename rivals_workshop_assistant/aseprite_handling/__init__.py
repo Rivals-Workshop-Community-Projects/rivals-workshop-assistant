@@ -16,6 +16,7 @@ from .constants import (
 from ..file_handling import File, _get_modified_time
 from ..dotfile_mod import get_processed_time
 from .types import AsepriteTag, TagColor
+from ..paths import ASEPRITE_LUA_SCRIPTS_PATH
 from ..script_mod import Script
 
 
@@ -73,63 +74,64 @@ class Anim(TagObject):
         has_small_sprites: bool,
         hurtboxes_enabled: bool,
     ):
-        self._delete_old_save(root_dir, aseprite_file_path, self.name)
-        dest_name = (
-            f"{self.get_base_name(root_dir, aseprite_file_path, self.name)}"
-            f"_strip{self.num_frames}.png"
-        )
-        dest = root_dir / paths.SPRITES_FOLDER / dest_name
-        dest.parent.mkdir(parents=True, exist_ok=True)
 
         if has_small_sprites and self._cares_about_small_sprites():
             scale_param = 1
         else:
             scale_param = 2
-
-        EXPORT_ASEPRITE_SCRIPT = Path(
-            "rivals_workshop_assistant/"
-            "aseprite_handling/_aseprite_loading/lua_scripts/"
-            "export_aseprite.lua"
+        self._run_lua_export(
+            root_dir=root_dir,
+            aseprite_file_path=aseprite_file_path,
+            aseprite_path=aseprite_path,
+            base_name=get_anim_file_name_root(root_dir, aseprite_file_path, self.name),
+            script_name="export_aseprite.lua",
+            lua_params={"scale": scale_param},
         )
-        command_parts = [
-            f'"{aseprite_path}"',
-            "-b",
-            f"-script-param filename={aseprite_file_path}",
-            f"-script-param dest={dest}",
-            f"-script-param startFrame={self.start+1}",
-            f"-script-param endFrame={self.end+1}",
-            f"-script-param scale={scale_param}",
-            f"-script {EXPORT_ASEPRITE_SCRIPT}",
-        ]
-        export_command = " ".join(command_parts)
-        subprocess.run(export_command)
 
-        # if hurtboxes_enabled and self._gets_a_hurtbox():
-        #     self._delete_old_hurtbox_save(root_dir, aseprite_file_path, self.name)
-        #     self._save_hurtbox(
-        #         root_dir,
-        #         aseprite_file_path=aseprite_file_path,
-        #         aseprite_path=aseprite_path,
-        #     )
+        if hurtboxes_enabled and self._gets_a_hurtbox():
+            self._run_lua_export(
+                root_dir=root_dir,
+                aseprite_file_path=aseprite_file_path,
+                aseprite_path=aseprite_path,
+                base_name=f"{get_anim_file_name_root(root_dir, aseprite_file_path, self.name)}_hurt",
+                script_name="generate_hurtbox.lua",
+            )
 
-    def _save_hurtbox(self, root_dir, aseprite_file_path, aseprite_path):
-        dest_name = (
-            f"{self.get_base_name(root_dir, aseprite_file_path, self.name)}"
-            f"_hurt_strip{self.num_frames}.png"
+    def _run_lua_export(
+        self,
+        root_dir: Path,
+        aseprite_file_path: Path,
+        aseprite_path: Path,
+        base_name: str,
+        script_name: str,
+        lua_params: dict = None,
+    ):
+        if lua_params is None:
+            lua_params = {}
+
+        self._delete_old_saves(
+            root_dir,
+            f"{base_name}" + "_strip*.png",
         )
+
+        dest_name = f"{base_name}" + f"_strip{self.num_frames}.png"
         dest = root_dir / paths.SPRITES_FOLDER / dest_name
+        dest.parent.mkdir(parents=True, exist_ok=True)
 
-        scale = 2
-
-        command_parts = [
-            f'"{aseprite_path}"',
-            "-b",
-            f"--frame-range {self.start},{self.end}",
-            f"--script filename.lua",
-            f'"{aseprite_file_path}"',
-            f"--scale {2}",
-            f'--sheet "{dest}"',
-        ]
+        command_parts = (
+            [
+                f'"{aseprite_path}"',
+                "-b",
+                f"-script-param filename={aseprite_file_path}",
+                f"-script-param dest={dest}",
+                f"-script-param startFrame={self.start + 1}",
+                f"-script-param endFrame={self.end + 1}",
+            ]
+            + [f"-script-param {key}={value}" for key, value in lua_params.items()]
+            + [
+                f"-script {ASEPRITE_LUA_SCRIPTS_PATH / script_name}",
+            ]
+        )
         export_command = " ".join(command_parts)
         subprocess.run(export_command)
 
@@ -139,35 +141,24 @@ class Anim(TagObject):
     def _gets_a_hurtbox(self):
         return self.name in ANIMS_WHICH_GET_HURTBOXES
 
-    def _delete_old_save(self, root_dir: Path, aseprite_file_path: Path, name: str):
-        old_paths = (root_dir / paths.SPRITES_FOLDER).glob(
-            f"{self.get_base_name(root_dir, aseprite_file_path, name)}_strip*.png"
-        )
+    def _delete_old_saves(self, root_dir: Path, paths_glob: str):
+        old_paths = (root_dir / paths.SPRITES_FOLDER).glob(paths_glob)
         for old_path in old_paths:
             os.remove(old_path)
 
-    # TODO CLEAN DUPLICATION
-    def _delete_old_hurtbox_save(
-        self, root_dir: Path, aseprite_file_path: Path, name: str
-    ):
-        old_paths = (root_dir / paths.SPRITES_FOLDER).glob(
-            f"{self.get_base_name(root_dir, aseprite_file_path, name)}_hurt_strip*.png"
-        )
-        for old_path in old_paths:
-            os.remove(old_path)
 
-    def get_base_name(self, root_dir: Path, aseprite_file_path: Path, name: str):
-        try:
-            relative_path = aseprite_file_path.relative_to(
-                root_dir / paths.ANIMS_FOLDER
-            )
-        except ValueError:
-            # The aseprite file path isn't in the root dir, maybe because testing.
-            return name
-        subfolders = list(relative_path.parents)[:-1]
-        path_parts = [path.name for path in reversed(subfolders)] + [name]
-        base_name = "_".join(path_parts)
-        return base_name
+def get_anim_file_name_root(root_dir: Path, aseprite_file_path: Path, name: str) -> str:
+    """Return the anim's name, prefixed with any subfolders the anim is in.
+    anims/vfx/hitfx/star.aseprite -> 'vfx_hitfx_star'"""
+    try:
+        relative_path = aseprite_file_path.relative_to(root_dir / paths.ANIMS_FOLDER)
+    except ValueError:
+        # The aseprite file path isn't in the root dir, maybe because testing.
+        return name
+    subfolders = list(relative_path.parents)[:-1]
+    path_parts = [path.name for path in reversed(subfolders)] + [name]
+    base_name = "_".join(path_parts)
+    return base_name
 
 
 class AsepriteData:
