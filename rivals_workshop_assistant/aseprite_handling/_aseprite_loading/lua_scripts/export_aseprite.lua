@@ -1,10 +1,16 @@
-
-
 local sprite = app.open(app.params["filename"])
 
 local startFrame = tonumber(app.params["startFrame"])
 local endFrame = tonumber(app.params["endFrame"])
 local scale = tonumber(app.params["scale"])
+
+for _, layer in ipairs(sprite.layers) do
+    if layer.name == "HURTMASK" or layer.name == "HURTBOX" then
+        app.range.layers = { layer }
+        app.command.removeLayer()
+    end
+end
+--assert(#sprite.layers == 1)
 
 local irrelevantFrames = {}
 local workingFrames = {}
