@@ -35,7 +35,7 @@ def assert_aseprite_saves_right_anims(
     hurtboxes_enabled: bool = False,
 ):
     if expected_missing_file_names is None:
-        expected_missing_file_names = []  # TODO ACTUALLY TEST THIS
+        expected_missing_file_names = []
     if dotfile is None:
         dotfile = {}
     if assistant_config is None:
@@ -65,6 +65,13 @@ def assert_aseprite_saves_right_anims(
                 expected_path
             ) as expected:
                 assert_images_equal(actual, expected)
+
+        for expected_missing_file_name in expected_missing_file_names:
+            expected_missing_path = (
+                root_dir / paths.SPRITES_FOLDER / f"{expected_missing_file_name}.png"
+            )
+            with pytest.raises(FileNotFoundError):
+                Image.open(expected_missing_path)
 
 
 @pytest.mark.parametrize(
@@ -170,6 +177,31 @@ def test_aseprite_save_hurtbox(
     save_file_names,
     expected_file_names,
     expected_missing_file_names,
+):
+    assert_aseprite_saves_right_anims(
+        aseprite_file_name=aseprite_file_name,
+        save_file_names=save_file_names,
+        expected_file_names=expected_file_names,
+        expected_missing_file_names=expected_missing_file_names,
+        hurtboxes_enabled=True,
+    )
+
+
+@pytest.mark.parametrize(
+    "aseprite_file_name, "
+    "save_file_names, "
+    "expected_file_names, "
+    "expected_missing_file_names",
+    [
+        pytest.param("fair", ["fair_hurt_strip1"], ["fair_hurt"], []),
+    ],
+)
+@pytest.mark.aseprite
+def test_aseprite_save_hurtbox__with_hurtmask(
+        aseprite_file_name,
+        save_file_names,
+        expected_file_names,
+        expected_missing_file_names,
 ):
     assert_aseprite_saves_right_anims(
         aseprite_file_name=aseprite_file_name,
