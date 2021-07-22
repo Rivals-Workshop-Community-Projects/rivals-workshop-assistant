@@ -194,14 +194,17 @@ def test_aseprite_save_hurtbox(
     "expected_missing_file_names",
     [
         pytest.param("fair", ["fair_hurt_strip1"], ["fair_hurt"], []),
+        pytest.param(
+            "1blah_1fair", ["fair_hurt_strip1"], ["fair_hurt"], ["blah_hurt_strip1"]
+        ),
     ],
 )
 @pytest.mark.aseprite
 def test_aseprite_save_hurtbox__with_hurtmask(
-        aseprite_file_name,
-        save_file_names,
-        expected_file_names,
-        expected_missing_file_names,
+    aseprite_file_name,
+    save_file_names,
+    expected_file_names,
+    expected_missing_file_names,
 ):
     assert_aseprite_saves_right_anims(
         aseprite_file_name=aseprite_file_name,
