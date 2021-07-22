@@ -4,7 +4,7 @@ import shutil
 from dataclasses import dataclass
 from pathlib import Path
 
-from PIL import Image, ImageChops
+from PIL import Image
 from testfixtures import TempDirectory
 
 import rivals_workshop_assistant.updating
@@ -146,9 +146,34 @@ def assert_images_equal(img1, img2):
     assert img1.height == img2.height
     assert img1.width == img2.width
     assert img1.mode == img2.mode
-    img1 = img1.convert("RGB")
-    img2 = img2.convert("RGB")
-    assert not ImageChops.difference(img1, img2).getbbox()
+    if img1.mode == img2.mode == "RGBA":
+        img1_alphas = [pixel[3] for pixel in img1.getdata()]
+        img2_alphas = [pixel[3] for pixel in img2.getdata()]
+        assert img1_alphas == img2_alphas
+    assert all(
+        are_pixels_equal(px1, px2) for px1, px2 in zip(img1.getdata(), img2.getdata())
+    )
+
+
+def get_px_alpha(px):
+    if len(px) == 4:
+        return px[3]
+    else:
+        return 255
+
+
+def are_pixels_equal(px1, px2):
+    alphas = [get_px_alpha(px) for px in (px1, px2)]
+    if alphas[0] != alphas[1]:
+        return False
+
+    if alphas[0] == 0:
+        return True  # They're both transparent, doesn't matter what their RGB is.
+
+    for color_index in range(3):
+        if px1[color_index] != px2[color_index]:
+            return False
+    return True
 
 
 def make_script(

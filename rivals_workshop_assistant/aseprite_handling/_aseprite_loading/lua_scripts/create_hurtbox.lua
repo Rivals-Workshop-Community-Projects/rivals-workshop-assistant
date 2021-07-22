@@ -31,20 +31,12 @@ for frameIndex, frame in ipairs(sprite.frames) do
         table.insert(irrelevantFrames, frame)
     end
 end
-
 if #irrelevantFrames > 0 then
     app.range.frames = irrelevantFrames
     app.command.RemoveFrame()
 end
 
-
 app.activeSprite = sprite
-
-app.command.SpriteSize {
-    scaleX=scale,
-    scaleY=scale,
-}
-
 
 local function is_non_transparent(pixel)
     return pixel() > 0
@@ -73,51 +65,73 @@ local function select_content(layer, frameNumber)
     return select
 end
 
-if hurtmaskLayer ~= nill then
-    hurtmaskLayer.isVisible = false
+local hurtmaskSelections = {}
+if hurtmaskLayer ~= nil then
+    for _, frame in ipairs(sprite.frames) do
+        local selection = select_content(hurtmaskLayer, frame)
+        table.insert(hurtmaskSelections, selection)
+    end
+    app.range.layers = { hurtmaskLayer }
+    app.command.removeLayer()
 end
-if hurtboxLayer ~= nill then
-    hurtboxLayer.isVisible = false
+
+if hurtboxLayer ~= nil then
+    hurtboxLayer.isVisible = False
 end
 
 
 -- Flatten content_layers.
 app.range.layers = content_layers
-app.command.FlattenLayers()
+app.command.FlattenLayers {
+    visibleOnly = True
+}
+
+-- Get content_layer
+local content_layer = nil
+for _, layer in ipairs(sprite.layers) do
+    if layer.name == "Flattened" then
+        content_layer = layer
+    end
+end
+assert(content_layer ~= nil, "no layer called Flattened")
+
+
+app.activeLayer = content_layer
+for i = 1, #hurtmaskSelections do
+    local layer = sprite.layers[i]
+    local selection = hurtmaskSelections[i]
+
+    app.range.layers = {layer}
+    sprite.selection = selection
+
+    app.command.ReplaceColor {
+        ui=false,
+        from=Color{r=255, g=255, b=255, a=255},
+        to=Color{ r=0, g=0, b=0, a=0},
+        tolerance=255
+    }
+    app.command.DeselectMask()
+end
+
 
 for _, frame in ipairs(sprite.frames) do
     app.activeFrame = frame
-
-    -- Get content_layer
-    local content_layer = nil
-    for _, layer in ipairs(sprite.layers) do
-        if layer.name == "Flattened" then
-            content_layer = layer
-        end
-    end
-    assert(content_layer ~= nil, "no layer called Flattened")
-
-    if hurtmaskLayer ~= nil then
-        sprite.selection = select_content(hurtmaskLayer, frame)
-        app.activeLayer = content_layer
-
-        app.command.ReplaceColor {
-            ui=false,
-            to=Color{ r=0, g=0, b=0, a=0 },
-            tolerance=255
-        }
-    end
 
     app.activeLayer = content_layer
     sprite.selection = select_content(content_layer, frame)
 
     app.command.ReplaceColor {
         ui=false,
-        to=Color{ r=0, g=255, b=0 },
+        from=Color{ r=255, g=255, b=255, a=255 },
+        to=Color{ r=0, g=255, b=0, a=255 },
         tolerance=255
     }
     app.command.DeselectMask()
 end
+
+app.command.SpriteSize {
+    scale=scale
+}
 
 app.command.ExportSpriteSheet {
     ui=false,
