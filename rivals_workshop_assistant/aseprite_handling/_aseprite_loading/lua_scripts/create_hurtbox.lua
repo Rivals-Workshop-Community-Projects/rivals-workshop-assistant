@@ -100,42 +100,38 @@ app.command.FlattenLayers {
 }
 
 -- Get content_layer
-local content_layer = nil
+local contentLayer = nil
 for _, layer in ipairs(sprite.layers) do
     if layer.name == "Flattened" then
-        content_layer = layer
+        contentLayer = layer
     end
 end
-assert(content_layer ~= nil, "no layer called Flattened")
+assert(contentLayer ~= nil, "no layer called Flattened")
 
 
-app.activeLayer = content_layer
-for i = 1, #hurtmaskSelections do
-    local layer = sprite.layers[i]
-    local selection = hurtmaskSelections[i]
-
-    app.range.layers = {layer}
-    sprite.selection = selection
+-- Delete hurtmaskSelections from content layer
+app.activeLayer = contentLayer
+for i, hurtmaskSelection in ipairs(hurtmaskSelections) do
+    app.activeFrame = sprite.frames[i]
+    app.range.frames = {sprite.frames[i]}
+    sprite.selection = hurtmaskSelection
 
     app.command.ReplaceColor {
         ui=false,
-        from=Color{r=255, g=255, b=255, a=255},
-        to=Color{ r=0, g=0, b=0, a=0},
+        to=Color{ r=0, g=0, b=0, a=0 },
         tolerance=255
     }
     app.command.DeselectMask()
 end
 
-
+-- Color the content layer green.
+app.activeLayer = contentLayer
 for _, frame in ipairs(sprite.frames) do
     app.activeFrame = frame
-
-    app.activeLayer = content_layer
-    sprite.selection = selectContent(content_layer, frame)
-
+    app.range.frames = {frame}
+    sprite.selection = selectContent(contentLayer, frame)
     app.command.ReplaceColor {
         ui=false,
-        from=Color{ r=255, g=255, b=255, a=255 },
         to=Color{ r=0, g=255, b=0, a=255 },
         tolerance=255
     }

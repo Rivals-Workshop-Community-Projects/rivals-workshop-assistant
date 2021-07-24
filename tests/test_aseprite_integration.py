@@ -197,6 +197,12 @@ def test_aseprite_save_hurtbox(
         pytest.param(
             "1blah_1fair", ["fair_hurt_strip1"], ["fair_hurt"], ["blah_hurt_strip1"]
         ),
+        pytest.param(
+            "1blah_2uair_1blah",
+            ["uair_hurt_strip2"],
+            ["uair_hurt"],
+            ["blah_hurt_strip1", "blah2_hurt_strip1"],
+        ),
     ],
 )
 @pytest.mark.aseprite
