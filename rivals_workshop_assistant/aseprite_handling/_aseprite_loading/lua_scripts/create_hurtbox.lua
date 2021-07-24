@@ -4,8 +4,14 @@ local startFrame = tonumber(app.params["startFrame"])
 local endFrame = tonumber(app.params["endFrame"])
 local scale = 2
 
+-- Hurtmask layer is subtracted from the hurtbox
 local hurtmaskLayer = nil
+
+-- Hurtbox layer, if present, is used as the initial hurtbox
+--  (rather than the sprite's silhouette)
 local hurtboxLayer = nil
+
+-- All the actual content of the sprite, not special purpose utility layers.
 local content_layers = {}
 for _, layer in ipairs(sprite.layers) do
     if layer.name == "HURTMASK" then
@@ -22,21 +28,20 @@ for _, layer in ipairs(sprite.layers) do
     end
 end
 
-local irrelevantFrames = {}
-local workingFrames = {}
+-- Deletes frames that aren't in the given range.
+local _irrelevantFrames = {}
+local _workingFrames = {}
 for frameIndex, frame in ipairs(sprite.frames) do
     if startFrame <= frameIndex  and frameIndex <= endFrame then
-        table.insert(workingFrames, frame)
+        table.insert(_workingFrames, frame)
     else
-        table.insert(irrelevantFrames, frame)
+        table.insert(_irrelevantFrames, frame)
     end
 end
-if #irrelevantFrames > 0 then
-    app.range.frames = irrelevantFrames
+if #_irrelevantFrames > 0 then
+    app.range.frames = _irrelevantFrames
     app.command.RemoveFrame()
 end
-
-app.activeSprite = sprite
 
 local function is_non_transparent(pixel)
     return pixel() > 0
