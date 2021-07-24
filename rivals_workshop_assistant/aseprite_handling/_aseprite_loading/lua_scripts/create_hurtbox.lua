@@ -70,15 +70,23 @@ local function select_content(layer, frameNumber)
     return select
 end
 
-local hurtmaskSelections = {}
-if hurtmaskLayer ~= nil then
-    for _, frame in ipairs(sprite.frames) do
-        local selection = select_content(hurtmaskLayer, frame)
-        table.insert(hurtmaskSelections, selection)
+
+local function convertLayerToSelections(layer)
+    selections = {}
+    if layer ~= nil then
+        for _, frame in ipairs(sprite.frames) do
+            local selection = select_content(layer, frame)
+            table.insert(selections, selection)
+        end
+        app.range.layers = { layer }
+        app.command.removeLayer()
     end
-    app.range.layers = { hurtmaskLayer }
-    app.command.removeLayer()
+    return selections
 end
+
+app.activeSprite = sprite
+
+hurtmaskSelections = convertLayerToSelections(hurtmaskLayer)
 
 if hurtboxLayer ~= nil then
     hurtboxLayer.isVisible = False
