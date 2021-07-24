@@ -12,7 +12,7 @@ local hurtmaskLayer = nil
 local hurtboxLayer = nil
 
 -- All the actual content of the sprite, not special purpose utility layers.
-local content_layers = {}
+local contentLayers = {}
 for _, layer in ipairs(sprite.layers) do
     if layer.name == "HURTMASK" then
         hurtmaskLayer = layer
@@ -20,7 +20,7 @@ for _, layer in ipairs(sprite.layers) do
         hurtboxLayer = layer
     else
         if layer.isVisible then
-            table.insert(content_layers, layer)
+            table.insert(contentLayers, layer)
         else
             app.range.layers = { layer }
             app.command.removeLayer()
@@ -43,13 +43,13 @@ if #_irrelevantFrames > 0 then
     app.command.RemoveFrame()
 end
 
-local function is_non_transparent(pixel)
+local function isNonTransparent(pixel)
     return pixel() > 0
     --return app.pixelColor.rgbaA(pixel) ~= 0
     --        or app.pixelColor.grayaA(pixel) ~= 0
 end
 
-local function select_content(layer, frameNumber)
+local function selectContent(layer, frameNumber)
     local cel = layer:cel(frameNumber)
     if cel == nil then
         return Selection()
@@ -57,15 +57,15 @@ local function select_content(layer, frameNumber)
 
     local points = {}
     for pixel in cel.image:pixels() do
-        if is_non_transparent(pixel) then
+        if isNonTransparent(pixel) then
             table.insert(points, Point(pixel.x + cel.position.x, pixel.y + cel.position.y))
         end
     end
 
     local select = Selection()
     for _, point in ipairs(points) do
-        local pixel_rect = Rectangle(point.x, point.y, 1, 1)
-        select:add(Selection(pixel_rect))
+        local pixelRect = Rectangle(point.x, point.y, 1, 1)
+        select:add(Selection(pixelRect))
     end
     return select
 end
@@ -75,7 +75,7 @@ local function convertLayerToSelections(layer)
     selections = {}
     if layer ~= nil then
         for _, frame in ipairs(sprite.frames) do
-            local selection = select_content(layer, frame)
+            local selection = selectContent(layer, frame)
             table.insert(selections, selection)
         end
         app.range.layers = { layer }
@@ -94,7 +94,7 @@ end
 
 
 -- Flatten content_layers.
-app.range.layers = content_layers
+app.range.layers = contentLayers
 app.command.FlattenLayers {
     visibleOnly = True
 }
@@ -131,7 +131,7 @@ for _, frame in ipairs(sprite.frames) do
     app.activeFrame = frame
 
     app.activeLayer = content_layer
-    sprite.selection = select_content(content_layer, frame)
+    sprite.selection = selectContent(content_layer, frame)
 
     app.command.ReplaceColor {
         ui=false,
