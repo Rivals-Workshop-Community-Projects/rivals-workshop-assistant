@@ -45,8 +45,6 @@ end
 
 local function isNonTransparent(pixel)
     return pixel() > 0
-    --return app.pixelColor.rgbaA(pixel) ~= 0
-    --        or app.pixelColor.grayaA(pixel) ~= 0
 end
 
 local function selectContent(layer, frameNumber)
@@ -87,11 +85,7 @@ end
 app.activeSprite = sprite
 
 hurtmaskSelections = convertLayerToSelections(hurtmaskLayer)
-
-if hurtboxLayer ~= nil then
-    hurtboxLayer.isVisible = False
-end
-
+hurtboxSelections = convertLayerToSelections(hurtboxLayer)
 
 -- Flatten content_layers.
 app.range.layers = contentLayers
@@ -107,6 +101,28 @@ for _, layer in ipairs(sprite.layers) do
     end
 end
 assert(contentLayer ~= nil, "no layer called Flattened")
+
+ --If hurtboxSelections exists, replace the content with the selections.
+app.activeLayer = contentLayer
+for i, hurtboxSelection in ipairs(hurtboxSelections) do
+    app.activeFrame = sprite.frames[i]
+    app.range.frames = {sprite.frames[i]}
+
+    -- Delete the image
+    app.command.ReplaceColor {
+        ui=false,
+        to=Color{ r=0, g=0, b=0, a=0},
+        tolerance=255
+    }
+    app.command.DeselectMask()
+
+    -- Fill the selection
+    sprite.selection = hurtboxSelection
+    app.fgColor = Color{ r=255, g=255, b=255, a=255 }
+    app.command.Fill()
+
+    app.command.DeselectMask()
+end
 
 
 -- Delete hurtmaskSelections from content layer

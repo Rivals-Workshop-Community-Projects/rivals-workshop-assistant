@@ -221,6 +221,39 @@ def test_aseprite_save_hurtbox__with_hurtmask(
     )
 
 
+@pytest.mark.parametrize(
+    "aseprite_file_name, "
+    "save_file_names, "
+    "expected_file_names, "
+    "expected_missing_file_names",
+    [
+        pytest.param(
+            "1blah_1ftilt", ["ftilt_hurt_strip1"], ["ftilt_hurt"], ["blah_hurt_strip1"]
+        ),
+        pytest.param(
+            "1blah_1ftilt_with_mask",
+            ["ftilt_hurt_strip1"],
+            ["ftilt_hurt_with_mask"],
+            ["blah_hurt_strip1"],
+        ),
+    ],
+)
+@pytest.mark.aseprite
+def test_aseprite_save_hurtbox__with_hurtbox_layer(
+    aseprite_file_name,
+    save_file_names,
+    expected_file_names,
+    expected_missing_file_names,
+):
+    assert_aseprite_saves_right_anims(
+        aseprite_file_name=aseprite_file_name,
+        save_file_names=save_file_names,
+        expected_file_names=expected_file_names,
+        expected_missing_file_names=expected_missing_file_names,
+        hurtboxes_enabled=True,
+    )
+
+
 # Hurtbox export
 #       With hurtbox mask, should mask
 #       With multiple anims
