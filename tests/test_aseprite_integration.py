@@ -102,6 +102,11 @@ def assert_aseprite_saves_right_anims(
             ["1frame_hurtbox_layer_strip1"],
             ["1frame"],
         ),
+        pytest.param(
+            "1has_flattened",
+            ["1has_flattened_strip1"],
+            ["1has_flattened"],
+        ),
     ],
 )
 @pytest.mark.aseprite
@@ -156,6 +161,28 @@ def test_aseprite_save__small_sprites(
         save_file_names=save_file_names,
         expected_file_names=expected_file_names,
         has_small_sprites=True,
+    )
+
+
+@pytest.mark.parametrize(
+    "aseprite_file_name, save_file_names, expected_file_names, expected_missing_file_names",
+    [
+        pytest.param("fair", [], [], ["fair_hurt_strip1"]),
+    ],
+)
+@pytest.mark.aseprite
+def test_aseprite_save__no_hurtbox(
+    aseprite_file_name,
+    save_file_names,
+    expected_file_names,
+    expected_missing_file_names,
+):
+    assert_aseprite_saves_right_anims(
+        aseprite_file_name=aseprite_file_name,
+        save_file_names=save_file_names,
+        expected_file_names=expected_file_names,
+        expected_missing_file_names=expected_file_names,
+        hurtboxes_enabled=False,
     )
 
 
@@ -252,12 +279,3 @@ def test_aseprite_save_hurtbox__with_hurtbox_layer(
         expected_missing_file_names=expected_missing_file_names,
         hurtboxes_enabled=True,
     )
-
-
-# Hurtbox export
-#       With hurtbox mask, should mask
-#       With multiple anims
-#       With a layer already called "Flattened"
-#       With small_sprite true
-#           should ignore?
-#   With generate_hurtboxes false
