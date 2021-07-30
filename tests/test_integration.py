@@ -267,11 +267,12 @@ def assert_anim_matches_test_anim(
 def test__save_aseprites(has_small_sprites):
     aseprite_path = get_aseprite_path()
 
-    with TempDirectory() as tmp:
-        root_dir = Path(tmp.path)
-        aseprites = [supply_aseprites(tmp)]
+    with TempDirectory() as root_dir, TempDirectory() as exe_dir:
+        root_dir = Path(root_dir.path)
+        aseprites = [supply_aseprites(root_dir)]
 
         rivals_workshop_assistant.aseprite_handling.save_anims(
+            exe_dir=Path(exe_dir.path),
             root_dir=root_dir,
             aseprite_path=Path(aseprite_path),
             aseprites=aseprites,
@@ -286,13 +287,14 @@ def test__save_aseprites__uses_subfolder_name():
     subfolder_name = "subfolder"
     aseprite_path = get_aseprite_path()
 
-    with TempDirectory() as tmp:
-        root_dir = Path(tmp.path)
+    with TempDirectory() as root_dir, TempDirectory() as exe_dir:
+        root_dir = Path(root_dir.path)
         aseprites = [
-            supply_aseprites(tmp, relative_dest=Path("anims") / subfolder_name)
+            supply_aseprites(root_dir, relative_dest=Path("anims") / subfolder_name)
         ]
 
         rivals_workshop_assistant.aseprite_handling.save_anims(
+            exe_dir=Path(exe_dir.path),
             root_dir=root_dir,
             aseprite_path=Path(aseprite_path),
             aseprites=aseprites,
@@ -310,9 +312,9 @@ def test__save_aseprites__uses_subfolder_name():
 def test__save_aseprites__removes_old_spritesheet():
     aseprite_path = get_aseprite_path()
 
-    with TempDirectory() as tmp:
-        root_dir = Path(tmp.path)
-        aseprites = [supply_aseprites(tmp)]
+    with TempDirectory() as root_dir, TempDirectory() as exe_dir:
+        root_dir = Path(root_dir.path)
+        aseprites = [supply_aseprites(root_dir)]
         old_filename = (
             root_dir / paths.SPRITES_FOLDER / f"{TEST_ANIM_NAME.stem}_strip2.png"
         )
@@ -321,6 +323,7 @@ def test__save_aseprites__removes_old_spritesheet():
         make_empty_file(other_filename)
 
         rivals_workshop_assistant.aseprite_handling.save_anims(
+            exe_dir=Path(exe_dir.path),
             root_dir=root_dir,
             aseprite_path=Path(aseprite_path),
             aseprites=aseprites,
@@ -336,10 +339,10 @@ def test__save_aseprites__removes_old_spritesheet__with_subfolder():
     aseprite_path = get_aseprite_path()
     subfolder_name = "subfolder"
 
-    with TempDirectory() as tmp:
-        root_dir = Path(tmp.path)
+    with TempDirectory() as root_dir, TempDirectory() as exe_dir:
+        root_dir = Path(root_dir.path)
         aseprites = [
-            supply_aseprites(tmp, relative_dest=Path("anims") / subfolder_name)
+            supply_aseprites(root_dir, relative_dest=Path("anims") / subfolder_name)
         ]
         old_filename = (
             root_dir
@@ -353,6 +356,7 @@ def test__save_aseprites__removes_old_spritesheet__with_subfolder():
         make_empty_file(other_filename)
 
         rivals_workshop_assistant.aseprite_handling.save_anims(
+            exe_dir=Path(exe_dir.path),
             root_dir=root_dir,
             aseprite_path=Path(aseprite_path),
             aseprites=aseprites,
@@ -367,13 +371,14 @@ def test__save_aseprites__removes_old_spritesheet__with_subfolder():
 def test__save_aseprites__multiple_aseprites():
     aseprite_path = get_aseprite_path()
 
-    with TempDirectory() as tmp:
-        root_dir = Path(tmp.path)
+    with TempDirectory() as root_dir, TempDirectory() as exe_dir:
+        root_dir = Path(root_dir.path)
         aseprites = [
-            supply_aseprites(tmp, relative_dest=Path("anims"), anim_tag_color="blue")
+            supply_aseprites(root_dir, relative_dest=Path("anims"), anim_tag_color="blue")
         ]
 
         rivals_workshop_assistant.aseprite_handling.save_anims(
+            exe_dir=Path(exe_dir.path),
             root_dir=root_dir,
             aseprite_path=Path(aseprite_path),
             aseprites=aseprites,

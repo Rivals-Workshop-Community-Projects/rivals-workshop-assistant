@@ -47,9 +47,10 @@ def assert_aseprite_saves_right_anims(
     aseprite = read_aseprite(
         path=path, dotfile=dotfile, assistant_config=assistant_config
     )
-    with TempDirectory() as tmp:
-        root_dir = Path(tmp.path)
+    with TempDirectory() as root_dir, TempDirectory() as exe_dir:
+        root_dir = Path(root_dir.path)
         aseprite.save(
+            exe_dir=Path(exe_dir.path),
             root_dir=root_dir,
             aseprite_path=aseprite_path,
             has_small_sprites=has_small_sprites,

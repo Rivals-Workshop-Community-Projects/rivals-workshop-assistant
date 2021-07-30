@@ -1,7 +1,9 @@
+import functools
 import sys
 from pathlib import Path
 
 
+@functools.cache
 def get_exe_path():
     return Path(sys.argv[0])
 
@@ -27,4 +29,4 @@ LOCKFILE_PATH = ASSISTANT_FOLDER / Path(".lock")
 
 PATHS_TO_BACK_UP = [SPRITES_FOLDER, SCRIPTS_FOLDER, ANIMS_FOLDER]
 
-ASEPRITE_LUA_SCRIPTS_PATH = Path("aseprite_handling/_aseprite_loading/lua_scripts/")
+ASEPRITE_LUA_SCRIPTS_FOLDER = Path("lua_scripts")

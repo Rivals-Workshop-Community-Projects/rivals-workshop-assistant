@@ -13,10 +13,11 @@ from .constants import (
     HURTBOX_LAYER_NAME,
     ANIMS_WHICH_GET_HURTBOXES,
 )
-from ..file_handling import File, _get_modified_time
+from .lua_scripts import LUA_SCRIPTS
+from ..file_handling import File, _get_modified_time, create_file
 from ..dotfile_mod import get_processed_time
 from .types import AsepriteTag, TagColor
-from ..paths import ASEPRITE_LUA_SCRIPTS_PATH
+from ..paths import ASEPRITE_LUA_SCRIPTS_FOLDER
 from ..script_mod import Script
 
 
@@ -39,6 +40,12 @@ class Window(TagObject):
         return f"""\
 #macro {self.name.upper()}_FRAMES {self.end - self.start + 1}
 #macro {self.name.upper()}_FRAME_START {self.start}"""
+
+
+def supply_lua_script(path: Path):
+    script_name = path.stem
+    script_content = LUA_SCRIPTS[script_name]
+    create_file(path=path, content=script_content, overwrite=False)
 
 
 class Anim(TagObject):
@@ -68,6 +75,7 @@ class Anim(TagObject):
 
     def save(
         self,
+        exe_dir: Path,
         root_dir: Path,
         aseprite_path: Path,
         aseprite_file_path: Path,
@@ -80,6 +88,7 @@ class Anim(TagObject):
         else:
             scale_param = 2
         self._run_lua_export(
+            exe_dir=exe_dir,
             root_dir=root_dir,
             aseprite_file_path=aseprite_file_path,
             aseprite_path=aseprite_path,
@@ -90,6 +99,7 @@ class Anim(TagObject):
 
         if hurtboxes_enabled and self._gets_a_hurtbox():
             self._run_lua_export(
+                exe_dir=exe_dir,
                 root_dir=root_dir,
                 aseprite_file_path=aseprite_file_path,
                 aseprite_path=aseprite_path,
@@ -99,6 +109,7 @@ class Anim(TagObject):
 
     def _run_lua_export(
         self,
+        exe_dir: Path,
         root_dir: Path,
         aseprite_file_path: Path,
         aseprite_path: Path,
@@ -106,6 +117,11 @@ class Anim(TagObject):
         script_name: str,
         lua_params: dict = None,
     ):
+        full_script_path = exe_dir / ASEPRITE_LUA_SCRIPTS_FOLDER / script_name
+        supply_lua_script(
+            path=full_script_path,
+        )
+
         if lua_params is None:
             lua_params = {}
 
@@ -129,7 +145,7 @@ class Anim(TagObject):
             ]
             + [f"-script-param {key}={value}" for key, value in lua_params.items()]
             + [
-                f"-script {(ASEPRITE_LUA_SCRIPTS_PATH / script_name).absolute()}",
+                f"-script {full_script_path.absolute()}",
             ]
         )
         export_command = " ".join(command_parts)
@@ -282,6 +298,7 @@ class Aseprite(File):
 
     def save(
         self,
+        exe_dir: Path,
         root_dir: Path,
         aseprite_path: Path,
         has_small_sprites: bool = False,
@@ -289,6 +306,7 @@ class Aseprite(File):
     ):
         for anim in self.content.anims:
             anim.save(
+                exe_dir=exe_dir,
                 root_dir=root_dir,
                 aseprite_path=aseprite_path,
                 aseprite_file_path=self.path,
@@ -339,6 +357,7 @@ def save_scripts(root_dir: Path, scripts: List[Script]):
 
 
 def save_anims(
+    exe_dir: Path,
     root_dir: Path,
     aseprite_path: Path,
     aseprites: List[Aseprite],
@@ -350,6 +369,7 @@ def save_anims(
     for aseprite in aseprites:
         if aseprite.is_fresh:
             aseprite.save(
+                exe_dir=exe_dir,
                 root_dir=root_dir,
                 aseprite_path=aseprite_path,
                 has_small_sprites=has_small_sprites,

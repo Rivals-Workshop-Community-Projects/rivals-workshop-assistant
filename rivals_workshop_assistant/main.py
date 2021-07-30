@@ -73,7 +73,8 @@ def update_files(root_dir):
     save_scripts(root_dir, scripts)
 
     save_anims(
-        root_dir,
+        exe_dir=exe_dir,
+        root_dir=root_dir,
         aseprite_path=get_aseprite_path(assistant_config),
         aseprites=aseprites,
         has_small_sprites=get_has_small_sprites(
