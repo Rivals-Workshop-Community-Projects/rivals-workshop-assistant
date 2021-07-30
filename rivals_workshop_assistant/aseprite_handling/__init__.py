@@ -129,11 +129,13 @@ class Anim(TagObject):
             ]
             + [f"-script-param {key}={value}" for key, value in lua_params.items()]
             + [
-                f"-script {ASEPRITE_LUA_SCRIPTS_PATH / script_name}",
+                f"-script {(ASEPRITE_LUA_SCRIPTS_PATH / script_name).absolute()}",
             ]
         )
         export_command = " ".join(command_parts)
-        subprocess.run(export_command)
+        result = subprocess.run(export_command)
+        if result.returncode != 0:
+            raise RuntimeError
 
     def _cares_about_small_sprites(self):
         return self.name in ANIMS_WHICH_CARE_ABOUT_SMALL_SPRITES

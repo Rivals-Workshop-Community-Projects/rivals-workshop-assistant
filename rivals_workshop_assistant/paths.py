@@ -27,6 +27,4 @@ LOCKFILE_PATH = ASSISTANT_FOLDER / Path(".lock")
 
 PATHS_TO_BACK_UP = [SPRITES_FOLDER, SCRIPTS_FOLDER, ANIMS_FOLDER]
 
-ASEPRITE_LUA_SCRIPTS_PATH = Path(
-    "rivals_workshop_assistant/" "aseprite_handling/_aseprite_loading/lua_scripts/"
-)
+ASEPRITE_LUA_SCRIPTS_PATH = Path("aseprite_handling/_aseprite_loading/lua_scripts/")
