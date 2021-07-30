@@ -6,3 +6,4 @@ retrying
 ruamel.yaml
 testfixtures
 parse
+pytest
