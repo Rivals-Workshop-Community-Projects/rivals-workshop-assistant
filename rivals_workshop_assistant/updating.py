@@ -68,26 +68,27 @@ class Release:
         if len(assets_with_name) >= 1:
             if len(assets_with_name) > 1:
                 print(
-                    f"WARN: Multiple assets with name {asset_name} for release {self.release_dict['url']}"
+                    f"WARN: Multiple assets with name {asset_name} "
+                    f"for release {self.release_dict['url']}"
                 )
             return assets_with_name[0]["browser_download_url"]
         else:
             return None
 
 
-def update(root_dir: Path, dotfile: dict, config: dict):
+def update(exe_dir: Path, root_dir: Path, dotfile: dict, config: dict):
     """Runs all self-updates.
     Controller"""
     if should_update(dotfile):
         update_backup(root_dir)
 
         assistant_updater = AssistantUpdater(
-            root_dir=root_dir, dotfile=dotfile, config=config
+            exe_dir=exe_dir, root_dir=root_dir, dotfile=dotfile, config=config
         )
         new_assistant_version = assistant_updater.update()
 
         library_updater = LibraryUpdater(
-            root_dir=root_dir, dotfile=dotfile, config=config
+            exe_dir=exe_dir, root_dir=root_dir, dotfile=dotfile, config=config
         )
         new_library_version = library_updater.update()
 
@@ -138,7 +139,8 @@ Error log is:
 class Updater(abc.ABC):
     REPO_NAME = NotImplemented
 
-    def __init__(self, root_dir: Path, dotfile: dict, config: dict):
+    def __init__(self, exe_dir: Path, root_dir: Path, dotfile: dict, config: dict):
+        self.exe_dir = exe_dir
         self.root_dir = root_dir
         self.dotfile = dotfile
         self.config = config
@@ -188,8 +190,8 @@ class Updater(abc.ABC):
 class AssistantUpdater(Updater):
     REPO_NAME = paths.ASSISTANT_REPO_NAME
 
-    def __init__(self, root_dir: Path, dotfile: dict, config: dict):
-        super().__init__(root_dir, dotfile, config)
+    def __init__(self, exe_dir: Path, root_dir: Path, dotfile: dict, config: dict):
+        super().__init__(exe_dir, root_dir, dotfile, config)
 
     def update(
         self,
@@ -200,12 +202,19 @@ class AssistantUpdater(Updater):
         current_exe_path = paths.get_exe_path()
         if current_exe_path.name != paths.ASSISTANT_EXE_NAME:
             print(
-                f"WARN: assistant exe at {current_exe_path} should be named {paths.ASSISTANT_EXE_NAME}.\n"
+                f"WARN: assistant exe at {current_exe_path} "
+                f"should be named {paths.ASSISTANT_EXE_NAME}.\n"
                 f"\tExe will not update."
             )
             return
 
-        return super(AssistantUpdater, self).update()
+        new_version = super(AssistantUpdater, self).update()
+        if new_version != self.current_version:
+            lua_glob = (self.exe_dir / paths.ASEPRITE_LUA_SCRIPTS_FOLDER).glob("*.lua")
+            for path in lua_glob:
+                path.unlink()
+
+        return new_version
 
     def _get_release_to_install(self):
         assistant_releases = self.get_releases()
@@ -246,8 +255,8 @@ class AssistantUpdater(Updater):
 class LibraryUpdater(Updater):
     REPO_NAME = paths.LIBRARY_REPO_NAME
 
-    def __init__(self, root_dir: Path, dotfile: dict, config: dict):
-        super().__init__(root_dir, dotfile, config)
+    def __init__(self, exe_dir: Path, root_dir: Path, dotfile: dict, config: dict):
+        super().__init__(exe_dir, root_dir, dotfile, config)
 
     def _get_release_to_install(self):
         update_level = assistant_config_mod.get_library_update_level(self.config)

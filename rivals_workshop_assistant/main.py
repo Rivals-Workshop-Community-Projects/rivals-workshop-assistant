@@ -46,7 +46,7 @@ def main(exe_dir: Path, given_dir: Path, guarantee_root_dir: bool = False):
     lock = FileLock(root_dir / paths.LOCKFILE_PATH)
     try:
         with lock.acquire(timeout=2):
-            update_files(root_dir)
+            update_files(exe_dir, root_dir)
     except TimeoutError:
         print(
             "WARN: Attempted to run assistant while an instance was already running."
@@ -54,12 +54,14 @@ def main(exe_dir: Path, given_dir: Path, guarantee_root_dir: bool = False):
         )
 
 
-def update_files(root_dir):
+def update_files(exe_dir: Path, root_dir: Path):
     dotfile = dotfile_mod.read(root_dir)
     assistant_config = assistant_config_mod.read_project_config(root_dir)
     character_config = character_config_mod.read(root_dir)
 
-    updating.update(root_dir=root_dir, dotfile=dotfile, config=assistant_config)
+    updating.update(
+        exe_dir=exe_dir, root_dir=root_dir, dotfile=dotfile, config=assistant_config
+    )
 
     scripts = read_scripts(root_dir, dotfile)
     aseprites = read_aseprites(
