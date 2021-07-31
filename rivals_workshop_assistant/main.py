@@ -68,7 +68,7 @@ def update_files(root_dir):
 
     handle_warning(assistant_config=assistant_config, scripts=scripts)
     handle_codegen(scripts)
-    handle_injection(root_dir=root_dir, scripts=scripts, anims=get_anims(aseprites))
+    handle_injection(root_dir=root_dir, scripts=scripts, anims=get_anims(aseprites), dotfile=dotfile)
 
     save_scripts(root_dir, scripts)
 

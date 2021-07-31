@@ -1,14 +1,16 @@
 import abc
 import textwrap
 import typing as t
+from pathlib import Path
 
 
 class GmlInjection(abc.ABC):
-    def __init__(self, name: str, gml: str, use_pattern: str, give_pattern: str):
+    def __init__(self, name: str, gml: str, use_pattern: str, give_pattern: str, filepath: Path = None):
         self.name = name
         self.gml = gml
         self.use_pattern = use_pattern
         self.give_pattern = give_pattern
+        self.filepath = filepath
 
     def __str__(self):
         return self.name
@@ -28,18 +30,19 @@ class GmlInjection(abc.ABC):
 class GmlDeclaration(GmlInjection, abc.ABC):
     IDENTIFIER_STRING = NotImplemented
 
-    def __init__(self, name: str, gml: str, use_pattern: str):
+    def __init__(self, name: str, gml: str, use_pattern: str, filepath: Path = None):
         """Serialize the gml elements into the final gml structure."""
         super().__init__(
             name=name,
             gml=gml,
             give_pattern=fr"#{self.IDENTIFIER_STRING}(\s)*{name}(\W|$)",
             use_pattern=use_pattern,
+            filepath=filepath,
         )
 
     @classmethod
     @abc.abstractmethod
-    def from_gml(cls, name: str, content: str):
+    def from_gml(cls, name: str, content: str, filepath: Path = None):
         raise NotImplementedError
 
 
@@ -53,6 +56,7 @@ class Define(GmlDeclaration):
         version: int = 0,
         docs: str = "",
         params: t.List[str] = None,
+        filepath: Path=None,
     ):
         if params is None:
             params = []
@@ -76,15 +80,16 @@ class Define(GmlDeclaration):
             name,
             gml,
             use_pattern=use_pattern,
+            filepath=filepath,
         )
 
     @classmethod
-    def from_gml(cls, name: str, content: str):
+    def from_gml(cls, name: str, content: str, filepath: Path = None):
         content = _remove_brackets(content)
         content = textwrap.dedent(content).strip("\n")
         docs, content = _split_docs_and_gml(content)
         name, params = _split_name_and_params(name)
-        return cls(name=name, params=params, docs=docs, content=content)
+        return cls(name=name, params=params, docs=docs, content=content, filepath=filepath)
 
 
 def _remove_brackets(content):
@@ -135,23 +140,24 @@ def _split_name_and_params(name: str) -> t.Tuple[str, t.List[str]]:
 class Macro(GmlDeclaration):
     IDENTIFIER_STRING = "macro"
 
-    def __init__(self, name: str, value: str):
+    def __init__(self, name: str, value: str, filepath: Path=None):
         gml = f"#macro {name} {value}"
         super().__init__(
             name,
             gml,
             use_pattern=fr"(^|\W){name}($|\W)",
+            filepath=filepath,
         )
 
     @classmethod
-    def from_gml(cls, name: str, content: str):
+    def from_gml(cls, name: str, content: str, filepath: Path=None):
         if content[0] == " ":
             content = content[1:]  # remove leading space
 
         content = textwrap.dedent(content).strip("\n")
         content = "\n".join(line.rstrip() for line in content.split("\n"))
 
-        return cls(name=name, value=content)
+        return cls(name=name, value=content, filepath=filepath)
 
 
 INJECT_TYPES = (Define, Macro)
