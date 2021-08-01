@@ -11,8 +11,8 @@ from rivals_workshop_assistant import (
     paths,
 )
 from rivals_workshop_assistant.character_config_mod import get_has_small_sprites
-from rivals_workshop_assistant.dotfile_mod import update_dotfile_after_saving
-from rivals_workshop_assistant.script_mod import read_scripts
+from rivals_workshop_assistant.dotfile_mod import update_dotfile_after_saving, get_clients_for_injection
+from rivals_workshop_assistant.script_mod import read_scripts, read_userinject
 from rivals_workshop_assistant.aseprite_handling import (
     read_aseprites,
     get_anims,
@@ -62,6 +62,16 @@ def update_files(root_dir):
     updating.update(root_dir=root_dir, dotfile=dotfile, config=assistant_config)
 
     scripts = read_scripts(root_dir, dotfile)
+    userinject_scripts = read_userinject(root_dir, dotfile)
+
+    for inject in userinject_scripts:
+        if inject.is_fresh:
+            #if a file in user_inject has been touched, mark its clients for update
+            clients = get_clients_for_injection(dotfile=dotfile, injectionscript=inject.path)
+            for script in scripts:
+                if script.path in clients:
+                    script.is_fresh = True
+
     aseprites = read_aseprites(
         root_dir, dotfile=dotfile, assistant_config=assistant_config
     )

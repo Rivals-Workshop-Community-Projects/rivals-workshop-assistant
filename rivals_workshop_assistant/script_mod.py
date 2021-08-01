@@ -80,3 +80,19 @@ def read_scripts(root_dir: Path, dotfile: dict) -> List[Script]:
         scripts.append(script)
 
     return scripts
+
+    
+def read_userinject(root_dir: Path, dotfile: dict) -> List[Script]:
+    """Returns all Scripts in the user_inject directory."""
+    gml_paths = list((root_dir / "assistant/user_inject").rglob("*.gml"))
+
+    scripts = []
+    for path in gml_paths:
+        script = Script(
+            path=path,
+            modified_time=_get_modified_time(path),
+            processed_time=get_processed_time(dotfile=dotfile, path=path),
+        )
+        scripts.append(script)
+
+    return scripts

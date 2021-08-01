@@ -55,6 +55,19 @@ def update_dotfile_injection_clients(dotfile:dict, clientscript:Path, dependenci
         dotfile[INJECT_CLIENTS_FIELD].pop(clientscript.as_posix())
 
 
+def get_clients_for_injection(dotfile:dict, injectionscript:Path) -> typing.List[Path]:
+    if INJECT_CLIENTS_FIELD not in dotfile:
+        return []
+    
+    str_path = injectionscript.as_posix()
+    clientslist = []
+    for key in dotfile[INJECT_CLIENTS_FIELD].keys():
+        if str_path in dotfile[INJECT_CLIENTS_FIELD][key]:
+            clientslist.append(Path(key))
+
+    return clientslist
+
+
 def get_processed_time(dotfile: dict, path: Path) -> typing.Optional[datetime]:
     seen_files = dotfile.get(SEEN_FILES_FIELD, [])
     if seen_files is None:
