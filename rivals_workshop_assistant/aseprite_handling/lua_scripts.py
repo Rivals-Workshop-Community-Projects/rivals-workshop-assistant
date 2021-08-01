@@ -92,7 +92,7 @@ if #_irrelevantFrames > 0 then
 end
 
 local function isNonTransparent(pixel)
-    return pixel() > 0
+    return app.pixelColor.rgbaA(pixel()) > 0
 end
 
 local function selectContent(layer, frameNumber)
