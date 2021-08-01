@@ -9,6 +9,11 @@ from rivals_workshop_assistant.file_handling import (
 )
 from rivals_workshop_assistant.dotfile_mod import get_processed_time
 
+from rivals_workshop_assistant.paths import (
+    SCRIPTS_FOLDER,
+    INJECT_FOLDER,
+    USER_INJECT_FOLDER,
+)
 
 class Script(File):
     def __init__(
@@ -66,9 +71,9 @@ class Script(File):
         )
 
 
-def read_scripts(root_dir: Path, dotfile: dict) -> List[Script]:
-    """Returns all Scripts in the scripts directory."""
-    gml_paths = list((root_dir / "scripts").rglob("*.gml"))
+def read_scripts(root_dir: Path, dotfile: dict, folder:str = SCRIPTS_FOLDER) -> List[Script]:
+    """Returns all Scripts in a given directory (defaults to the scripts folder)."""
+    gml_paths = list((root_dir / folder).rglob("*.gml"))
 
     scripts = []
     for path in gml_paths:
@@ -81,18 +86,10 @@ def read_scripts(root_dir: Path, dotfile: dict) -> List[Script]:
 
     return scripts
 
-    
 def read_userinject(root_dir: Path, dotfile: dict) -> List[Script]:
     """Returns all Scripts in the user_inject directory."""
-    gml_paths = list((root_dir / "assistant/user_inject").rglob("*.gml"))
-
-    scripts = []
-    for path in gml_paths:
-        script = Script(
-            path=path,
-            modified_time=_get_modified_time(path),
-            processed_time=get_processed_time(dotfile=dotfile, path=path),
-        )
-        scripts.append(script)
-
-    return scripts
+    return read_scripts(root_dir=root_dir, dotfile=dotfile, folder=USER_INJECT_FOLDER)
+    
+def read_libinject(root_dir: Path, dotfile: dict) -> List[Script]:
+    """Returns all Scripts in the .inject directory."""
+    return read_scripts(root_dir=root_dir, dotfile=dotfile, folder=INJECT_FOLDER)

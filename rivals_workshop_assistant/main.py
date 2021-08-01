@@ -11,8 +11,15 @@ from rivals_workshop_assistant import (
     paths,
 )
 from rivals_workshop_assistant.character_config_mod import get_has_small_sprites
-from rivals_workshop_assistant.dotfile_mod import update_dotfile_after_saving, get_clients_for_injection
-from rivals_workshop_assistant.script_mod import read_scripts, read_userinject
+from rivals_workshop_assistant.dotfile_mod import (
+    update_dotfile_after_saving, 
+    get_clients_for_injection,
+)
+from rivals_workshop_assistant.script_mod import (
+    read_scripts, 
+    read_userinject, 
+    read_libinject,
+)
 from rivals_workshop_assistant.aseprite_handling import (
     read_aseprites,
     get_anims,
@@ -63,8 +70,9 @@ def update_files(root_dir):
 
     scripts = read_scripts(root_dir, dotfile)
     userinject_scripts = read_userinject(root_dir, dotfile)
+    libinject_scripts = read_libinject(root_dir, dotfile)
 
-    for inject in userinject_scripts:
+    for inject in userinject_scripts + libinject_scripts:
         if inject.is_fresh:
             #if a file in user_inject has been touched, mark its clients for update
             clients = get_clients_for_injection(dotfile=dotfile, injectionscript=inject.path)
@@ -93,7 +101,7 @@ def update_files(root_dir):
         hurtboxes_enabled=get_hurtboxes_enabled(config=assistant_config),
     )
     update_dotfile_after_saving(
-        now=datetime.datetime.now(), dotfile=dotfile, files=scripts + aseprites
+        now=datetime.datetime.now(), dotfile=dotfile, files=scripts + userinject_scripts + aseprites
     )
 
     assets = get_required_assets(scripts)
