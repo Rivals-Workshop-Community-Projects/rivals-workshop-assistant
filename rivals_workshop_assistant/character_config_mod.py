@@ -19,7 +19,9 @@ def read(root_dir: Path) -> ConfigParser:
 
 
 def get_config_truth_value(config_value: str) -> bool:
-    if any([string in config_value.lower() for string in ["0", "false"]]):
+    if isinstance(config_value, str) and any(
+        [string in config_value.lower() for string in ["0", "false"]]
+    ):
         return False
     return bool(config_value)
 
