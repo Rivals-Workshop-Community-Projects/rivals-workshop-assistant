@@ -1,4 +1,8 @@
 # language=lua
+from pathlib import Path
+
+from rivals_workshop_assistant import paths
+
 EXPORT_ASEPRITE = """\
 local sprite = app.open(app.params["filename"])
     
@@ -218,3 +222,9 @@ LUA_SCRIPTS = {
     "export_aseprite": EXPORT_ASEPRITE,
     "create_hurtbox": CREATE_HURTBOX,
 }
+
+
+def delete_lua_scripts(exe_dir: Path):
+    lua_glob = (exe_dir / paths.ASEPRITE_LUA_SCRIPTS_FOLDER).glob("*.lua")
+    for path in lua_glob:
+        path.unlink()

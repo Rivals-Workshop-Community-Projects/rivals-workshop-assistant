@@ -13,6 +13,7 @@ import requests
 
 import rivals_workshop_assistant.paths
 from rivals_workshop_assistant import paths as paths, assistant_config_mod
+from rivals_workshop_assistant.aseprite_handling import lua_scripts
 from rivals_workshop_assistant.assistant_config_mod import UpdateLevel
 from rivals_workshop_assistant.dotfile_mod import (
     LAST_UPDATED_FIELD,
@@ -210,9 +211,7 @@ class AssistantUpdater(Updater):
 
         new_version = super(AssistantUpdater, self).update()
         if new_version != self.current_version:
-            lua_glob = (self.exe_dir / paths.ASEPRITE_LUA_SCRIPTS_FOLDER).glob("*.lua")
-            for path in lua_glob:
-                path.unlink()
+            lua_scripts.delete_lua_scripts(self.exe_dir)
 
         return new_version
 
