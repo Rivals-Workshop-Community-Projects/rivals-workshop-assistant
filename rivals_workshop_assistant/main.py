@@ -29,7 +29,7 @@ from rivals_workshop_assistant.injection import handle_injection
 from rivals_workshop_assistant.code_generation import handle_codegen
 from rivals_workshop_assistant.warning_handling import handle_warning
 
-__version__ = "1.1.2"
+__version__ = "1.1.4"
 
 
 def main(exe_dir: Path, given_dir: Path, guarantee_root_dir: bool = False):

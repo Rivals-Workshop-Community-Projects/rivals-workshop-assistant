@@ -3,7 +3,7 @@ import sys
 from pathlib import Path
 
 
-@functools.lru_cache
+@functools.lru_cache()
 def get_exe_path():
     return Path(sys.argv[0])
 
