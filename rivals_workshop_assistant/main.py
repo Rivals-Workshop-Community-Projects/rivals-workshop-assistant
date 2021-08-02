@@ -110,6 +110,8 @@ Files in current directory are: {file_names}"""
 
 
 if __name__ == "__main__":
-    exe_dir = Path(__file__).parent
-    root_dir = Path(sys.argv[1])
+    exe_dir = Path(__file__).parent.absolute()
+    root_dir = Path(sys.argv[1]).absolute()
+    print(f"Exe dir: {exe_dir}")
+    print(f"Project dir: {root_dir}")
     main(exe_dir, root_dir)
