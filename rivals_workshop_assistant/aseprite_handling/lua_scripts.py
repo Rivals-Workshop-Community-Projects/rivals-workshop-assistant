@@ -104,7 +104,7 @@ end
 local function selectContent(layer, frameNumber)
 local cel = layer:cel(frameNumber)
 if cel == nil then
-    return Selection()
+    return nil
 end
 
 local points = {}
