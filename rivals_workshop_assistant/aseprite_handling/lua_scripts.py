@@ -52,6 +52,8 @@ app.command.ExportSpriteSheet {
 CREATE_HURTBOX = """\
 local sprite = app.open(app.params["filename"])
 
+app.command.ChangePixelFormat{ui=false, format="rgb", dithering="none"}
+
 local startFrame = tonumber(app.params["startFrame"])
 local endFrame = tonumber(app.params["endFrame"])
 local scale = 2
@@ -72,7 +74,7 @@ for _, layer in ipairs(sprite.layers) do
         hurtboxLayer = layer
     else
         if layer.isVisible then
-        table.insert(contentLayers, layer)
+            table.insert(contentLayers, layer)
         else
             app.range.layers = { layer }
             app.command.removeLayer()
