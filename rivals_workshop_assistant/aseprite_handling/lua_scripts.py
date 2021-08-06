@@ -58,6 +58,8 @@ local startFrame = tonumber(app.params["startFrame"])
 local endFrame = tonumber(app.params["endFrame"])
 local scale = 2
 
+local NIL_CONSTANT = "nil"
+
 -- Hurtmask layer is subtracted from the hurtbox
 local hurtmaskLayer = nil
 
@@ -102,25 +104,27 @@ local function isNonTransparent(pixel)
 end
 
 local function selectContent(layer, frameNumber)
-local cel = layer:cel(frameNumber)
-if cel == nil then
-    return nil
-end
-
-local points = {}
-for pixel in cel.image:pixels() do
-    if isNonTransparent(pixel) then
-        table.insert(points, Point(pixel.x + cel.position.x, pixel.y + cel.position.y))
+    local cel = layer:cel(frameNumber)
+    if cel == nil then
+        return NIL_CONSTANT
     end
-end
 
-local select = Selection()
+    local points = {}
+    for pixel in cel.image:pixels() do
+        if isNonTransparent(pixel) then
+            table.insert(points, Point(pixel.x + cel.position.x, pixel.y + cel.position.y))
+        end
+    end
+
+    local select = Selection()
     for _, point in ipairs(points) do
         local pixelRect = Rectangle(point.x, point.y, 1, 1)
         select:add(Selection(pixelRect))
     end
     return select
 end
+
+
 
 
 local function convertLayerToSelections(layer)
@@ -159,39 +163,43 @@ assert(contentLayer ~= nil, "no layer called Flattened")
 --If hurtboxSelections exists, replace the content with the selections.
 app.activeLayer = contentLayer
 for i, hurtboxSelection in ipairs(hurtboxSelections) do
-    app.activeFrame = sprite.frames[i]
-    app.range.frames = {sprite.frames[i]}
-    
-    -- Delete the image
-    app.command.ReplaceColor {
-        ui=false,
-           to=Color{ r=0, g=0, b=0, a=0},
-    tolerance=255
-    }
-    app.command.DeselectMask()
-    
-    -- Fill the selection
-    sprite.selection = hurtboxSelection
-    app.fgColor = Color{ r=255, g=255, b=255, a=255 }
-    app.command.Fill()
-    
-    app.command.DeselectMask()
+    if hurtboxSelection ~= NIL_CONSTANT then
+        app.activeFrame = sprite.frames[i]
+        app.range.frames = {sprite.frames[i]}
+        
+        -- Delete the image
+        app.command.ReplaceColor {
+            ui=false,
+            to=Color{ r=0, g=0, b=0, a=0},
+            tolerance=255
+        }
+        app.command.DeselectMask()
+        
+        -- Fill the selection
+        sprite.selection = hurtboxSelection
+        app.fgColor = Color{ r=255, g=255, b=255, a=255 }
+        app.command.Fill()
+        
+        app.command.DeselectMask()
+    end
 end
 
 
 -- Delete hurtmaskSelections from content layer
 app.activeLayer = contentLayer
 for i, hurtmaskSelection in ipairs(hurtmaskSelections) do
-    app.activeFrame = sprite.frames[i]
-    app.range.frames = {sprite.frames[i]}
-    sprite.selection = hurtmaskSelection
-    
-    app.command.ReplaceColor {
-        ui=false,
-           to=Color{ r=0, g=0, b=0, a=0 },
-    tolerance=255
-    }
-    app.command.DeselectMask()
+    if hurtmaskSelection ~= NIL_CONSTANT then
+        app.activeFrame = sprite.frames[i]
+        app.range.frames = {sprite.frames[i]}
+        sprite.selection = hurtmaskSelection
+        
+        app.command.ReplaceColor {
+            ui=false,
+            to=Color{ r=0, g=0, b=0, a=0 },
+            tolerance=255
+        }
+        app.command.DeselectMask()
+    end
 end
 
 -- Color the content layer green.
@@ -199,13 +207,18 @@ app.activeLayer = contentLayer
 for _, frame in ipairs(sprite.frames) do
     app.activeFrame = frame
     app.range.frames = {frame}
-    sprite.selection = selectContent(contentLayer, frame)
-    app.command.ReplaceColor {
-        ui=false,
-           to=Color{ r=0, g=255, b=0, a=255 },
-    tolerance=255
-    }
-    app.command.DeselectMask()
+    local selection = selectContent(contentLayer, frame)
+    if selection ~= NIL_CONSTANT then
+        sprite.selection = selection
+        -- app.fgColor = Color{ r=0, g=255, b=0, a=255 }
+        -- app.command.Fill()
+        app.command.ReplaceColor {
+            ui=false,
+            to=Color{ r=0, g=255, b=0, a=255 },
+            tolerance=255
+        }
+        app.command.DeselectMask()
+    end
 end
 
 app.command.SpriteSize {
@@ -214,9 +227,9 @@ app.command.SpriteSize {
 
 app.command.ExportSpriteSheet {
     ui=false,
-       askOverwrite=false,
-                    type=SpriteSheetType.HORIZONTAL,
-                         textureFilename=app.params["dest"],
+    askOverwrite=false,
+    type=SpriteSheetType.HORIZONTAL,
+    textureFilename=app.params["dest"],
 }
 """
 
