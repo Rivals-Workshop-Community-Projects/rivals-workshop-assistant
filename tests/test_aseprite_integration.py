@@ -197,6 +197,9 @@ def test_aseprite_save__no_hurtbox(
         pytest.param(
             "1frame_1bair", ["bair_hurt_strip1"], ["bair_hurt"], ["1frame_hurt_strip1"]
         ),
+        pytest.param(
+            "wrong_color_type", ["fair_hurt_strip1"], ["wrong_color_type"], []
+        ),
     ],
 )
 @pytest.mark.aseprite
