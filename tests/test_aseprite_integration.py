@@ -283,3 +283,30 @@ def test_aseprite_save_hurtbox__with_hurtbox_layer(
         expected_missing_file_names=expected_missing_file_names,
         hurtboxes_enabled=True,
     )
+
+
+@pytest.mark.parametrize(
+    "aseprite_file_name, "
+    "save_file_names, "
+    "expected_file_names, "
+    "expected_missing_file_names",
+    [
+        pytest.param(
+            "hurt_layers_fair", ["fair_hurt_strip1"], ["hurt_layers_fair"], []
+        ),
+    ],
+)
+@pytest.mark.aseprite
+def test_aseprite_save_hurtbox__with_nohurt_layers(
+    aseprite_file_name,
+    save_file_names,
+    expected_file_names,
+    expected_missing_file_names,
+):
+    assert_aseprite_saves_right_anims(
+        aseprite_file_name=aseprite_file_name,
+        save_file_names=save_file_names,
+        expected_file_names=expected_file_names,
+        expected_missing_file_names=expected_missing_file_names,
+        hurtboxes_enabled=True,
+    )

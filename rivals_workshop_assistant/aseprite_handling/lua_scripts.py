@@ -124,9 +124,6 @@ local function selectContent(layer, frameNumber)
     return select
 end
 
-
-
-
 local function convertLayerToSelections(layer)
     selections = {}
     if layer ~= nil then
@@ -144,6 +141,20 @@ app.activeSprite = sprite
 
 hurtmaskSelections = convertLayerToSelections(hurtmaskLayer)
 hurtboxSelections = convertLayerToSelections(hurtboxLayer)
+
+local function startsWith(str, prefix)
+    return string.sub(str, 1, string.len(prefix)) == prefix
+end
+
+-- Hide layers with NOHURT prefix
+local NOHURT = "NOHURT"
+for _, layer in ipairs(sprite.layers) do
+    if startsWith(layer.name, NOHURT) then
+        -- layer.isVisible = false
+        app.range.layers = { layer }
+        app.command.removeLayer()
+    end
+end
 
 -- Flatten content_layers.
 app.range.layers = contentLayers
