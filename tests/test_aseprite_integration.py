@@ -294,6 +294,9 @@ def test_aseprite_save_hurtbox__with_hurtbox_layer(
         pytest.param(
             "hurt_layers_fair", ["fair_hurt_strip1"], ["hurt_layers_fair"], []
         ),
+        pytest.param(
+            "nohurt_meta_fair", ["fair_hurt_strip1"], ["nohurt_meta_fair"], []
+        ),
     ],
 )
 @pytest.mark.aseprite

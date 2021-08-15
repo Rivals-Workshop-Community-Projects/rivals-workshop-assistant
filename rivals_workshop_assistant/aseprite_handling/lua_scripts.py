@@ -149,8 +149,7 @@ end
 -- Hide layers with NOHURT prefix
 local NOHURT = "NOHURT"
 for _, layer in ipairs(sprite.layers) do
-    if startsWith(layer.name, NOHURT) then
-        -- layer.isVisible = false
+    if startsWith(layer.name, NOHURT) or string.find(layer.data, NOHURT) then
         app.range.layers = { layer }
         app.command.removeLayer()
     end
