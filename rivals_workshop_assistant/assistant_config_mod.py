@@ -130,7 +130,7 @@ DEFAULT_CONFIG = f"""\
 
 {GENERATE_HURTBOXES_FIELD}: {GENERATE_HURTBOXES_DEFAULT}
     # If the assistant should automatically generate hurtboxes from your anim files.
-    # See TODO PUT A LINK TO THE ASSISTANT. TELL QAZZQUIMBY ON DISCORD IF HE FORGETS TO REPLACE THIS!
+    # See https://rivalslib.com/assistant/animation_handling.html#hurtbox-generation
 
 {LIBRARY_UPDATE_LEVEL_FIELD}: {LIBRARY_UPDATE_LEVEL_DEFAULT.value}
     # What kind of library updates to allow. 
