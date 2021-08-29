@@ -91,10 +91,6 @@ def get_initial_default_config() -> dict:
     return info_files.YAML_HANDLER.load(DEFAULT_CONFIG)
 
 
-def override_default_config(default_config, user_default_config_override):
-    raise NotImplementedError
-
-
 GENERATE_HURTBOXES_FIELD = "generate_hurtboxes"
 GENERATE_HURTBOXES_DEFAULT = True
 
