@@ -67,6 +67,11 @@ def test_get_warning_types():
             "a += 3   // NO-WARN",
             "a += 3   // NO-WARN",
         ),
+        pytest.param(
+            "css_draw",
+            "global = 3",
+            f"global = 3",
+        ),
     ],
 )
 def test_handle_warn_setting_nonlocal_var_in_draw_script(

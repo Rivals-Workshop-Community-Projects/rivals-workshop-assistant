@@ -16,7 +16,7 @@ class ObjectVarSetInDrawScript(WarningType):
     )
 
     def get_detection_lines(self, script: Script):
-        if not is_draw_script(script.path):
+        if not is_draw_script(script.path) or script.path.name == "css_draw.gml":
             return []
         detection_lines = []
         local_vars = []
