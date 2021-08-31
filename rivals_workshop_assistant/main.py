@@ -37,15 +37,16 @@ __version__ = "1.1.8"
 
 
 class Mode(Enum):
-    ANIMS = 1
-    SCRIPTS = 2
+    ALL = "all"
+    ANIMS = "anims"
+    SCRIPTS = "scripts"
 
 
 def main(
     exe_dir: Path,
     given_dir: Path,
     guarantee_root_dir: bool = False,
-    mode: Optional[Mode] = None,
+    mode: Mode = Mode.ALL,
 ):
     """Runs all processes on scripts in the root_dir
     If guarantee_root_dir is true, it won't backtrack to find the root directory."""
@@ -76,7 +77,7 @@ def handle_scripts(
     handle_injection(root_dir=root_dir, scripts=scripts, anims=anims)
 
 
-def update_files(exe_dir: Path, root_dir: Path, mode: Optional[Mode] = None):
+def update_files(exe_dir: Path, root_dir: Path, mode: Mode.ALL):
     dotfile = dotfile_mod.read(root_dir)
     assistant_config = assistant_config_mod.read_project_config(root_dir)
     character_config = character_config_mod.read(root_dir)
@@ -92,7 +93,7 @@ def update_files(exe_dir: Path, root_dir: Path, mode: Optional[Mode] = None):
     anims = get_anims(aseprites)
 
     seen_files = []
-    if mode is None or mode == Mode.SCRIPTS:
+    if mode in (mode.ALL, mode.SCRIPTS):
         handle_scripts(
             root_dir=root_dir,
             scripts=scripts,
@@ -102,7 +103,7 @@ def update_files(exe_dir: Path, root_dir: Path, mode: Optional[Mode] = None):
         save_scripts(root_dir, scripts)
         seen_files += scripts
 
-    if mode is None or mode == mode.ANIMS:
+    if mode in (mode.ALL, mode.ANIMS):
         save_anims(
             exe_dir=exe_dir,
             root_dir=root_dir,
@@ -143,6 +144,21 @@ Files in current directory are: {file_names}"""
 if __name__ == "__main__":
     exe_dir = Path(__file__).parent.absolute()
     root_dir = Path(sys.argv[1]).absolute()
+    try:
+        mode_value = sys.argv[2]
+        try:
+            mode = Mode(mode_value)
+        except ValueError:
+            print(
+                f"WARNING: Invalid mode argument. f{mov}"
+                f"Valid modes are {[mode.name for mode in Mode]}"
+            )
+            mode = Mode.ALL
+    except IndexError:
+        mode = Mode.ALL
+
     print(f"Exe dir: {exe_dir}")
     print(f"Project dir: {root_dir}")
-    main(exe_dir, root_dir)
+    print(f"Mode: {mode.name}")
+
+    main(exe_dir, root_dir, mode=mode)
