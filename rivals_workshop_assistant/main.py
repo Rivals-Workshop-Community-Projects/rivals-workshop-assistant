@@ -1,3 +1,6 @@
+from enum import Enum
+from typing import List, Optional
+
 from rivals_workshop_assistant.filelock import FileLock
 import datetime
 import sys
@@ -12,12 +15,13 @@ from rivals_workshop_assistant import (
 )
 from rivals_workshop_assistant.character_config_mod import get_has_small_sprites
 from rivals_workshop_assistant.dotfile_mod import update_dotfile_after_saving
-from rivals_workshop_assistant.script_mod import read_scripts
+from rivals_workshop_assistant.script_mod import read_scripts, Script
 from rivals_workshop_assistant.aseprite_handling import (
     read_aseprites,
     get_anims,
     save_scripts,
     save_anims,
+    Anim,
 )
 from rivals_workshop_assistant.assistant_config_mod import (
     get_aseprite_path,
@@ -32,7 +36,17 @@ from rivals_workshop_assistant.warning_handling import handle_warning
 __version__ = "1.1.8"
 
 
-def main(exe_dir: Path, given_dir: Path, guarantee_root_dir: bool = False):
+class Mode(Enum):
+    ANIMS = 1
+    SCRIPTS = 2
+
+
+def main(
+    exe_dir: Path,
+    given_dir: Path,
+    guarantee_root_dir: bool = False,
+    mode: Optional[Mode] = None,
+):
     """Runs all processes on scripts in the root_dir
     If guarantee_root_dir is true, it won't backtrack to find the root directory."""
     print(f"Assistant Version: {__version__}")
@@ -46,7 +60,7 @@ def main(exe_dir: Path, given_dir: Path, guarantee_root_dir: bool = False):
     lock = FileLock(root_dir / paths.LOCKFILE_PATH)
     try:
         with lock.acquire(timeout=2):
-            update_files(exe_dir, root_dir)
+            update_files(exe_dir=exe_dir, root_dir=root_dir, mode=mode)
     except TimeoutError:
         print(
             "WARN: Attempted to run assistant while an instance was already running."
@@ -54,7 +68,15 @@ def main(exe_dir: Path, given_dir: Path, guarantee_root_dir: bool = False):
         )
 
 
-def update_files(exe_dir: Path, root_dir: Path):
+def handle_scripts(
+    root_dir: Path, scripts: List[Script], anims: List[Anim], assistant_config: dict
+):
+    handle_warning(assistant_config=assistant_config, scripts=scripts)
+    handle_codegen(scripts)
+    handle_injection(root_dir=root_dir, scripts=scripts, anims=anims)
+
+
+def update_files(exe_dir: Path, root_dir: Path, mode: Optional[Mode] = None):
     dotfile = dotfile_mod.read(root_dir)
     assistant_config = assistant_config_mod.read_project_config(root_dir)
     character_config = character_config_mod.read(root_dir)
@@ -67,25 +89,34 @@ def update_files(exe_dir: Path, root_dir: Path):
     aseprites = read_aseprites(
         root_dir, dotfile=dotfile, assistant_config=assistant_config
     )
+    anims = get_anims(aseprites)
 
-    handle_warning(assistant_config=assistant_config, scripts=scripts)
-    handle_codegen(scripts)
-    handle_injection(root_dir=root_dir, scripts=scripts, anims=get_anims(aseprites))
+    seen_files = []
+    if mode is None or mode == Mode.SCRIPTS:
+        handle_scripts(
+            root_dir=root_dir,
+            scripts=scripts,
+            assistant_config=assistant_config,
+            anims=anims,
+        )
+        save_scripts(root_dir, scripts)
+        seen_files += scripts
 
-    save_scripts(root_dir, scripts)
+    if mode is None or mode == mode.ANIMS:
+        save_anims(
+            exe_dir=exe_dir,
+            root_dir=root_dir,
+            aseprite_path=get_aseprite_path(assistant_config),
+            aseprites=aseprites,
+            has_small_sprites=get_has_small_sprites(
+                scripts=scripts, character_config=character_config
+            ),
+            hurtboxes_enabled=get_hurtboxes_enabled(config=assistant_config),
+        )
+        seen_files += aseprites
 
-    save_anims(
-        exe_dir=exe_dir,
-        root_dir=root_dir,
-        aseprite_path=get_aseprite_path(assistant_config),
-        aseprites=aseprites,
-        has_small_sprites=get_has_small_sprites(
-            scripts=scripts, character_config=character_config
-        ),
-        hurtboxes_enabled=get_hurtboxes_enabled(config=assistant_config),
-    )
     update_dotfile_after_saving(
-        now=datetime.datetime.now(), dotfile=dotfile, files=scripts + aseprites
+        now=datetime.datetime.now(), dotfile=dotfile, seen_files=seen_files
     )
 
     assets = get_required_assets(scripts)
