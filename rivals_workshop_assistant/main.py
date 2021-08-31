@@ -33,7 +33,7 @@ from rivals_workshop_assistant.injection import handle_injection
 from rivals_workshop_assistant.code_generation import handle_codegen
 from rivals_workshop_assistant.warning_handling import handle_warning
 
-__version__ = "1.1.8"
+__version__ = "1.1.9"
 
 
 class Mode(Enum):
@@ -150,7 +150,7 @@ if __name__ == "__main__":
             mode = Mode(mode_value)
         except ValueError:
             print(
-                f"WARNING: Invalid mode argument. f{mov}"
+                f"WARNING: Invalid mode argument. f{mode_value}"
                 f"Valid modes are {[mode.name for mode in Mode]}"
             )
             mode = Mode.ALL
