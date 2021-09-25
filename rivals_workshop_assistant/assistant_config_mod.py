@@ -107,6 +107,7 @@ DEFAULT_CONFIG = f"""\
 {ASEPRITE_PATH_FIELD}: # FILL THIS IN TO USE ASEPRITE
     # Point this to your Aseprite.exe absolute path, for example: 
     # aseprite_path: C:/Program Files/Aseprite/aseprite.exe
+    # If correct, copying the path into your file explorer address bar will open aseprite.
     # This is needed for the assistant to automatically export your animations to spritesheets.
     # If you use Steam for Aseprite, you can find the path with:
     #   The aseprite page of your library, The gear icon at the top right,

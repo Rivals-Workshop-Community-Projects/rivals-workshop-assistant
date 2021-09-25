@@ -150,9 +150,12 @@ class Anim(TagObject):
         )
         export_command = " ".join(command_parts)
         print(f"Running lua script: {export_command}")
-        result = subprocess.run(export_command)
-        if result.returncode != 0:
-            raise RuntimeError
+        try:
+            result = subprocess.run(export_command)
+            if result.returncode != 0:
+                print(f"ERROR: Lua script command failed. {export_command}")
+        except FileNotFoundError:
+            print(f"ERROR: Aseprite not found at {aseprite_path}")
 
     def _cares_about_small_sprites(self):
         return self.name in ANIMS_WHICH_CARE_ABOUT_SMALL_SPRITES
