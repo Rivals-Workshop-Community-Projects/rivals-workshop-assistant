@@ -1,3 +1,4 @@
+import itertools
 import re
 from pathlib import Path
 from typing import List, Tuple
@@ -18,9 +19,28 @@ def read_injection_library(root_dir: Path) -> List[GmlInjection]:
     return get_injection_library_from_gml(full_inject_gml)
 
 
+def grouper(n, iterable, fillvalue=None):
+    "grouper(3, 'ABCDEFG', 'x') --> ABC DEF Gxx"
+    args = [iter(iterable)] * n
+    return itertools.zip_longest(fillvalue=fillvalue, *args)
+
+
+def get_dependency_strings(dependency_splits: List[str]):
+    if not dependency_splits[0].startswith("#"):
+        dependency_splits = dependency_splits[1:]
+    dependency_strings = [
+        f"{dependency_type}{content}"
+        for dependency_type, content in grouper(2, dependency_splits)
+    ]
+    return dependency_strings
+
+
 def get_injection_library_from_gml(gml: str) -> List[GmlInjection]:
     dependencies = []
-    dependency_strings = gml.split("#")[1:]
+    dependency_splits = re.split(
+        "(#(?:define|macro))", gml
+    )  # literally having define|macro is duplication with INJECT_TYPES, but simpler
+    dependency_strings = get_dependency_strings(dependency_splits)
     for dependency_string in dependency_strings:
         inject_type, name, content = _get_inject_components(dependency_string)
 
@@ -37,6 +57,7 @@ def get_injection_library_from_gml(gml: str) -> List[GmlInjection]:
 
 def _get_inject_components(gml: str) -> Tuple[str, str, str]:
     inject_type, after_inject_type = gml.split(" ", maxsplit=1)
+    inject_type = inject_type.split("#")[1]
     if "(" in after_inject_type:
         pattern = r"(\n|{)"
     else:
