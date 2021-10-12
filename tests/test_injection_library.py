@@ -49,6 +49,34 @@ content
 """,
             Define(name="other", content="different content"),
         ),
+        pytest.param(
+            """\
+#define set_window(_new_window)
+    // Sets the window to the given state and resets the window timer.
+    window = _new_window
+    window_timer = 0
+""",
+            Define(
+                name="set_window",
+                content="// Sets the window to the given state and resets the window timer.\nwindow = _new_window\nwindow_timer = 0",
+                params=["_new_window"],
+            ),
+        ),
+        pytest.param(
+            """\
+#define set_window(_new_window) {
+    // Sets the window to the given state and resets the window timer.
+    window = _new_window
+    window_timer = 0
+}
+""",
+            Define(
+                name="set_window",
+                content="// Sets the window to the given state and resets the window "
+                "timer.\nwindow = _new_window\nwindow_timer = 0",
+                params=["_new_window"],
+            ),
+        ),
     ],
 )
 def test_loads_dependency_minimal(content, define):
@@ -114,6 +142,35 @@ def test_loads_dependency_parameters(content, define):
     ],
 )
 def test_loads_multiple_dependencies_minimal(content, library):
+    actual_library = get_injection_library_from_gml(content)
+
+    assert actual_library == library
+
+
+@pytest.mark.parametrize(
+    "content, library",
+    [
+        pytest.param(
+            """\
+// This is define 1
+#define define1
+    content1
+
+//Trailing comment
+
+// This is define 2
+#define define2
+    content2
+    more content2        
+""",
+            [
+                Define(name="define1", content="content1"),
+                Define(name="define2", content="content2\nmore content2"),
+            ],
+        ),
+    ],
+)
+def test_loads_multiple_dependencies_with_leading_comments(content, library):
     actual_library = get_injection_library_from_gml(content)
 
     assert actual_library == library

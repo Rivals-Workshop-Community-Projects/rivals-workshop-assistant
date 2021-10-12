@@ -4,7 +4,7 @@ from pathlib import Path
 from typing import List, Tuple
 
 import rivals_workshop_assistant.paths
-from .dependency_handling import GmlInjection, INJECT_TYPES
+from .dependency_handling import GmlInjection, INJECT_TYPES, _strip_non_content_lines
 
 
 def read_injection_library(root_dir: Path) -> List[GmlInjection]:
@@ -20,7 +20,7 @@ def read_injection_library(root_dir: Path) -> List[GmlInjection]:
 
 
 def grouper(n, iterable, fillvalue=None):
-    "grouper(3, 'ABCDEFG', 'x') --> ABC DEF Gxx"
+    """grouper(3, 'ABCDEFG', 'x') --> ABC DEF Gxx"""
     args = [iter(iterable)] * n
     return itertools.zip_longest(fillvalue=fillvalue, *args)
 
@@ -63,4 +63,9 @@ def _get_inject_components(gml: str) -> Tuple[str, str, str]:
     else:
         pattern = r"(\s|{)"
     split = re.split(pattern=pattern, string=after_inject_type, maxsplit=1)
-    return inject_type, split[0], split[1] + split[2]
+
+    name = split[0]
+    content = split[1] + split[2]
+    content = _strip_non_content_lines(content)
+
+    return inject_type, name, content

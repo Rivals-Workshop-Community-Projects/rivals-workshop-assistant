@@ -87,6 +87,49 @@ class Define(GmlDeclaration):
         return cls(name=name, params=params, docs=docs, content=content)
 
 
+def _is_content_line(line: str, remove_comments=False) -> bool:
+    stripped = line.strip()
+    is_empty = len(stripped) == 0
+
+    if remove_comments:
+        is_comment = stripped.startswith("//")  # todo this wont detect `/*` blocks
+        return not (is_empty or is_comment)
+    else:
+        return not is_empty
+
+
+def _strip_content_in_direction(
+    content: str, remove_comments: bool = False, reverse: bool = False
+) -> str:
+    stripped_lines = []
+
+    lines = content.splitlines()
+    if reverse:
+        lines = reversed(lines)
+
+    content_found = False
+    for line in lines:
+        if content_found:
+            stripped_lines.append(line)
+        else:
+            if _is_content_line(line, remove_comments):
+                content_found = True
+                stripped_lines.append(line)
+
+    if reverse:
+        stripped_lines = reversed(stripped_lines)
+
+    stripped_content = "\n".join(stripped_lines)
+    return stripped_content
+
+
+def _strip_non_content_lines(content: str) -> str:
+    """Remove surrounding whitespace, empty lines, and comment lines"""
+    content = _strip_content_in_direction(content)
+    content = _strip_content_in_direction(content, remove_comments=True, reverse=True)
+    return content
+
+
 def _remove_brackets(content):
     has_start_bracket = content.strip().startswith("{")
     has_end_bracket = content.strip().endswith("}")
