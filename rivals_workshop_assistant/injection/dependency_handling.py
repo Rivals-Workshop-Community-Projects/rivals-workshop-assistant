@@ -1,6 +1,6 @@
 import abc
 import textwrap
-from typing import NewType, List, Tuple, Union
+from typing import List, Tuple, Union
 
 
 class GmlInjection(abc.ABC):
@@ -135,7 +135,6 @@ def _is_content_line(line: str, remove_comments=False) -> bool:
     is_empty = len(stripped) == 0
 
     if remove_comments:
-        # This assumes that lines in /* blocks also have //
         is_comment = any(
             stripped.startswith(comment_str) for comment_str in ("//", "/*", "*/")
         )
