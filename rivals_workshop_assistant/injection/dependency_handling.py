@@ -1,6 +1,6 @@
 import abc
 import textwrap
-import typing as t
+from typing import NewType, List, Tuple, Union
 
 
 class GmlInjection(abc.ABC):
@@ -52,7 +52,7 @@ class Define(GmlDeclaration):
         content: str,
         version: int = 0,
         docs: str = "",
-        params: t.List[str] = None,
+        params: List[str] = None,
     ):
         if params is None:
             params = []
@@ -87,37 +87,47 @@ class Define(GmlDeclaration):
         return cls(name=name, params=params, docs=docs, content=content)
 
 
-def _normalize_comments(content: str) -> str:
+class Comment(str):
+    pass
+
+
+def _partition_block_comments(content: str) -> List[Union[str, Comment]]:
+    partitions = []
+    start_splits = content.split("/*")
+
+    partitions.append(start_splits[0])
+    for start_split in start_splits[1:]:
+        end_splits = start_split.split("*/")
+        comment, code = end_splits
+        partitions.append(Comment(comment))
+        partitions.append(code)
+    return partitions
+
+
+def _normalize_block_comments(content: str) -> str:
     """Add // to the beginning of all lines inside a /* */ block"""
 
-    split_by_enter = content.split("/*")
-    normalized_splits = []
-    for split in split_by_enter:
-        inner_splits = split.split("*/")
-        if len(inner_splits) == 1:
-            normalized_splits.append(inner_splits[0])
-        else:
-            split_content, after = inner_splits
-
-            normalized_content_lines = []
-            split_content_lines = split_content.splitlines(keepends=True)
-            normalized_content_lines.append(split_content_lines[0])
-            for line in split_content_lines[1:]:
-                # line_starts_with_comment_sign = any(
-                #     line.lstrip().startswith(comment_sign) for comment_sign in ("//",)
-                # )
+    comment_partitions = _partition_block_comments(content)
+    normalized_partitions = []
+    for partition in comment_partitions:
+        if isinstance(partition, Comment):
+            comment = partition
+            normalized_comment_lines = []
+            comment_lines = comment.splitlines(keepends=True)
+            normalized_comment_lines.append(comment_lines[0])
+            for line in comment_lines[1:]:
                 if line.lstrip().startswith("//"):
                     normalized_line = line
                 else:
                     normalized_line = f"// {line}"
-                normalized_content_lines.append(normalized_line)
-            normalized_content = "".join(normalized_content_lines)
+                normalized_comment_lines.append(normalized_line)
+            normalized_comment = f'/*{"".join(normalized_comment_lines)}*/'
+            normalized_partitions.append(normalized_comment)
+        else:
+            normalized_partitions.append(partition)
 
-            content_and_after = f"{normalized_content}*/{after}"
-            normalized_splits.append(content_and_after)
-    full_normalized_content = "/*".join(normalized_splits)
-
-    return full_normalized_content
+    normalized_content = "".join(normalized_partitions)
+    return normalized_content
 
 
 def _is_content_line(line: str, remove_comments=False) -> bool:
@@ -178,7 +188,7 @@ def _remove_brackets(content):
     return content
 
 
-def _split_docs_and_gml(content: str) -> t.Tuple[str, str]:
+def _split_docs_and_gml(content: str) -> Tuple[str, str]:
     lines = content.split("\n")
     non_docs_found = False
 
@@ -199,7 +209,7 @@ def _split_docs_and_gml(content: str) -> t.Tuple[str, str]:
     return "\n".join(doc_lines), "\n".join(gml_lines)
 
 
-def _split_name_and_params(name: str) -> t.Tuple[str, t.List[str]]:
+def _split_name_and_params(name: str) -> Tuple[str, List[str]]:
     name = name.strip()
     if "(" not in name:
         return name, []
@@ -234,53 +244,3 @@ class Macro(GmlDeclaration):
 
 
 INJECT_TYPES = (Define, Macro)
-
-
-if __name__ == "__main__":
-    test = """\
-
-1
-
-/*
-
-in first
-
-  */    
-
-2
-
-/*
-
-in second
-
-hmm */
-
-3
-    
-    """
-
-    exp = """\
-
-1
-
-/*
-// 
-// in first
-// 
-//   */    
-
-2
-
-/*
-// 
-// in second
-// 
-// hmm */
-
-3
-    
-    """
-
-    out = _normalize_comments(test)
-    assert out == exp
-    print(out)
