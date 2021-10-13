@@ -87,12 +87,48 @@ class Define(GmlDeclaration):
         return cls(name=name, params=params, docs=docs, content=content)
 
 
+def _normalize_comments(content: str) -> str:
+    """Add // to the beginning of all lines inside a /* */ block"""
+
+    split_by_enter = content.split("/*")
+    normalized_splits = []
+    for split in split_by_enter:
+        inner_splits = split.split("*/")
+        if len(inner_splits) == 1:
+            normalized_splits.append(inner_splits[0])
+        else:
+            split_content, after = inner_splits
+
+            normalized_content_lines = []
+            split_content_lines = split_content.splitlines(keepends=True)
+            normalized_content_lines.append(split_content_lines[0])
+            for line in split_content_lines[1:]:
+                # line_starts_with_comment_sign = any(
+                #     line.lstrip().startswith(comment_sign) for comment_sign in ("//",)
+                # )
+                if line.lstrip().startswith("//"):
+                    normalized_line = line
+                else:
+                    normalized_line = f"// {line}"
+                normalized_content_lines.append(normalized_line)
+            normalized_content = "".join(normalized_content_lines)
+
+            content_and_after = f"{normalized_content}*/{after}"
+            normalized_splits.append(content_and_after)
+    full_normalized_content = "/*".join(normalized_splits)
+
+    return full_normalized_content
+
+
 def _is_content_line(line: str, remove_comments=False) -> bool:
     stripped = line.strip()
     is_empty = len(stripped) == 0
 
     if remove_comments:
-        is_comment = stripped.startswith("//")  # todo this wont detect `/*` blocks
+        # This assumes that lines in /* blocks also have //
+        is_comment = any(
+            stripped.startswith(comment_str) for comment_str in ("//", "/*", "*/")
+        )
         return not (is_empty or is_comment)
     else:
         return not is_empty
@@ -198,3 +234,53 @@ class Macro(GmlDeclaration):
 
 
 INJECT_TYPES = (Define, Macro)
+
+
+if __name__ == "__main__":
+    test = """\
+
+1
+
+/*
+
+in first
+
+  */    
+
+2
+
+/*
+
+in second
+
+hmm */
+
+3
+    
+    """
+
+    exp = """\
+
+1
+
+/*
+// 
+// in first
+// 
+//   */    
+
+2
+
+/*
+// 
+// in second
+// 
+// hmm */
+
+3
+    
+    """
+
+    out = _normalize_comments(test)
+    assert out == exp
+    print(out)

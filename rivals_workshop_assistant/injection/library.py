@@ -4,7 +4,12 @@ from pathlib import Path
 from typing import List, Tuple
 
 import rivals_workshop_assistant.paths
-from .dependency_handling import GmlInjection, INJECT_TYPES, _strip_non_content_lines
+from .dependency_handling import (
+    GmlInjection,
+    INJECT_TYPES,
+    _strip_non_content_lines,
+    _normalize_comments,
+)
 
 
 def read_injection_library(root_dir: Path) -> List[GmlInjection]:
@@ -66,6 +71,7 @@ def _get_inject_components(gml: str) -> Tuple[str, str, str]:
 
     name = split[0]
     content = split[1] + split[2]
+    content = _normalize_comments(content)
     content = _strip_non_content_lines(content)
 
     return inject_type, name, content

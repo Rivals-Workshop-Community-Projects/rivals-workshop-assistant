@@ -150,21 +150,43 @@ def test_loads_multiple_dependencies_minimal(content, library):
 @pytest.mark.parametrize(
     "content, library",
     [
+        #         pytest.param(
+        #             """\
+        # // This is define 1
+        # #define define1
+        #     content1
+        #
+        # //Trailing comment
+        #
+        # // This is define 2
+        # #define define2
+        #     content2
+        #     more content2
+        # """,
+        #             [
+        #                 Define(name="define1", content="content1"),
+        #                 Define(name="define2", content="content2\nmore content2"),
+        #             ],
+        #         ),
         pytest.param(
             """\
-// This is define 1
 #define define1
     content1
+    more content1
 
-//Trailing comment
+/* start of block comment
+comment inside
 
-// This is define 2
+more comment inside
+ 
+*/
+
 #define define2
     content2
     more content2        
 """,
             [
-                Define(name="define1", content="content1"),
+                Define(name="define1", content="content1\nmore content1"),
                 Define(name="define2", content="content2\nmore content2"),
             ],
         ),
