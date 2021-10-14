@@ -341,7 +341,7 @@ def _delete_old_library_release(root_dir: Path):
 def _download_and_unzip_library_release(root_dir: Path, release: Release):
     """Controller"""
     with tempfile.TemporaryDirectory() as tmp:
-        response = requests.get(release.download_url)
+        response = requests.get(release.download_url, timeout=800)
         zipped_release = zipfile.ZipFile(io.BytesIO(response.content))
         zipped_release.extractall(path=tmp)
 
