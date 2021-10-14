@@ -101,20 +101,31 @@ content"""
     ]
 
 
-def test_replace_existing_library_dependencies():
+@pytest.mark.parametrize(
+    "header",
+    [
+        pytest.param(application.INJECTION_START_HEADER),
+        pytest.param(application.OLD_INJECTION_START_HEADERS[0]),
+    ],
+)
+def test_replace_existing_library_dependencies(header):
     script_content = "define1()"
 
     script = f"""\
 {script_content}
-{application.INJECTION_START_HEADER}
+{header}
+{define1.gml}
 {define2.gml}
 {application.INJECTION_END_HEADER}
 """
-    scripts = [make_script(PATH_A, script)]
-    library = [define1]
 
-    application.apply_injection(scripts=scripts, injection_library=library, anims=[])
-    assert scripts == [
+    actual_scripts = [make_script(PATH_A, script)]
+    library = [define1]
+    application.apply_injection(
+        scripts=actual_scripts, injection_library=library, anims=[]
+    )
+
+    expected_scripts = [
         make_script(
             PATH_A,
             original_content=script,
@@ -126,6 +137,7 @@ def test_replace_existing_library_dependencies():
 {application.INJECTION_END_HEADER}""",
         )
     ]
+    assert expected_scripts == actual_scripts
 
 
 def test_removes_injection_when_not_needed():

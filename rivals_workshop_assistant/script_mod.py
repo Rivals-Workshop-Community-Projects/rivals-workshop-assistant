@@ -21,7 +21,7 @@ class Script(File):
     ):
         super().__init__(path, modified_time, processed_time)
         self._original_content = original_content
-        self._working_content = working_content
+        self._working_content = working_content  # used with property
 
         self.working_content = working_content
 

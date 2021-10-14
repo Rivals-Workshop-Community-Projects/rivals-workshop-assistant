@@ -6,17 +6,22 @@ from rivals_workshop_assistant.script_mod import Script
 from ..aseprite_handling import Anim
 from typing import List
 
-INJECTION_START_MARKER = "// vvv LIBRARY DEFINES AND MACROS vvv\n"
+OLD_INJECTION_START_MARKERS = ["// vvv LIBRARY DEFINES AND MACROS vvv\n"]
+INJECTION_START_MARKER = "// #region vvv LIBRARY DEFINES AND MACROS vvv\n"
 INJECTION_START_WARNING = (
     "// DANGER File below this point will be overwritten! "
     "Generated defines and macros below.\n"
     "// Write NO-INJECT in a comment above this area to disable injection."
 )
+OLD_INJECTION_START_HEADERS = [
+    f"{start}{INJECTION_START_WARNING}" for start in OLD_INJECTION_START_MARKERS
+]
 INJECTION_START_HEADER = f"{INJECTION_START_MARKER}{INJECTION_START_WARNING}"
 INJECTION_END_HEADER = (
     "// DANGER: "
     "Write your code ABOVE the LIBRARY DEFINES AND MACROS header "
-    "or it will be overwritten!"
+    "or it will be overwritten!\n"
+    "// #endregion"
 )
 
 
@@ -38,6 +43,7 @@ def _apply_injection_to_script(
         needed_gmls = _get_inject_gmls_needed_in_gml(
             script.working_content, injection_library
         ) + _get_anim_data_gmls_needed_in_gml(anim)
+
         script.working_content = _add_inject_gmls_in_script(
             script.working_content, needed_gmls
         )
@@ -109,9 +115,7 @@ def _gml_uses_inject(gml: str, injection: GmlInjection):
 
 
 def _gml_supplies_inject(gml: str, inject: GmlInjection):
-    return re.search(
-        pattern=inject.give_pattern, string=gml.split(INJECTION_START_MARKER)[0]
-    )
+    return re.search(pattern=inject.give_pattern, string=_get_script_contents(gml))
 
 
 def _add_inject_gmls_in_script(script: str, dependency_gmls: List[str]) -> str:
@@ -130,5 +134,7 @@ def _add_inject_gmls_in_script(script: str, dependency_gmls: List[str]) -> str:
 
 
 def _get_script_contents(script: str):
-    """Get the portion of the script above the dependency header."""
-    return script.split(INJECTION_START_MARKER)[0].rstrip()
+    old_markers_pattern = "|".join(marker for marker in OLD_INJECTION_START_MARKERS)
+    pattern = fr"(?:{INJECTION_START_MARKER}|{old_markers_pattern})"
+    contents = re.split(pattern=pattern, string=script)[0].rstrip()
+    return contents
