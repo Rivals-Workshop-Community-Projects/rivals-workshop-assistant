@@ -28,7 +28,10 @@ INJECTION_END_HEADER = (
 
 
 def apply_injection(
-    scripts: List[Script], injection_library: List[GmlInjection], anims: List[Anim], dotfile:dict=None
+    scripts: List[Script],
+    injection_library: List[GmlInjection],
+    anims: List[Anim],
+    dotfile: dict = None,
 ):
     """Updates scripts with supplied dependencies."""
     for script in scripts:
@@ -38,28 +41,36 @@ def apply_injection(
 
 
 def _apply_injection_to_script(
-    script: Script, injection_library: List[GmlInjection], anim: Anim, dotfile:dict=None
+    script: Script,
+    injection_library: List[GmlInjection],
+    anim: Anim,
+    dotfile: dict = None,
 ):
     """Updates the dependencies supplied to the script."""
     if _should_inject(script.working_content):
 
         needed_injects = _get_injects_needed_in_gml(
-             gml=_get_script_contents(script.working_content),
-             injection_library=injection_library)
+            gml=_get_script_contents(script.working_content),
+            injection_library=injection_library,
+        )
 
         # TODO refactor code below this point
         # need to map script-to-script dependencies into the dotfile
         if dotfile is not None:
             inject_scripts = []
             for injection in needed_injects:
-                if not (injection.filepath is None or injection.filepath in inject_scripts):
+                if not (
+                    injection.filepath is None or injection.filepath in inject_scripts
+                ):
                     inject_scripts.append(injection.filepath)
 
-            update_dotfile_injection_clients(dotfile=dotfile, clientscript=script.path, dependencies=inject_scripts)
+            update_dotfile_injection_clients(
+                dotfile=dotfile, clientscript=script.path, dependencies=inject_scripts
+            )
 
-
-        needed_gmls = [injection.gml for injection in needed_injects
-                      ] + _get_anim_data_gmls_needed_in_gml(anim)
+        needed_gmls = [
+            injection.gml for injection in needed_injects
+        ] + _get_anim_data_gmls_needed_in_gml(anim)
 
         script.working_content = _add_inject_gmls_in_script(
             script.working_content, needed_gmls
@@ -134,9 +145,7 @@ def _gml_uses_inject(gml: str, injection: GmlInjection):
 
 def _gml_supplies_inject(gml: str, inject: GmlInjection):
     """checks if a detected injection is already defined in the original script."""
-    return re.search(
-        pattern=inject.give_pattern, string=_get_script_contents(gml)
-    )
+    return re.search(pattern=inject.give_pattern, string=_get_script_contents(gml))
 
 
 def _add_inject_gmls_in_script(script: str, dependency_gmls: List[str]) -> str:

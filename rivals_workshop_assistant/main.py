@@ -43,6 +43,7 @@ from rivals_workshop_assistant.warning_handling import handle_warning
 
 __version__ = "1.1.2"
 
+
 class Mode(Enum):
     ALL = "all"
     ANIMS = "anims"
@@ -77,7 +78,11 @@ def main(
 
 
 def handle_scripts(
-    root_dir: Path, scripts: List[Script], anims: List[Anim], assistant_config: dict, dotfile: dict
+    root_dir: Path,
+    scripts: List[Script],
+    anims: List[Anim],
+    assistant_config: dict,
+    dotfile: dict,
 ):
     handle_warning(assistant_config=assistant_config, scripts=scripts)
     handle_codegen(scripts)
@@ -101,8 +106,10 @@ def update_files(exe_dir: Path, root_dir: Path, mode: Mode.ALL):
 
     for inject in userinject_scripts + libinject_scripts:
         if inject.is_fresh:
-            #if a file in user_inject has been touched, mark its clients for update
-            clients = get_clients_for_injection(dotfile=dotfile, injectionscript=inject.path)
+            # if a file in user_inject has been touched, mark its clients for update
+            clients = get_clients_for_injection(
+                dotfile=dotfile, injectionscript=inject.path
+            )
             for script in scripts:
                 if script.path in clients:
                     script.is_fresh = True
@@ -120,7 +127,7 @@ def update_files(exe_dir: Path, root_dir: Path, mode: Mode.ALL):
             scripts=scripts,
             assistant_config=assistant_config,
             anims=anims,
-            dotfile=dotfile
+            dotfile=dotfile,
         )
         save_scripts(root_dir, scripts)
         seen_files += scripts
@@ -139,7 +146,9 @@ def update_files(exe_dir: Path, root_dir: Path, mode: Mode.ALL):
         seen_files += aseprites
 
     update_dotfile_after_saving(
-        now=datetime.datetime.now(), dotfile=dotfile, seen_files=seen_files + userinject_scripts
+        now=datetime.datetime.now(),
+        dotfile=dotfile,
+        seen_files=seen_files + userinject_scripts,
     )
 
     assets = get_required_assets(scripts)

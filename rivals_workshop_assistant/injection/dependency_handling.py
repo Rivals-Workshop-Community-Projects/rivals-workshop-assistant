@@ -3,8 +3,16 @@ import textwrap
 from typing import List, Tuple, Union
 from pathlib import Path
 
+
 class GmlInjection(abc.ABC):
-    def __init__(self, name: str, gml: str, use_pattern: str, give_pattern: str, filepath: Path = None):
+    def __init__(
+        self,
+        name: str,
+        gml: str,
+        use_pattern: str,
+        give_pattern: str,
+        filepath: Path = None,
+    ):
         self.name = name
         self.gml = gml
         self.use_pattern = use_pattern
@@ -55,7 +63,7 @@ class Define(GmlDeclaration):
         version: int = 0,
         docs: str = "",
         params: List[str] = None,
-        filepath: Path=None,
+        filepath: Path = None,
     ):
         if params is None:
             params = []
@@ -88,7 +96,9 @@ class Define(GmlDeclaration):
         content = textwrap.dedent(content).strip("\n")
         docs, content = _split_docs_and_gml(content)
         name, params = _split_name_and_params(name)
-        return cls(name=name, params=params, docs=docs, content=content, filepath=filepath)
+        return cls(
+            name=name, params=params, docs=docs, content=content, filepath=filepath
+        )
 
 
 class Comment(str):
@@ -227,7 +237,7 @@ def _split_name_and_params(name: str) -> Tuple[str, List[str]]:
 class Macro(GmlDeclaration):
     IDENTIFIER_STRING = "macro"
 
-    def __init__(self, name: str, value: str, filepath: Path=None):
+    def __init__(self, name: str, value: str, filepath: Path = None):
         gml = f"#macro {name} {value}"
         super().__init__(
             name,
@@ -237,7 +247,7 @@ class Macro(GmlDeclaration):
         )
 
     @classmethod
-    def from_gml(cls, name: str, content: str, filepath: Path=None):
+    def from_gml(cls, name: str, content: str, filepath: Path = None):
         if content[0] == " ":
             content = content[1:]  # remove leading space
 
