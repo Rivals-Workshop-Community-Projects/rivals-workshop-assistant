@@ -91,10 +91,6 @@ def get_initial_default_config() -> dict:
     return info_files.YAML_HANDLER.load(DEFAULT_CONFIG)
 
 
-def override_default_config(default_config, user_default_config_override):
-    raise NotImplementedError
-
-
 GENERATE_HURTBOXES_FIELD = "generate_hurtboxes"
 GENERATE_HURTBOXES_DEFAULT = True
 
@@ -111,6 +107,7 @@ DEFAULT_CONFIG = f"""\
 {ASEPRITE_PATH_FIELD}: # FILL THIS IN TO USE ASEPRITE
     # Point this to your Aseprite.exe absolute path, for example: 
     # aseprite_path: C:/Program Files/Aseprite/aseprite.exe
+    # If correct, copying the path into your file explorer address bar will open aseprite.
     # This is needed for the assistant to automatically export your animations to spritesheets.
     # If you use Steam for Aseprite, you can find the path with:
     #   The aseprite page of your library, The gear icon at the top right,
@@ -130,7 +127,7 @@ DEFAULT_CONFIG = f"""\
 
 {GENERATE_HURTBOXES_FIELD}: {GENERATE_HURTBOXES_DEFAULT}
     # If the assistant should automatically generate hurtboxes from your anim files.
-    # See TODO PUT A LINK TO THE ASSISTANT. TELL QAZZQUIMBY ON DISCORD IF HE FORGETS TO REPLACE THIS!
+    # See https://rivalslib.com/assistant/animation_handling.html#hurtbox-generation
 
 {LIBRARY_UPDATE_LEVEL_FIELD}: {LIBRARY_UPDATE_LEVEL_DEFAULT.value}
     # What kind of library updates to allow. 

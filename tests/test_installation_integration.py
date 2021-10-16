@@ -71,23 +71,23 @@ def test__download_and_unzip_release():
 
 
 def test__install_release():
-    with TempDirectory() as tmp:
+    with TempDirectory() as root_dir, TempDirectory() as exe_dir:
         create_script(
-            tmp,
+            root_dir,
             ScriptWithPath(
                 path=rivals_workshop_assistant.dotfile_mod.PATH,
                 content=f"{LIBRARY_VERSION_FIELD}: 0.0.0",
             ),
         )
         create_script(
-            tmp,
+            root_dir,
             ScriptWithPath(
                 path=rivals_workshop_assistant.assistant_config_mod.PATH,
                 content="update_level: none",
             ),
         )
         create_script(
-            tmp,
+            root_dir,
             ScriptWithPath(
                 path=rivals_workshop_assistant.paths.INJECT_FOLDER / "test.gml",
                 content="test content",
@@ -97,10 +97,10 @@ def test__install_release():
             path=rivals_workshop_assistant.paths.USER_INJECT_FOLDER / "users.gml",
             content="whatever",
         )
-        create_script(tmp, existing_user_inject)
+        create_script(root_dir, existing_user_inject)
 
         rivals_workshop_assistant.updating.update(
-            root_dir=Path(tmp.path), dotfile={}, config={}
+            exe_dir=exe_dir, root_dir=Path(root_dir.path), dotfile={}, config={}
         )
-        assert_test_release_scripts_installed(tmp)
-        assert_script_with_path(tmp, existing_user_inject)
+        assert_test_release_scripts_installed(root_dir)
+        assert_script_with_path(root_dir, existing_user_inject)

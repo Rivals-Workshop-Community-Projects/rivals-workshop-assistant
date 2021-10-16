@@ -11,24 +11,38 @@ from rivals_workshop_assistant.info_files import _yaml_load
 from tests.testing_helpers import make_version, make_release, TEST_DATE_STRING
 
 
-def make_library_updater(root_dir=Path("a"), dotfile=None, config=None):
+def make_library_updater(
+    root_dir=Path("a"), exe_dir=Path("exe_dir"), dotfile=None, config=None
+):
     return _make_updater(
-        root_dir=root_dir, dotfile=dotfile, config=config, type_=src.LibraryUpdater
+        exe_dir=exe_dir,
+        root_dir=root_dir,
+        dotfile=dotfile,
+        config=config,
+        type_=src.LibraryUpdater,
     )
 
 
-def make_assistant_updater(root_dir=Path("a"), dotfile=None, config=None):
+def make_assistant_updater(
+    root_dir=Path("a"), exe_dir=Path("exe_dir"), dotfile=None, config=None
+):
     return _make_updater(
-        root_dir=root_dir, dotfile=dotfile, config=config, type_=src.AssistantUpdater
+        exe_dir=exe_dir,
+        root_dir=root_dir,
+        dotfile=dotfile,
+        config=config,
+        type_=src.AssistantUpdater,
     )
 
 
-def _make_updater(root_dir, dotfile, config, type_: typing.Type):
+def _make_updater(
+    exe_dir: Path, root_dir: Path, dotfile: dict, config: dict, type_: typing.Type
+):
     if dotfile is None:
         dotfile = {}
     if config is None:
         config = {}
-    return type_(root_dir=root_dir, dotfile=dotfile, config=config)
+    return type_(exe_dir=exe_dir, root_dir=root_dir, dotfile=dotfile, config=config)
 
 
 @pytest.mark.parametrize(

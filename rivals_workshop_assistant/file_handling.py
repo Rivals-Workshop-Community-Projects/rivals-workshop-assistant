@@ -9,6 +9,7 @@ def create_file(path: Path, content: str, overwrite=False):
         return
 
     with open(path, "w+", newline="\n") as f:
+        print(f"Creating new file: {path}")
         f.write(content)
 
 

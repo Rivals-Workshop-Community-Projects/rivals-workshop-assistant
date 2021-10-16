@@ -57,15 +57,6 @@ def build_gmedit():
 
     os.chdir(wd)
 
-    # requests.post('POST https://api.github.com/repos'
-    #               f'/{paths.REPO_OWNER}'
-    #               f'/{paths.REPO_NAME}'
-    #               '/releases',
-    # )
-    # todo Create release, Zip files, upload zip
-
 
 if __name__ == "__main__":
     build_exe()
-    # build_vscode()
-    # build_gmedit()

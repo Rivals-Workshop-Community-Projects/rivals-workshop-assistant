@@ -138,20 +138,24 @@ class Anim(TagObject):
             [
                 f'"{aseprite_path}"',
                 "-b",
-                f"-script-param filename={aseprite_file_path}",
+                f'-script-param filename="{aseprite_file_path}"',
                 f"-script-param dest={dest}",
                 f"-script-param startFrame={self.start + 1}",
                 f"-script-param endFrame={self.end + 1}",
             ]
             + [f"-script-param {key}={value}" for key, value in lua_params.items()]
             + [
-                f"-script {full_script_path.absolute()}",
+                f'-script "{full_script_path.absolute()}"',
             ]
         )
         export_command = " ".join(command_parts)
-        result = subprocess.run(export_command)
-        if result.returncode != 0:
-            raise RuntimeError
+        print(f"Running lua script: {export_command}")
+        try:
+            result = subprocess.run(export_command)
+            if result.returncode != 0:
+                print(f"ERROR: Lua script command failed. {export_command}")
+        except FileNotFoundError:
+            print(f"ERROR: Aseprite not found at {aseprite_path}")
 
     def _cares_about_small_sprites(self):
         return self.name in ANIMS_WHICH_CARE_ABOUT_SMALL_SPRITES

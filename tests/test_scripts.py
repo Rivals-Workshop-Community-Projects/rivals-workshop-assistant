@@ -43,7 +43,7 @@ def test_dotfile_after_saving():
     time = make_time()
 
     rivals_workshop_assistant.dotfile_mod.update_dotfile_after_saving(
-        dotfile=dotfile, now=time, files=[script]
+        dotfile=dotfile, now=time, seen_files=[script]
     )
 
     assert dotfile == {

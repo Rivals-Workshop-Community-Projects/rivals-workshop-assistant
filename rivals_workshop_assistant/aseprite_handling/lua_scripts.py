@@ -1,4 +1,8 @@
 # language=lua
+from pathlib import Path
+
+from rivals_workshop_assistant import paths
+
 EXPORT_ASEPRITE = """\
 local sprite = app.open(app.params["filename"])
     
@@ -48,9 +52,13 @@ app.command.ExportSpriteSheet {
 CREATE_HURTBOX = """\
 local sprite = app.open(app.params["filename"])
 
+app.command.ChangePixelFormat{ui=false, format="rgb", dithering="none"}
+
 local startFrame = tonumber(app.params["startFrame"])
 local endFrame = tonumber(app.params["endFrame"])
 local scale = 2
+
+local NIL_CONSTANT = "nil"
 
 -- Hurtmask layer is subtracted from the hurtbox
 local hurtmaskLayer = nil
@@ -68,7 +76,7 @@ for _, layer in ipairs(sprite.layers) do
         hurtboxLayer = layer
     else
         if layer.isVisible then
-        table.insert(contentLayers, layer)
+            table.insert(contentLayers, layer)
         else
             app.range.layers = { layer }
             app.command.removeLayer()
@@ -92,30 +100,29 @@ if #_irrelevantFrames > 0 then
 end
 
 local function isNonTransparent(pixel)
-    return pixel() > 0
+    return app.pixelColor.rgbaA(pixel()) > 0
 end
 
 local function selectContent(layer, frameNumber)
-local cel = layer:cel(frameNumber)
-if cel == nil then
-    return Selection()
-end
-
-local points = {}
-for pixel in cel.image:pixels() do
-    if isNonTransparent(pixel) then
-        table.insert(points, Point(pixel.x + cel.position.x, pixel.y + cel.position.y))
+    local cel = layer:cel(frameNumber)
+    if cel == nil then
+        return NIL_CONSTANT
     end
-end
 
-local select = Selection()
+    local points = {}
+    for pixel in cel.image:pixels() do
+        if isNonTransparent(pixel) then
+            table.insert(points, Point(pixel.x + cel.position.x, pixel.y + cel.position.y))
+        end
+    end
+
+    local select = Selection()
     for _, point in ipairs(points) do
         local pixelRect = Rectangle(point.x, point.y, 1, 1)
         select:add(Selection(pixelRect))
     end
     return select
 end
-
 
 local function convertLayerToSelections(layer)
     selections = {}
@@ -135,6 +142,19 @@ app.activeSprite = sprite
 hurtmaskSelections = convertLayerToSelections(hurtmaskLayer)
 hurtboxSelections = convertLayerToSelections(hurtboxLayer)
 
+local function startsWith(str, prefix)
+    return string.sub(str, 1, string.len(prefix)) == prefix
+end
+
+-- Hide layers with NOHURT prefix
+local NOHURT = "NOHURT"
+for _, layer in ipairs(sprite.layers) do
+    if startsWith(layer.name, NOHURT) or string.find(layer.data, NOHURT) then
+        app.range.layers = { layer }
+        app.command.removeLayer()
+    end
+end
+
 -- Flatten content_layers.
 app.range.layers = contentLayers
 app.command.FlattenLayers {
@@ -153,39 +173,43 @@ assert(contentLayer ~= nil, "no layer called Flattened")
 --If hurtboxSelections exists, replace the content with the selections.
 app.activeLayer = contentLayer
 for i, hurtboxSelection in ipairs(hurtboxSelections) do
-    app.activeFrame = sprite.frames[i]
-    app.range.frames = {sprite.frames[i]}
-    
-    -- Delete the image
-    app.command.ReplaceColor {
-        ui=false,
-           to=Color{ r=0, g=0, b=0, a=0},
-    tolerance=255
-    }
-    app.command.DeselectMask()
-    
-    -- Fill the selection
-    sprite.selection = hurtboxSelection
-    app.fgColor = Color{ r=255, g=255, b=255, a=255 }
-    app.command.Fill()
-    
-    app.command.DeselectMask()
+    if hurtboxSelection ~= NIL_CONSTANT then
+        app.activeFrame = sprite.frames[i]
+        app.range.frames = {sprite.frames[i]}
+        
+        -- Delete the image
+        app.command.ReplaceColor {
+            ui=false,
+            to=Color{ r=0, g=0, b=0, a=0},
+            tolerance=255
+        }
+        app.command.DeselectMask()
+        
+        -- Fill the selection
+        sprite.selection = hurtboxSelection
+        app.fgColor = Color{ r=255, g=255, b=255, a=255 }
+        app.command.Fill()
+        
+        app.command.DeselectMask()
+    end
 end
 
 
 -- Delete hurtmaskSelections from content layer
 app.activeLayer = contentLayer
 for i, hurtmaskSelection in ipairs(hurtmaskSelections) do
-    app.activeFrame = sprite.frames[i]
-    app.range.frames = {sprite.frames[i]}
-    sprite.selection = hurtmaskSelection
-    
-    app.command.ReplaceColor {
-        ui=false,
-           to=Color{ r=0, g=0, b=0, a=0 },
-    tolerance=255
-    }
-    app.command.DeselectMask()
+    if hurtmaskSelection ~= NIL_CONSTANT then
+        app.activeFrame = sprite.frames[i]
+        app.range.frames = {sprite.frames[i]}
+        sprite.selection = hurtmaskSelection
+        
+        app.command.ReplaceColor {
+            ui=false,
+            to=Color{ r=0, g=0, b=0, a=0 },
+            tolerance=255
+        }
+        app.command.DeselectMask()
+    end
 end
 
 -- Color the content layer green.
@@ -193,13 +217,18 @@ app.activeLayer = contentLayer
 for _, frame in ipairs(sprite.frames) do
     app.activeFrame = frame
     app.range.frames = {frame}
-    sprite.selection = selectContent(contentLayer, frame)
-    app.command.ReplaceColor {
-        ui=false,
-           to=Color{ r=0, g=255, b=0, a=255 },
-    tolerance=255
-    }
-    app.command.DeselectMask()
+    local selection = selectContent(contentLayer, frame)
+    if selection ~= NIL_CONSTANT then
+        sprite.selection = selection
+        -- app.fgColor = Color{ r=0, g=255, b=0, a=255 }
+        -- app.command.Fill()
+        app.command.ReplaceColor {
+            ui=false,
+            to=Color{ r=0, g=255, b=0, a=255 },
+            tolerance=255
+        }
+        app.command.DeselectMask()
+    end
 end
 
 app.command.SpriteSize {
@@ -208,9 +237,9 @@ app.command.SpriteSize {
 
 app.command.ExportSpriteSheet {
     ui=false,
-       askOverwrite=false,
-                    type=SpriteSheetType.HORIZONTAL,
-                         textureFilename=app.params["dest"],
+    askOverwrite=false,
+    type=SpriteSheetType.HORIZONTAL,
+    textureFilename=app.params["dest"],
 }
 """
 
@@ -218,3 +247,9 @@ LUA_SCRIPTS = {
     "export_aseprite": EXPORT_ASEPRITE,
     "create_hurtbox": CREATE_HURTBOX,
 }
+
+
+def delete_lua_scripts(exe_dir: Path):
+    lua_glob = (exe_dir / paths.ASEPRITE_LUA_SCRIPTS_FOLDER).glob("*.lua")
+    for path in lua_glob:
+        path.unlink()

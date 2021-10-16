@@ -1,8 +1,7 @@
 import abc
 import textwrap
-import typing as t
+from typing import List, Tuple, Union
 from pathlib import Path
-
 
 class GmlInjection(abc.ABC):
     def __init__(self, name: str, gml: str, use_pattern: str, give_pattern: str, filepath: Path = None):
@@ -55,7 +54,7 @@ class Define(GmlDeclaration):
         content: str,
         version: int = 0,
         docs: str = "",
-        params: t.List[str] = None,
+        params: List[str] = None,
         filepath: Path=None,
     ):
         if params is None:
@@ -92,6 +91,94 @@ class Define(GmlDeclaration):
         return cls(name=name, params=params, docs=docs, content=content, filepath=filepath)
 
 
+class Comment(str):
+    pass
+
+
+def _partition_block_comments(content: str) -> List[Union[str, Comment]]:
+    partitions = []
+    start_splits = content.split("/*")
+
+    partitions.append(start_splits[0])
+    for start_split in start_splits[1:]:
+        end_splits = start_split.split("*/")
+        comment, code = end_splits
+        partitions.append(Comment(comment))
+        partitions.append(code)
+    return partitions
+
+
+def _normalize_block_comments(content: str) -> str:
+    """Add // to the beginning of all lines inside a /* */ block"""
+
+    comment_partitions = _partition_block_comments(content)
+    normalized_partitions = []
+    for partition in comment_partitions:
+        if isinstance(partition, Comment):
+            comment = partition
+            normalized_comment_lines = []
+            comment_lines = comment.splitlines(keepends=True)
+            normalized_comment_lines.append(comment_lines[0])
+            for line in comment_lines[1:]:
+                if line.lstrip().startswith("//"):
+                    normalized_line = line
+                else:
+                    normalized_line = f"// {line}"
+                normalized_comment_lines.append(normalized_line)
+            normalized_comment = f'/*{"".join(normalized_comment_lines)}*/'
+            normalized_partitions.append(normalized_comment)
+        else:
+            normalized_partitions.append(partition)
+
+    normalized_content = "".join(normalized_partitions)
+    return normalized_content
+
+
+def _is_content_line(line: str, remove_comments=False) -> bool:
+    stripped = line.strip()
+    is_empty = len(stripped) == 0
+
+    if remove_comments:
+        is_comment = any(
+            stripped.startswith(comment_str) for comment_str in ("//", "/*", "*/")
+        )
+        return not (is_empty or is_comment)
+    else:
+        return not is_empty
+
+
+def _strip_content_in_direction(
+    content: str, remove_comments: bool = False, reverse: bool = False
+) -> str:
+    stripped_lines = []
+
+    lines = content.splitlines()
+    if reverse:
+        lines = reversed(lines)
+
+    content_found = False
+    for line in lines:
+        if content_found:
+            stripped_lines.append(line)
+        else:
+            if _is_content_line(line, remove_comments):
+                content_found = True
+                stripped_lines.append(line)
+
+    if reverse:
+        stripped_lines = reversed(stripped_lines)
+
+    stripped_content = "\n".join(stripped_lines)
+    return stripped_content
+
+
+def _strip_non_content_lines(content: str) -> str:
+    """Remove surrounding whitespace, empty lines, and comment lines"""
+    content = _strip_content_in_direction(content)
+    content = _strip_content_in_direction(content, remove_comments=True, reverse=True)
+    return content
+
+
 def _remove_brackets(content):
     has_start_bracket = content.strip().startswith("{")
     has_end_bracket = content.strip().endswith("}")
@@ -104,7 +191,7 @@ def _remove_brackets(content):
     return content
 
 
-def _split_docs_and_gml(content: str) -> t.Tuple[str, str]:
+def _split_docs_and_gml(content: str) -> Tuple[str, str]:
     lines = content.split("\n")
     non_docs_found = False
 
@@ -125,7 +212,7 @@ def _split_docs_and_gml(content: str) -> t.Tuple[str, str]:
     return "\n".join(doc_lines), "\n".join(gml_lines)
 
 
-def _split_name_and_params(name: str) -> t.Tuple[str, t.List[str]]:
+def _split_name_and_params(name: str) -> Tuple[str, List[str]]:
     name = name.strip()
     if "(" not in name:
         return name, []

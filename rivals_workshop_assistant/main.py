@@ -1,3 +1,6 @@
+from enum import Enum
+from typing import List, Optional
+
 from rivals_workshop_assistant.filelock import FileLock
 import datetime
 import sys
@@ -12,12 +15,13 @@ from rivals_workshop_assistant import (
 )
 from rivals_workshop_assistant.character_config_mod import get_has_small_sprites
 from rivals_workshop_assistant.dotfile_mod import (
-    update_dotfile_after_saving, 
+    update_dotfile_after_saving,
     get_clients_for_injection,
 )
 from rivals_workshop_assistant.script_mod import (
-    read_scripts, 
-    read_userinject, 
+    read_scripts,
+    Script,
+    read_userinject,
     read_libinject,
 )
 from rivals_workshop_assistant.aseprite_handling import (
@@ -25,6 +29,7 @@ from rivals_workshop_assistant.aseprite_handling import (
     get_anims,
     save_scripts,
     save_anims,
+    Anim,
 )
 from rivals_workshop_assistant.assistant_config_mod import (
     get_aseprite_path,
@@ -38,8 +43,18 @@ from rivals_workshop_assistant.warning_handling import handle_warning
 
 __version__ = "1.1.2"
 
+class Mode(Enum):
+    ALL = "all"
+    ANIMS = "anims"
+    SCRIPTS = "scripts"
 
-def main(exe_dir: Path, given_dir: Path, guarantee_root_dir: bool = False):
+
+def main(
+    exe_dir: Path,
+    given_dir: Path,
+    guarantee_root_dir: bool = False,
+    mode: Mode = Mode.ALL,
+):
     """Runs all processes on scripts in the root_dir
     If guarantee_root_dir is true, it won't backtrack to find the root directory."""
     print(f"Assistant Version: {__version__}")
@@ -53,7 +68,7 @@ def main(exe_dir: Path, given_dir: Path, guarantee_root_dir: bool = False):
     lock = FileLock(root_dir / paths.LOCKFILE_PATH)
     try:
         with lock.acquire(timeout=2):
-            update_files(root_dir)
+            update_files(exe_dir=exe_dir, root_dir=root_dir, mode=mode)
     except TimeoutError:
         print(
             "WARN: Attempted to run assistant while an instance was already running."
@@ -61,14 +76,26 @@ def main(exe_dir: Path, given_dir: Path, guarantee_root_dir: bool = False):
         )
 
 
-def update_files(root_dir):
+def handle_scripts(
+    root_dir: Path, scripts: List[Script], anims: List[Anim], assistant_config: dict, dotfile: dict
+):
+    handle_warning(assistant_config=assistant_config, scripts=scripts)
+    handle_codegen(scripts)
+    handle_injection(root_dir=root_dir, scripts=scripts, anims=anims, dotfile=dotfile)
+
+
+def update_files(exe_dir: Path, root_dir: Path, mode: Mode.ALL):
     dotfile = dotfile_mod.read(root_dir)
     assistant_config = assistant_config_mod.read_project_config(root_dir)
     character_config = character_config_mod.read(root_dir)
 
-    updating.update(root_dir=root_dir, dotfile=dotfile, config=assistant_config)
+    updating.update(
+        exe_dir=exe_dir, root_dir=root_dir, dotfile=dotfile, config=assistant_config
+    )
 
     scripts = read_scripts(root_dir, dotfile)
+
+    # TODO REFACTOR
     userinject_scripts = read_userinject(root_dir, dotfile)
     libinject_scripts = read_libinject(root_dir, dotfile)
 
@@ -79,29 +106,40 @@ def update_files(root_dir):
             for script in scripts:
                 if script.path in clients:
                     script.is_fresh = True
+    # ---
 
     aseprites = read_aseprites(
         root_dir, dotfile=dotfile, assistant_config=assistant_config
     )
+    anims = get_anims(aseprites)
 
-    handle_warning(assistant_config=assistant_config, scripts=scripts)
-    handle_codegen(scripts)
-    handle_injection(root_dir=root_dir, scripts=scripts, anims=get_anims(aseprites), dotfile=dotfile)
+    seen_files = []
+    if mode in (mode.ALL, mode.SCRIPTS):
+        handle_scripts(
+            root_dir=root_dir,
+            scripts=scripts,
+            assistant_config=assistant_config,
+            anims=anims,
+            dotfile=dotfile
+        )
+        save_scripts(root_dir, scripts)
+        seen_files += scripts
 
-    save_scripts(root_dir, scripts)
+    if mode in (mode.ALL, mode.ANIMS):
+        save_anims(
+            exe_dir=exe_dir,
+            root_dir=root_dir,
+            aseprite_path=get_aseprite_path(assistant_config),
+            aseprites=aseprites,
+            has_small_sprites=get_has_small_sprites(
+                scripts=scripts, character_config=character_config
+            ),
+            hurtboxes_enabled=get_hurtboxes_enabled(config=assistant_config),
+        )
+        seen_files += aseprites
 
-    save_anims(
-        exe_dir=exe_dir,
-        root_dir=root_dir,
-        aseprite_path=get_aseprite_path(assistant_config),
-        aseprites=aseprites,
-        has_small_sprites=get_has_small_sprites(
-            scripts=scripts, character_config=character_config
-        ),
-        hurtboxes_enabled=get_hurtboxes_enabled(config=assistant_config),
-    )
     update_dotfile_after_saving(
-        now=datetime.datetime.now(), dotfile=dotfile, files=scripts + userinject_scripts + aseprites
+        now=datetime.datetime.now(), dotfile=dotfile, seen_files=seen_files + userinject_scripts
     )
 
     assets = get_required_assets(scripts)
@@ -126,6 +164,23 @@ Files in current directory are: {file_names}"""
 
 
 if __name__ == "__main__":
-    exe_dir = Path(__file__).parent
-    root_dir = Path(sys.argv[1])
-    main(exe_dir, root_dir)
+    exe_dir = Path(__file__).parent.absolute()
+    root_dir = Path(sys.argv[1]).absolute()
+    try:
+        mode_value = sys.argv[2]
+        try:
+            mode = Mode(mode_value)
+        except ValueError:
+            print(
+                f"WARNING: Invalid mode argument. f{mode_value}"
+                f"Valid modes are {[mode.name for mode in Mode]}"
+            )
+            mode = Mode.ALL
+    except IndexError:
+        mode = Mode.ALL
+
+    print(f"Exe dir: {exe_dir}")
+    print(f"Project dir: {root_dir}")
+    print(f"Mode: {mode.name}")
+
+    main(exe_dir, root_dir, mode=mode)

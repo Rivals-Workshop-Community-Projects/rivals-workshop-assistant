@@ -13,6 +13,7 @@ import requests
 
 import rivals_workshop_assistant.paths
 from rivals_workshop_assistant import paths as paths, assistant_config_mod
+from rivals_workshop_assistant.aseprite_handling import lua_scripts
 from rivals_workshop_assistant.assistant_config_mod import UpdateLevel
 from rivals_workshop_assistant.dotfile_mod import (
     LAST_UPDATED_FIELD,
@@ -68,26 +69,27 @@ class Release:
         if len(assets_with_name) >= 1:
             if len(assets_with_name) > 1:
                 print(
-                    f"WARN: Multiple assets with name {asset_name} for release {self.release_dict['url']}"
+                    f"WARN: Multiple assets with name {asset_name} "
+                    f"for release {self.release_dict['url']}"
                 )
             return assets_with_name[0]["browser_download_url"]
         else:
             return None
 
 
-def update(root_dir: Path, dotfile: dict, config: dict):
+def update(exe_dir: Path, root_dir: Path, dotfile: dict, config: dict):
     """Runs all self-updates.
     Controller"""
     if should_update(dotfile):
         update_backup(root_dir)
 
         assistant_updater = AssistantUpdater(
-            root_dir=root_dir, dotfile=dotfile, config=config
+            exe_dir=exe_dir, root_dir=root_dir, dotfile=dotfile, config=config
         )
         new_assistant_version = assistant_updater.update()
 
         library_updater = LibraryUpdater(
-            root_dir=root_dir, dotfile=dotfile, config=config
+            exe_dir=exe_dir, root_dir=root_dir, dotfile=dotfile, config=config
         )
         new_library_version = library_updater.update()
 
@@ -138,7 +140,8 @@ Error log is:
 class Updater(abc.ABC):
     REPO_NAME = NotImplemented
 
-    def __init__(self, root_dir: Path, dotfile: dict, config: dict):
+    def __init__(self, exe_dir: Path, root_dir: Path, dotfile: dict, config: dict):
+        self.exe_dir = exe_dir
         self.root_dir = root_dir
         self.dotfile = dotfile
         self.config = config
@@ -188,8 +191,8 @@ class Updater(abc.ABC):
 class AssistantUpdater(Updater):
     REPO_NAME = paths.ASSISTANT_REPO_NAME
 
-    def __init__(self, root_dir: Path, dotfile: dict, config: dict):
-        super().__init__(root_dir, dotfile, config)
+    def __init__(self, exe_dir: Path, root_dir: Path, dotfile: dict, config: dict):
+        super().__init__(exe_dir, root_dir, dotfile, config)
 
     def update(
         self,
@@ -200,12 +203,17 @@ class AssistantUpdater(Updater):
         current_exe_path = paths.get_exe_path()
         if current_exe_path.name != paths.ASSISTANT_EXE_NAME:
             print(
-                f"WARN: assistant exe at {current_exe_path} should be named {paths.ASSISTANT_EXE_NAME}.\n"
+                f"WARN: assistant exe at {current_exe_path} "
+                f"should be named {paths.ASSISTANT_EXE_NAME}.\n"
                 f"\tExe will not update."
             )
             return
 
-        return super(AssistantUpdater, self).update()
+        new_version = super(AssistantUpdater, self).update()
+        if new_version != self.current_version:
+            lua_scripts.delete_lua_scripts(self.exe_dir)
+
+        return new_version
 
     def _get_release_to_install(self):
         assistant_releases = self.get_releases()
@@ -246,8 +254,8 @@ class AssistantUpdater(Updater):
 class LibraryUpdater(Updater):
     REPO_NAME = paths.LIBRARY_REPO_NAME
 
-    def __init__(self, root_dir: Path, dotfile: dict, config: dict):
-        super().__init__(root_dir, dotfile, config)
+    def __init__(self, exe_dir: Path, root_dir: Path, dotfile: dict, config: dict):
+        super().__init__(exe_dir, root_dir, dotfile, config)
 
     def _get_release_to_install(self):
         update_level = assistant_config_mod.get_library_update_level(self.config)
@@ -333,7 +341,7 @@ def _delete_old_library_release(root_dir: Path):
 def _download_and_unzip_library_release(root_dir: Path, release: Release):
     """Controller"""
     with tempfile.TemporaryDirectory() as tmp:
-        response = requests.get(release.download_url)
+        response = requests.get(release.download_url, timeout=800)
         zipped_release = zipfile.ZipFile(io.BytesIO(response.content))
         zipped_release.extractall(path=tmp)
 

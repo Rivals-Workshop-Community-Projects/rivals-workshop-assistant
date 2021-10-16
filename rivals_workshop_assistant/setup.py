@@ -8,7 +8,6 @@ from rivals_workshop_assistant.injection.installation import (
     ANIMS_FOLDER_README,
 )
 from rivals_workshop_assistant.assistant_config_mod import (
-    override_default_config,
     make_default_override,
     get_initial_default_config,
     read_default_override,
