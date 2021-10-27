@@ -9,6 +9,7 @@ from testfixtures import TempDirectory
 import rivals_workshop_assistant.aseprite_handling
 import rivals_workshop_assistant.assistant_config_mod
 import rivals_workshop_assistant.script_mod
+from rivals_workshop_assistant.injection.application import ANIM_TIMING_FLAG
 from tests import testing_helpers
 from tests.testing_helpers import (
     make_empty_file,
@@ -437,10 +438,12 @@ def test__aseprites_set_window_data():
 
 {injection.application.INJECTION_START_HEADER}
 #macro WINDOW1_FRAMES 1
-#macro WINDOW1_FRAME_START 1
+#macro WINDOW1_FRAME_START 0
 
 #macro WINDOW2_FRAMES 1
-#macro WINDOW2_FRAME_START 2
+#macro WINDOW2_FRAME_START 1
+
+{ANIM_TIMING_FLAG}
 {injection.application.INJECTION_END_HEADER}"""
         )
 

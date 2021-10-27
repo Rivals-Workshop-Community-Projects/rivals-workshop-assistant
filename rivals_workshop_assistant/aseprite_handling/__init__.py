@@ -39,7 +39,7 @@ class Window(TagObject):
     def _make_gml(self):
         return f"""\
 #macro {self.name.upper()}_FRAMES {self.end - self.start + 1}
-#macro {self.name.upper()}_FRAME_START {self.start}"""
+#macro {self.name.upper()}_FRAME_START {self.start - 1}"""
 
 
 def supply_lua_script(path: Path):

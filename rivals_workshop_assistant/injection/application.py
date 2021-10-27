@@ -1,12 +1,11 @@
 import re
 import typing
+from typing import List
 
 from .dependency_handling import GmlInjection
 from rivals_workshop_assistant.script_mod import Script
 from rivals_workshop_assistant.dotfile_mod import update_dotfile_injection_clients
-
 from ..aseprite_handling import Anim
-from typing import List
 
 OLD_INJECTION_START_MARKERS = ["// vvv LIBRARY DEFINES AND MACROS vvv\n"]
 INJECTION_START_MARKER = "// #region vvv LIBRARY DEFINES AND MACROS vvv\n"
@@ -81,10 +80,13 @@ def _should_inject(script: str):
     return "NO-INJECT" not in _get_script_contents(script)  # Performance problem?
 
 
+ANIM_TIMING_FLAG = "#define defineflag_animation_timings_injected"
+
+
 def _get_anim_data_gmls_needed_in_gml(anim: Anim):
     if anim is None:
         return []
-    window_gmls = [window.gml for window in anim.windows]
+    window_gmls = [window.gml for window in anim.windows] + [ANIM_TIMING_FLAG]
     return window_gmls
 
 

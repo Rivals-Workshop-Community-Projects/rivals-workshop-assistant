@@ -319,6 +319,8 @@ def test_get_anim_data_gmls_needed_in_gml():
 
 {application.INJECTION_START_HEADER}
 {anim.windows[0].gml}
+
+{application.ANIM_TIMING_FLAG}
 {application.INJECTION_END_HEADER}""",
         )
     ]
