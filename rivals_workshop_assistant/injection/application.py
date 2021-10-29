@@ -80,13 +80,10 @@ def _should_inject(script: str):
     return "NO-INJECT" not in _get_script_contents(script)  # Performance problem?
 
 
-ANIM_TIMING_FLAG = "#define defineflag_animation_timings_injected"
-
-
 def _get_anim_data_gmls_needed_in_gml(anim: Anim):
     if anim is None:
         return []
-    window_gmls = [window.gml for window in anim.windows] + [ANIM_TIMING_FLAG]
+    window_gmls = [window.gml for window in anim.windows]
     return window_gmls
 
 
