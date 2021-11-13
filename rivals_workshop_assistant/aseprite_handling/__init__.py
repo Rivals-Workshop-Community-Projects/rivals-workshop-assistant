@@ -373,6 +373,11 @@ def save_anims(
     hurtboxes_enabled: bool = False,
 ):
     if not aseprite_path:
+        print(
+            "WARN: Not saving anims, because no aseprite path has been supplied.\n"
+            "Add a path to your aseprite.exe in assistant/assistant_config.yaml to "
+            "process aseprite files."
+        )
         return
     for aseprite in aseprites:
         if aseprite.is_fresh:
