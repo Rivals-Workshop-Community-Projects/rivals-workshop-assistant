@@ -437,10 +437,18 @@ def test__aseprites_set_window_data():
 
 {injection.application.INJECTION_START_HEADER}
 #macro WINDOW1_FRAMES 1
-#macro WINDOW1_FRAME_START 1
+#define _get_window1_frames()
+    return WINDOW1_FRAMES
+#macro WINDOW1_FRAME_START 0
+#define _get_window1_frame_start()
+    return WINDOW1_FRAME_START
 
 #macro WINDOW2_FRAMES 1
-#macro WINDOW2_FRAME_START 2
+#define _get_window2_frames()
+    return WINDOW2_FRAMES
+#macro WINDOW2_FRAME_START 1
+#define _get_window2_frame_start()
+    return WINDOW2_FRAME_START
 {injection.application.INJECTION_END_HEADER}"""
         )
 

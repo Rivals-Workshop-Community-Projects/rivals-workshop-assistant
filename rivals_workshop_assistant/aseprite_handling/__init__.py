@@ -39,7 +39,11 @@ class Window(TagObject):
     def _make_gml(self):
         return f"""\
 #macro {self.name.upper()}_FRAMES {self.end - self.start + 1}
-#macro {self.name.upper()}_FRAME_START {self.start}"""
+#define _get_{self.name}_frames()
+    return {self.name.upper()}_FRAMES
+#macro {self.name.upper()}_FRAME_START {self.start - 1}
+#define _get_{self.name}_frame_start()
+    return {self.name.upper()}_FRAME_START"""
 
 
 def supply_lua_script(path: Path):
@@ -369,6 +373,11 @@ def save_anims(
     hurtboxes_enabled: bool = False,
 ):
     if not aseprite_path:
+        print(
+            "WARN: Not saving anims, because no aseprite path has been supplied.\n"
+            "Add a path to your aseprite.exe in assistant/assistant_config.yaml to "
+            "process aseprite files."
+        )
         return
     for aseprite in aseprites:
         if aseprite.is_fresh:

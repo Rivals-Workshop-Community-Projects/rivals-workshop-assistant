@@ -14,8 +14,16 @@ from rivals_workshop_assistant import (
     paths,
 )
 from rivals_workshop_assistant.character_config_mod import get_has_small_sprites
-from rivals_workshop_assistant.dotfile_mod import update_dotfile_after_saving
-from rivals_workshop_assistant.script_mod import read_scripts, Script
+from rivals_workshop_assistant.dotfile_mod import (
+    update_dotfile_after_saving,
+    get_clients_for_injection,
+)
+from rivals_workshop_assistant.script_mod import (
+    read_scripts,
+    Script,
+    read_userinject,
+    read_libinject,
+)
 from rivals_workshop_assistant.aseprite_handling import (
     read_aseprites,
     get_anims,
@@ -33,7 +41,7 @@ from rivals_workshop_assistant.injection import handle_injection
 from rivals_workshop_assistant.code_generation import handle_codegen
 from rivals_workshop_assistant.warning_handling import handle_warning
 
-__version__ = "1.1.9"
+__version__ = "1.1.13"
 
 
 class Mode(Enum):
@@ -70,11 +78,15 @@ def main(
 
 
 def handle_scripts(
-    root_dir: Path, scripts: List[Script], anims: List[Anim], assistant_config: dict
+    root_dir: Path,
+    scripts: List[Script],
+    anims: List[Anim],
+    assistant_config: dict,
+    dotfile: dict,
 ):
     handle_warning(assistant_config=assistant_config, scripts=scripts)
     handle_codegen(scripts)
-    handle_injection(root_dir=root_dir, scripts=scripts, anims=anims)
+    handle_injection(root_dir=root_dir, scripts=scripts, anims=anims, dotfile=dotfile)
 
 
 def update_files(exe_dir: Path, root_dir: Path, mode: Mode.ALL):
@@ -87,6 +99,22 @@ def update_files(exe_dir: Path, root_dir: Path, mode: Mode.ALL):
     )
 
     scripts = read_scripts(root_dir, dotfile)
+
+    # TODO REFACTOR
+    userinject_scripts = read_userinject(root_dir, dotfile)
+    libinject_scripts = read_libinject(root_dir, dotfile)
+
+    for inject in userinject_scripts + libinject_scripts:
+        if inject.is_fresh:
+            # if a file in user_inject has been touched, mark its clients for update
+            clients = get_clients_for_injection(
+                dotfile=dotfile, injectionscript=inject.path
+            )
+            for script in scripts:
+                if script.path in clients:
+                    script.is_fresh = True
+    # ---
+
     aseprites = read_aseprites(
         root_dir, dotfile=dotfile, assistant_config=assistant_config
     )
@@ -99,6 +127,7 @@ def update_files(exe_dir: Path, root_dir: Path, mode: Mode.ALL):
             scripts=scripts,
             assistant_config=assistant_config,
             anims=anims,
+            dotfile=dotfile,
         )
         save_scripts(root_dir, scripts)
         seen_files += scripts
@@ -117,7 +146,9 @@ def update_files(exe_dir: Path, root_dir: Path, mode: Mode.ALL):
         seen_files += aseprites
 
     update_dotfile_after_saving(
-        now=datetime.datetime.now(), dotfile=dotfile, seen_files=seen_files
+        now=datetime.datetime.now(),
+        dotfile=dotfile,
+        seen_files=seen_files + userinject_scripts,
     )
 
     assets = get_required_assets(scripts)
@@ -142,7 +173,7 @@ Files in current directory are: {file_names}"""
 
 
 if __name__ == "__main__":
-    exe_dir = Path(__file__).parent.absolute()
+    exe_dir = Path(sys.argv[0]).parent.absolute()
     root_dir = Path(sys.argv[1]).absolute()
     try:
         mode_value = sys.argv[2]

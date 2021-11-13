@@ -19,9 +19,11 @@ def read_injection_library(root_dir: Path) -> List[GmlInjection]:
     ) + list(
         (root_dir / rivals_workshop_assistant.paths.USER_INJECT_FOLDER).rglob("*.gml")
     )
-    inject_gmls = [gml_path.read_text() for gml_path in inject_gml_paths]
-    full_inject_gml = "\n\n".join(inject_gmls)
-    return get_injection_library_from_gml(full_inject_gml)
+
+    full_lib = []
+    for file in inject_gml_paths:
+        full_lib.extend(get_injection_library_from_file(file))
+    return full_lib
 
 
 def grouper(n, iterable, fillvalue=None):
@@ -57,6 +59,15 @@ def get_injection_library_from_gml(gml: str) -> List[GmlInjection]:
             raise ValueError(f"unknown inject type {inject_type}")
         dependencies.append(injection)
 
+    return dependencies
+
+
+def get_injection_library_from_file(gml_path: Path) -> List[GmlInjection]:
+    dependencies = get_injection_library_from_gml(gml_path.read_text())
+    #saving filepath ideally done through constructor 
+    #didn't feel like upsetting signature of all other functions just yet
+    for dep in dependencies:
+        dep.filepath = gml_path
     return dependencies
 
 

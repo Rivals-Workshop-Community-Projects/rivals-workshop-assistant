@@ -1,10 +1,11 @@
 import re
 import typing
+from typing import List
 
 from .dependency_handling import GmlInjection
 from rivals_workshop_assistant.script_mod import Script
+from rivals_workshop_assistant.dotfile_mod import update_dotfile_injection_clients
 from ..aseprite_handling import Anim
-from typing import List
 
 OLD_INJECTION_START_MARKERS = ["// vvv LIBRARY DEFINES AND MACROS vvv\n"]
 INJECTION_START_MARKER = "// #region vvv LIBRARY DEFINES AND MACROS vvv\n"
@@ -26,23 +27,49 @@ INJECTION_END_HEADER = (
 
 
 def apply_injection(
-    scripts: List[Script], injection_library: List[GmlInjection], anims: List[Anim]
+    scripts: List[Script],
+    injection_library: List[GmlInjection],
+    anims: List[Anim],
+    dotfile: dict = None,
 ):
     """Updates scripts with supplied dependencies."""
     for script in scripts:
         anim = _get_anim_for_script(script, anims)
         if script.is_fresh or (anim is not None and anim.is_fresh):
-            _apply_injection_to_script(script, injection_library, anim)
+            _apply_injection_to_script(script, injection_library, anim, dotfile)
 
 
 def _apply_injection_to_script(
-    script: Script, injection_library: List[GmlInjection], anim: Anim
+    script: Script,
+    injection_library: List[GmlInjection],
+    anim: Anim,
+    dotfile: dict = None,
 ):
     """Updates the dependencies supplied to the script."""
     if _should_inject(script.working_content):
-        needed_gmls = _get_inject_gmls_needed_in_gml(
-            script.working_content, injection_library
-        ) + _get_anim_data_gmls_needed_in_gml(anim)
+
+        needed_injects = _get_injects_needed_in_gml(
+            gml=_get_script_contents(script.working_content),
+            injection_library=injection_library,
+        )
+
+        # TODO refactor code below this point
+        # need to map script-to-script dependencies into the dotfile
+        if dotfile is not None:
+            inject_scripts = []
+            for injection in needed_injects:
+                if not (
+                    injection.filepath is None or injection.filepath in inject_scripts
+                ):
+                    inject_scripts.append(injection.filepath)
+
+            update_dotfile_injection_clients(
+                dotfile=dotfile, clientscript=script.path, dependencies=inject_scripts
+            )
+
+        needed_gmls = [
+            injection.gml for injection in needed_injects
+        ] + _get_anim_data_gmls_needed_in_gml(anim)
 
         script.working_content = _add_inject_gmls_in_script(
             script.working_content, needed_gmls
@@ -111,10 +138,12 @@ def _get_injects_used_in_gml(
 
 
 def _gml_uses_inject(gml: str, injection: GmlInjection):
+    """checks if an injection is being used by the script."""
     return re.search(pattern=injection.use_pattern, string=gml)
 
 
 def _gml_supplies_inject(gml: str, inject: GmlInjection):
+    """checks if a detected injection is already defined in the original script."""
     return re.search(pattern=inject.give_pattern, string=_get_script_contents(gml))
 
 
@@ -134,6 +163,7 @@ def _add_inject_gmls_in_script(script: str, dependency_gmls: List[str]) -> str:
 
 
 def _get_script_contents(script: str):
+    """Get the portion of the script above the dependency header."""
     old_markers_pattern = "|".join(marker for marker in OLD_INJECTION_START_MARKERS)
     pattern = fr"(?:{INJECTION_START_MARKER}|{old_markers_pattern})"
     contents = re.split(pattern=pattern, string=script)[0].rstrip()

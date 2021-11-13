@@ -27,6 +27,7 @@ def get_assistant_version_string(dotfile: dict) -> typing.Optional[str]:
 LAST_UPDATED_FIELD = "last_updated"
 PROCESSED_TIME_FIELD = "processed_time"
 SEEN_FILES_FIELD = "seen_files"
+INJECT_CLIENTS_FIELD = "injection_clients"
 
 
 def read(root_dir: Path) -> dict:
@@ -44,6 +45,29 @@ def update_dotfile_after_saving(
 ):
     dotfile[PROCESSED_TIME_FIELD] = now
     dotfile[SEEN_FILES_FIELD] = [file.path.as_posix() for file in seen_files]
+
+
+def update_dotfile_injection_clients(dotfile:dict, clientscript:Path, dependencies:typing.List[Path]):
+    if INJECT_CLIENTS_FIELD not in dotfile:
+        dotfile[INJECT_CLIENTS_FIELD] = {}
+    
+    if len(dependencies) > 0:
+        dotfile[INJECT_CLIENTS_FIELD][clientscript.as_posix()] = [dep.as_posix() for dep in dependencies]
+    elif clientscript.as_posix() in dotfile[INJECT_CLIENTS_FIELD]:
+        dotfile[INJECT_CLIENTS_FIELD].pop(clientscript.as_posix())
+
+
+def get_clients_for_injection(dotfile:dict, injectionscript:Path) -> typing.List[Path]:
+    if INJECT_CLIENTS_FIELD not in dotfile:
+        return []
+    
+    str_path = injectionscript.as_posix()
+    clientslist = []
+    for key in dotfile[INJECT_CLIENTS_FIELD].keys():
+        if str_path in dotfile[INJECT_CLIENTS_FIELD][key]:
+            clientslist.append(Path(key))
+
+    return clientslist
 
 
 def get_processed_time(dotfile: dict, path: Path) -> typing.Optional[datetime]:

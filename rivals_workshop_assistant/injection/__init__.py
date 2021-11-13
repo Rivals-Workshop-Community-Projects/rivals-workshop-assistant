@@ -7,7 +7,7 @@ from rivals_workshop_assistant.script_mod import Script
 from ..aseprite_handling import Anim
 
 
-def handle_injection(root_dir: Path, scripts: List[Script], anims: List[Anim]):
+def handle_injection(root_dir: Path, scripts: List[Script], anims: List[Anim], dotfile:dict=None):
     """Controller"""
     injection_library = read_injection_library(root_dir)
-    apply_injection(scripts, injection_library, anims)
+    apply_injection(scripts, injection_library, anims, dotfile)
