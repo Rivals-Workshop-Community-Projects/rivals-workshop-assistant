@@ -173,7 +173,7 @@ Files in current directory are: {file_names}"""
 
 
 if __name__ == "__main__":
-    exe_dir = Path(__file__).parent.absolute()
+    exe_dir = Path(sys.argv[0]).parent.absolute()
     root_dir = Path(sys.argv[1]).absolute()
     try:
         mode_value = sys.argv[2]
