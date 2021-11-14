@@ -53,7 +53,9 @@ class Release:
 
     @classmethod
     def from_github_response(cls, response_dict):
-        major, minor, patch = response_dict["tag_name"].split("-")[0].split(".")
+        major, minor, patch = [
+            int(val) for val in response_dict["tag_name"].split("-")[0].split(".")
+        ]
         return cls(
             version=Version(major=major, minor=minor, patch=patch),
             download_url=response_dict["zipball_url"],
