@@ -121,7 +121,9 @@ class Anim(TagObject):
         script_name: str,
         lua_params: dict = None,
     ):
-        full_script_path = exe_dir / ASEPRITE_LUA_SCRIPTS_FOLDER / script_name
+        full_script_path = (
+            exe_dir / ASEPRITE_LUA_SCRIPTS_FOLDER / script_name
+        ).absolute()
         supply_lua_script(
             path=full_script_path,
         )
@@ -149,7 +151,7 @@ class Anim(TagObject):
             ]
             + [f"-script-param {key}={value}" for key, value in lua_params.items()]
             + [
-                f'-script "{full_script_path.absolute()}"',
+                f'-script "{full_script_path}"',
             ]
         )
         export_command = " ".join(command_parts)
