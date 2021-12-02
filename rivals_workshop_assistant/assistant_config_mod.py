@@ -101,19 +101,21 @@ def get_hurtboxes_enabled(config: dict):
 
 DEFAULT_CONFIG = f"""\
 # Format is <key name>: <value> (with a space after the : )
-# E.g.
-# update_level: patch
-  
-{ASEPRITE_PATH_FIELD}: # FILL THIS IN TO USE ASEPRITE
-    # Point this to your Aseprite.exe absolute path, for example: 
+# For example
+# the_option_name: your input
+
+
+{ASEPRITE_PATH_FIELD}: # TO USE ASEPRITE, PUT YOUR PATH BEFORE THE "#" <-
+    # ^ This should point to your Aseprite.exe absolute path, for example: 
     # aseprite_path: C:/Program Files/Aseprite/aseprite.exe
     # If correct, copying the path into your file explorer address bar will open aseprite.
     # This is needed for the assistant to automatically export your animations to spritesheets.
     # If you use Steam for Aseprite, you can find the path with:
     #   The aseprite page of your library, The gear icon at the top right,
     #   Manage, Browse Local Files, Copy the path of Aseprite.exe to the config.
-    #
-    # Aseprite Tag Color Configs
+
+
+    # *Aseprite Tag Color Configs*
     # Legal values are:
     #   black, red, orange, yellow, green, blue, purple, gray
 {ANIM_TAG_COLOR_FIELD}: {ANIM_TAG_COLOR_DEFAULT}
@@ -125,9 +127,11 @@ DEFAULT_CONFIG = f"""\
     # If a tag of this color is found, it will be used to add animation meta-data to the 
     # bottom of the attack's script.
 
+
 {GENERATE_HURTBOXES_FIELD}: {GENERATE_HURTBOXES_DEFAULT}
     # If the assistant should automatically generate hurtboxes from your anim files.
     # See https://rivalslib.com/assistant/animation_handling.html#hurtbox-generation
+
 
 {LIBRARY_UPDATE_LEVEL_FIELD}: {LIBRARY_UPDATE_LEVEL_DEFAULT.value}
     # What kind of library updates to allow. 
@@ -139,10 +143,12 @@ DEFAULT_CONFIG = f"""\
     # {UpdateLevel.PATCH.value} = Only allow changes to existing functions 
     #   that fix bugs or can't break current functionality.
     # {UpdateLevel.NONE.value} = No updates.
-    
+
+
 {ASSISTANT_SELF_UPDATE_FIELD}: {ASSISTANT_SELF_UPDATE_DEFAULT}
     # If the assistant should automatically receive behavior updates.
-    #
+
+
 {WARNINGS_FIELD}: 
 - {WARNING_DESYNC_OBJECT_VAR_SET_IN_DRAW_SCRIPT_VALUE}
 - {WARNING_DESYNC_UNSAFE_CAMERA_READ_VALUE}
