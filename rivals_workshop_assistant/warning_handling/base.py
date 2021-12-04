@@ -55,6 +55,10 @@ class WarningType(abc.ABC):
         return hash(self.__class__)
 
     def _should_apply_to_script(self, script: Script):
+        """Return if this warning applies to this script.
+
+        For example, some code may only be dangerous in a draw script, and would
+        return false here outside of draw scripts"""
         return True
 
 
