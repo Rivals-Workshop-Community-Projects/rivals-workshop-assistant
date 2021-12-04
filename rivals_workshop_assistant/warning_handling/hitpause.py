@@ -31,7 +31,7 @@ class CheckWindowTimerEqualsWithoutCheckHitpause(ABCHitpauseWarning):
     warning_content = "Possible repetition during hitpause. Consider using window_time_is(frame) https://rivalslib.com/assistant/function_library/attacks/window_time_is.html"
 
     def _should_warn_for_line(self, script: Script, line: str) -> bool:
-        return _has_window_timer_eq_check(line) and not NOT_HITPAUSE in line
+        return _has_window_timer_eq_check(line) and NOT_HITPAUSE not in line
 
 
 def _is_hitpause_guard(line: str) -> bool:
