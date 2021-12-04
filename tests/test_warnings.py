@@ -176,6 +176,39 @@ def test_handle_warn_check_window_timer_mod_without_check_hitpause(
     )
 
 
+def test__no_repeated_warning():
+    original_content = f"""\
+switch (lock)
+{{
+    default:
+    case 0:
+        break
+    case 1:
+        _offscreenx = 2;
+        _offscreeny = y - view_get_yview();{desync.UnsafeCameraReadY.get_warning_text()}
+        _offscreenId = 4;
+    //Left
+    case 2:
+        break
+}}
+    """
+    path = Path("article1_update.gml")
+    script = make_script(path=path, original_content=original_content)
+
+    handle_warning(
+        assistant_config={"warnings": ["desync_unsafe_camera_read"]}, scripts=[script]
+    )
+
+    assert (
+        script.working_content
+        == make_script(
+            path=path,
+            original_content=original_content,
+            working_content=original_content,
+        ).working_content
+    )
+
+
 @pytest.mark.parametrize(
     "original, expected",
     [
