@@ -9,7 +9,7 @@ from rivals_workshop_assistant.assistant_config_mod import (
     WARNINGS_FIELD,
     WARNING_DESYNC_OBJECT_VAR_SET_IN_DRAW_SCRIPT_VALUE,
 )
-from rivals_workshop_assistant.warning_handling import remove_warnings
+from rivals_workshop_assistant.warning_handling import remove_warnings, handle_warning
 from tests.testing_helpers import make_script
 
 
@@ -18,9 +18,7 @@ def test_get_warning_types():
 
     result = warnings.get_warning_types(config)
 
-    assert result == {
-        desync.ObjectVarSetInDrawScript()
-    }
+    assert result == {desync.ObjectVarSetInDrawScript()}
 
 
 @pytest.mark.parametrize(
@@ -124,9 +122,7 @@ def test_handle_warn_check_window_timer_eq_without_check_hitpause(
 ):
     path = Path(path + ".gml")
     script = make_script(path=path, original_content=original_content)
-    sut = (
-        hitpause.CheckWindowTimerEqualsWithoutCheckHitpause()
-    )
+    sut = hitpause.CheckWindowTimerEqualsWithoutCheckHitpause()
 
     sut.apply(script)
 
@@ -171,9 +167,7 @@ def test_handle_warn_check_window_timer_mod_without_check_hitpause(
 ):
     path = Path(path + ".gml")
     script = make_script(path=path, original_content=original_content)
-    sut = (
-        hitpause.CheckWindowTimerModuloWithoutCheckHitpause()
-    )
+    sut = hitpause.CheckWindowTimerModuloWithoutCheckHitpause()
 
     sut.apply(script)
 
