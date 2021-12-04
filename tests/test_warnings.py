@@ -2,24 +2,24 @@ from pathlib import Path
 
 import pytest
 
-import rivals_workshop_assistant.warning_handling.desync
-import rivals_workshop_assistant.warning_handling.hitpause
-import rivals_workshop_assistant.warning_handling.warnings as src
+import rivals_workshop_assistant.warning_handling.desync as desync
+import rivals_workshop_assistant.warning_handling.hitpause as hitpause
+import rivals_workshop_assistant.warning_handling.warnings as warnings
 from rivals_workshop_assistant.assistant_config_mod import (
     WARNINGS_FIELD,
     WARNING_DESYNC_OBJECT_VAR_SET_IN_DRAW_SCRIPT_VALUE,
 )
-from rivals_workshop_assistant.warning_handling import _remove_warnings
+from rivals_workshop_assistant.warning_handling import remove_warnings
 from tests.testing_helpers import make_script
 
 
 def test_get_warning_types():
     config = {WARNINGS_FIELD: [WARNING_DESYNC_OBJECT_VAR_SET_IN_DRAW_SCRIPT_VALUE]}
 
-    result = src.get_warning_types(config)
+    result = warnings.get_warning_types(config)
 
     assert result == {
-        rivals_workshop_assistant.warning_handling.desync.ObjectVarSetInDrawScript()
+        desync.ObjectVarSetInDrawScript()
     }
 
 
@@ -30,12 +30,12 @@ def test_get_warning_types():
         pytest.param(
             "post_draw",
             "global = 3",
-            f"global = 3{rivals_workshop_assistant.warning_handling.desync.ObjectVarSetInDrawScript.get_warning_text()}",
+            f"global = 3{desync.ObjectVarSetInDrawScript.get_warning_text()}",
         ),
         pytest.param(
             "post_draw",
             "okay line\nglobal = 3\nalso fine",
-            f"okay line\nglobal = 3{rivals_workshop_assistant.warning_handling.desync.ObjectVarSetInDrawScript.get_warning_text()}\nalso fine",
+            f"okay line\nglobal = 3{desync.ObjectVarSetInDrawScript.get_warning_text()}\nalso fine",
         ),
         pytest.param(
             "post_draw",
@@ -60,7 +60,7 @@ def test_get_warning_types():
         pytest.param(
             "post_draw",
             "a += 3",
-            f"a += 3{rivals_workshop_assistant.warning_handling.desync.ObjectVarSetInDrawScript.get_warning_text()}",
+            f"a += 3{desync.ObjectVarSetInDrawScript.get_warning_text()}",
         ),
         pytest.param(
             "post_draw",
@@ -79,7 +79,7 @@ def test_handle_warn_setting_nonlocal_var_in_draw_script(
 ):
     path = Path(path + ".gml")
     script = make_script(path=path, original_content=original_content)
-    sut = rivals_workshop_assistant.warning_handling.desync.ObjectVarSetInDrawScript()
+    sut = desync.ObjectVarSetInDrawScript()
 
     sut.apply(script)
 
@@ -95,22 +95,22 @@ def test_handle_warn_setting_nonlocal_var_in_draw_script(
         pytest.param(
             "post_draw",
             f"if window_timer == 3",
-            f"if window_timer == 3{rivals_workshop_assistant.warning_handling.hitpause.CheckWindowTimerEqualsWithoutCheckHitpause.get_warning_text()}",
+            f"if window_timer == 3{hitpause.CheckWindowTimerEqualsWithoutCheckHitpause.get_warning_text()}",
         ),
         pytest.param(
             "post_draw",
             f"if window_timer = 3",
-            f"if window_timer = 3{rivals_workshop_assistant.warning_handling.hitpause.CheckWindowTimerEqualsWithoutCheckHitpause.get_warning_text()}",
+            f"if window_timer = 3{hitpause.CheckWindowTimerEqualsWithoutCheckHitpause.get_warning_text()}",
         ),
         pytest.param(
             "post_draw",
             f"if (window_timer == 3)",
-            f"if (window_timer == 3){rivals_workshop_assistant.warning_handling.hitpause.CheckWindowTimerEqualsWithoutCheckHitpause.get_warning_text()}",
+            f"if (window_timer == 3){hitpause.CheckWindowTimerEqualsWithoutCheckHitpause.get_warning_text()}",
         ),
         pytest.param(
             "post_draw",
             f" if   (  window_timer   ==    3  )",
-            f" if   (  window_timer   ==    3  ){rivals_workshop_assistant.warning_handling.hitpause.CheckWindowTimerEqualsWithoutCheckHitpause.get_warning_text()}",
+            f" if   (  window_timer   ==    3  ){hitpause.CheckWindowTimerEqualsWithoutCheckHitpause.get_warning_text()}",
         ),
         pytest.param(
             "post_draw",
@@ -125,7 +125,7 @@ def test_handle_warn_check_window_timer_eq_without_check_hitpause(
     path = Path(path + ".gml")
     script = make_script(path=path, original_content=original_content)
     sut = (
-        rivals_workshop_assistant.warning_handling.hitpause.CheckWindowTimerEqualsWithoutCheckHitpause()
+        hitpause.CheckWindowTimerEqualsWithoutCheckHitpause()
     )
 
     sut.apply(script)
@@ -142,22 +142,22 @@ def test_handle_warn_check_window_timer_eq_without_check_hitpause(
         pytest.param(
             "post_draw",
             f"if window_timer % 3 == 0",
-            f"if window_timer % 3 == 0{rivals_workshop_assistant.warning_handling.hitpause.CheckWindowTimerModuloWithoutCheckHitpause.get_warning_text()}",
+            f"if window_timer % 3 == 0{hitpause.CheckWindowTimerModuloWithoutCheckHitpause.get_warning_text()}",
         ),
         pytest.param(
             "post_draw",
             f"if window_timer % 3 = 0",
-            f"if window_timer % 3 = 0{rivals_workshop_assistant.warning_handling.hitpause.CheckWindowTimerModuloWithoutCheckHitpause.get_warning_text()}",
+            f"if window_timer % 3 = 0{hitpause.CheckWindowTimerModuloWithoutCheckHitpause.get_warning_text()}",
         ),
         pytest.param(
             "post_draw",
             f"if (window_timer % 3 == 0)",
-            f"if (window_timer % 3 == 0){rivals_workshop_assistant.warning_handling.hitpause.CheckWindowTimerModuloWithoutCheckHitpause.get_warning_text()}",
+            f"if (window_timer % 3 == 0){hitpause.CheckWindowTimerModuloWithoutCheckHitpause.get_warning_text()}",
         ),
         pytest.param(
             "post_draw",
             f" if   (  window_timer   %    3  == 0 )",
-            f" if   (  window_timer   %    3  == 0 ){rivals_workshop_assistant.warning_handling.hitpause.CheckWindowTimerModuloWithoutCheckHitpause.get_warning_text()}",
+            f" if   (  window_timer   %    3  == 0 ){hitpause.CheckWindowTimerModuloWithoutCheckHitpause.get_warning_text()}",
         ),
         pytest.param(
             "post_draw",
@@ -172,7 +172,7 @@ def test_handle_warn_check_window_timer_mod_without_check_hitpause(
     path = Path(path + ".gml")
     script = make_script(path=path, original_content=original_content)
     sut = (
-        rivals_workshop_assistant.warning_handling.hitpause.CheckWindowTimerModuloWithoutCheckHitpause()
+        hitpause.CheckWindowTimerModuloWithoutCheckHitpause()
     )
 
     sut.apply(script)
@@ -187,19 +187,19 @@ def test_handle_warn_check_window_timer_mod_without_check_hitpause(
     [
         pytest.param("nothing to do", "nothing to do"),
         pytest.param(
-            f"if window_timer % 3 == 0{rivals_workshop_assistant.warning_handling.hitpause.CheckWindowTimerModuloWithoutCheckHitpause.get_warning_text()}",
+            f"if window_timer % 3 == 0{hitpause.CheckWindowTimerModuloWithoutCheckHitpause.get_warning_text()}",
             f"if window_timer % 3 == 0",
         ),
         pytest.param(
-            f"blah                {rivals_workshop_assistant.warning_handling.desync.ObjectVarSetInDrawScript.get_warning_text()}",
+            f"blah                {desync.ObjectVarSetInDrawScript.get_warning_text()}",
             f"blah                ",
         ),
         pytest.param(
-            f"twice! {rivals_workshop_assistant.warning_handling.desync.ObjectVarSetInDrawScript.get_warning_text()}{rivals_workshop_assistant.warning_handling.desync.ObjectVarSetInDrawScript.get_warning_text()}",
+            f"twice! {desync.ObjectVarSetInDrawScript.get_warning_text()}{desync.ObjectVarSetInDrawScript.get_warning_text()}",
             f"twice! ",
         ),
     ],
 )
 def test__remove_warnings(original, expected):
-    actual = _remove_warnings(original)
+    actual = remove_warnings(original)
     assert actual == expected

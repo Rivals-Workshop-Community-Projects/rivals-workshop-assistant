@@ -14,12 +14,12 @@ def handle_warning(assistant_config: dict, scripts: List[Script]):
 
 
 def _apply_warnings_to_script(script: Script, warning_types: Set[WarningType]):
-    script.working_content = _remove_warnings(script.working_content)
+    script.working_content = remove_warnings(script.working_content)
     for warning_type in warning_types:
         _apply_warning_to_script(script, warning_type)
 
 
-def _remove_warnings(script_content: str) -> str:
+def remove_warnings(script_content: str) -> str:
     return re.sub(pattern=fr"{WARNING_PREFIX}.*(\n|$)", repl="", string=script_content)
 
 
