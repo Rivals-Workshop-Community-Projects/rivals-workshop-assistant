@@ -215,15 +215,23 @@ switch (lock)
         pytest.param("nothing to do", "nothing to do"),
         pytest.param(
             f"if window_timer % 3 == 0{hitpause.CheckWindowTimerModuloWithoutCheckHitpause.get_warning_text()}",
-            f"if window_timer % 3 == 0",
+            f"if window_timer % 3 == 0\n",
         ),
         pytest.param(
             f"blah                {desync.ObjectVarSetInDrawScript.get_warning_text()}",
-            f"blah                ",
+            f"blah                \n",
         ),
         pytest.param(
             f"twice! {desync.ObjectVarSetInDrawScript.get_warning_text()}{desync.ObjectVarSetInDrawScript.get_warning_text()}",
-            f"twice! ",
+            f"twice! \n",
+        ),
+        pytest.param(
+            f"""\
+newline {desync.ObjectVarSetInDrawScript.get_warning_text()}
+more""",
+            f"""\
+newline 
+more""",
         ),
     ],
 )
