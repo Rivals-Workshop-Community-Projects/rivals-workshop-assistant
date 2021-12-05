@@ -306,6 +306,32 @@ def test__save_aseprites(has_small_sprites):
 
 
 @pytest.mark.aseprite
+def test__save_aseprites__multiple_tag_colors():
+    aseprite_path = get_aseprite_path()
+
+    with TempDirectoryWithSpace() as tmp_root_dir, TempDirectoryWithSpace() as exe_dir:
+        root_dir = Path(tmp_root_dir.path)
+        aseprites = [
+            supply_aseprites(
+                tmp_root_dir,
+                name="nair_multiple_colors.aseprite",
+                anim_tag_color=["blue", "yellow"],
+                window_tag_color=["red", "green"],
+            )
+        ]
+
+        rivals_workshop_assistant.aseprite_handling.save_anims(
+            exe_dir=Path(exe_dir.path),
+            root_dir=root_dir,
+            aseprite_path=Path(aseprite_path),
+            aseprites=aseprites,
+            has_small_sprites=False,
+        )
+
+        assert_anim_matches_test_anim(root_dir)
+
+
+@pytest.mark.aseprite
 def test__save_aseprites__uses_subfolder_name():
     subfolder_name = "subfolder"
     aseprite_path = get_aseprite_path()

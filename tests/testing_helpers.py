@@ -89,15 +89,17 @@ def supply_aseprites(
     processed_time=None,
     relative_dest=Path("anims"),
     anim_tag_color="green",
+    window_tag_color="orange",
 ):
     dest = Path(tmp.path) / relative_dest
     dest.mkdir(parents=True, exist_ok=True)
-    shutil.copy(Path("tests/assets/sprites" / name), dest)
+    shutil.copy(Path("tests/assets/sprites") / name, dest)
     return make_aseprite(
         path=dest / name,
         modified_time=modified_time,
         processed_time=processed_time,
         anim_tag_color=anim_tag_color,
+        window_tag_color=window_tag_color,
     )
 
 
