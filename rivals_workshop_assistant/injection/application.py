@@ -64,7 +64,7 @@ def _apply_injection_to_script(
                     inject_scripts.append(injection.filepath)
 
             update_dotfile_injection_clients(
-                dotfile=dotfile, clientscript=script.path, dependencies=inject_scripts
+                dotfile=dotfile, client_script=script.path, dependencies=inject_scripts
             )
 
         needed_gmls = [

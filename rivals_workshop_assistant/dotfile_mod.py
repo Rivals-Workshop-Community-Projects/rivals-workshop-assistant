@@ -1,4 +1,3 @@
-import datetime
 import typing
 from datetime import datetime
 from pathlib import Path
@@ -47,21 +46,27 @@ def update_dotfile_after_saving(
     dotfile[SEEN_FILES_FIELD] = [file.path.as_posix() for file in seen_files]
 
 
-def update_dotfile_injection_clients(dotfile:dict, clientscript:Path, dependencies:typing.List[Path]):
+def update_dotfile_injection_clients(
+    dotfile: dict, client_script: Path, dependencies: typing.List[Path]
+):
     if INJECT_CLIENTS_FIELD not in dotfile:
         dotfile[INJECT_CLIENTS_FIELD] = {}
-    
+
     if len(dependencies) > 0:
-        dotfile[INJECT_CLIENTS_FIELD][clientscript.as_posix()] = [dep.as_posix() for dep in dependencies]
-    elif clientscript.as_posix() in dotfile[INJECT_CLIENTS_FIELD]:
-        dotfile[INJECT_CLIENTS_FIELD].pop(clientscript.as_posix())
+        dotfile[INJECT_CLIENTS_FIELD][client_script.as_posix()] = [
+            dep.as_posix() for dep in dependencies
+        ]
+    elif client_script.as_posix() in dotfile[INJECT_CLIENTS_FIELD]:
+        dotfile[INJECT_CLIENTS_FIELD].pop(client_script.as_posix())
 
 
-def get_clients_for_injection(dotfile:dict, injectionscript:Path) -> typing.List[Path]:
+def get_clients_for_injection(
+    dotfile: dict, injection_script: Path
+) -> typing.List[Path]:
     if INJECT_CLIENTS_FIELD not in dotfile:
         return []
-    
-    str_path = injectionscript.as_posix()
+
+    str_path = injection_script.as_posix()
     clientslist = []
     for key in dotfile[INJECT_CLIENTS_FIELD].keys():
         if str_path in dotfile[INJECT_CLIENTS_FIELD][key]:

@@ -1,8 +1,7 @@
 from pathlib import Path
 
 import rivals_workshop_assistant.assistant_config_mod
-import rivals_workshop_assistant.paths
-from rivals_workshop_assistant import paths as paths
+from rivals_workshop_assistant import paths
 from rivals_workshop_assistant.info_files import _yaml_dumps
 from rivals_workshop_assistant.injection.installation import (
     ANIMS_FOLDER_README,
@@ -17,9 +16,7 @@ from rivals_workshop_assistant.file_handling import create_file
 
 
 def make_user_inject_folder(root_dir: Path):
-    (root_dir / rivals_workshop_assistant.paths.USER_INJECT_FOLDER).mkdir(
-        parents=True, exist_ok=True
-    )
+    (root_dir / paths.USER_INJECT_FOLDER).mkdir(parents=True, exist_ok=True)
 
 
 def make_anims_folder(root_dir: Path):

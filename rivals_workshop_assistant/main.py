@@ -1,5 +1,5 @@
 from enum import Enum
-from typing import List, Optional
+from typing import List
 
 from rivals_workshop_assistant.filelock import FileLock
 import datetime
