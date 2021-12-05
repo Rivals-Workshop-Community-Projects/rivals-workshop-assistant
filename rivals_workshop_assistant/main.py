@@ -36,7 +36,10 @@ from rivals_workshop_assistant.assistant_config_mod import (
     get_hurtboxes_enabled,
 )
 from rivals_workshop_assistant.asset_handling import get_required_assets, save_assets
-from rivals_workshop_assistant.setup import make_basic_folder_structure
+from rivals_workshop_assistant.setup import (
+    make_basic_folder_structure,
+    get_assistant_folder_exists,
+)
 from rivals_workshop_assistant.injection import handle_injection
 from rivals_workshop_assistant.code_generation import handle_codegen
 from rivals_workshop_assistant.warning_handling import handle_warning
@@ -64,7 +67,19 @@ def main(
         root_dir = given_dir
     else:
         root_dir = get_root_dir(given_dir)
+
+    is_first_run = not get_assistant_folder_exists(root_dir)
     make_basic_folder_structure(exe_dir, root_dir)
+    if is_first_run:
+        print(
+            """\
+FIRST TIME SETUP
+An `assistant` folder should have been created for you.
+Stopping now so you have a chance to edit `assistant/assistant_config.yaml`.
+Next time, the assistant will run normally. 
+"""
+        )
+        return
 
     lock = FileLock(root_dir / paths.LOCKFILE_PATH)
     try:
@@ -108,7 +123,7 @@ def update_files(exe_dir: Path, root_dir: Path, mode: Mode.ALL):
         if inject.is_fresh:
             # if a file in user_inject has been touched, mark its clients for update
             clients = get_clients_for_injection(
-                dotfile=dotfile, injectionscript=inject.path
+                dotfile=dotfile, injection_script=inject.path
             )
             for script in scripts:
                 if script.path in clients:

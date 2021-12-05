@@ -9,6 +9,8 @@ from testfixtures import TempDirectory
 import rivals_workshop_assistant.aseprite_handling
 import rivals_workshop_assistant.assistant_config_mod
 import rivals_workshop_assistant.script_mod
+import rivals_workshop_assistant.dotfile_mod
+import rivals_workshop_assistant.character_config_mod as character_config
 from tests import testing_helpers
 from tests.testing_helpers import (
     make_empty_file,
@@ -408,7 +410,7 @@ def test__aseprites_set_window_data():
         root_dir = Path(tmp.path)
 
         # setup, make config.ini, make anim and bair
-        testing_helpers.make_empty_file(root_dir / "config.ini")
+        testing_helpers.make_empty_file(root_dir / character_config.FILENAME)
 
         make_test_config(root_dir)
         create_script(tmp, bair)
@@ -457,7 +459,7 @@ def test__backup_made():
     with TempDirectory() as tmp:
         root_dir = Path(tmp.path)
 
-        testing_helpers.make_empty_file(root_dir / "config.ini")
+        testing_helpers.make_empty_file(root_dir / character_config.FILENAME)
 
         make_test_config(root_dir)
         create_script(tmp, bair)
@@ -485,3 +487,27 @@ def test__backup_made():
             )
             == f"""{bair.content}"""
         )
+
+
+def test__empty_project_just_inits():
+    with TempDirectory() as tmp:
+        root_dir = Path(tmp.path)
+
+        tmp_exe_dir = Path(tmp.path) / "tmp_exe_dir"
+        tmp_exe_dir.mkdir()
+
+        testing_helpers.make_empty_file(root_dir / character_config.FILENAME)
+        create_script(tmp, script_1)
+
+        src.main(exe_dir=tmp_exe_dir, given_dir=root_dir, guarantee_root_dir=True)
+
+        assert {path.name for path in root_dir.glob("*")} == {
+            "anims",
+            "assistant",
+            "scripts",
+            character_config.FILENAME,
+            "tmp_exe_dir",
+        }
+
+        # Assert dotfile hasn't been made yet. Should show it didn't actually run.
+        assert not (root_dir / rivals_workshop_assistant.dotfile_mod.PATH).exists()

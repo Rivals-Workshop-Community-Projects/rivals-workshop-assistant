@@ -47,3 +47,7 @@ def make_basic_folder_structure(exe_dir: Path, root_dir: Path):
     make_default_config(root_dir, _yaml_dumps(default_config))
 
     create_file(path=(root_dir / paths.LOCKFILE_PATH), content="")
+
+
+def get_assistant_folder_exists(root_dir: Path) -> bool:
+    return (root_dir / paths.ASSISTANT_FOLDER).exists()
