@@ -70,15 +70,19 @@ def make_aseprite(
     path: Path,
     modified_time=make_time(),
     processed_time=None,
-    anim_tag_color="green",
-    window_tag_color="orange",
+    anim_tag_colors=None,
+    window_tag_colors=None,
 ):
+    if not anim_tag_colors:
+        anim_tag_colors = ["green"]
+    if not window_tag_colors:
+        window_tag_colors = ["orange"]
     return Aseprite(
         path=path,
         modified_time=modified_time,
         processed_time=processed_time,
-        anim_tag_color=anim_tag_color,
-        window_tag_color=window_tag_color,
+        anim_tag_colors=anim_tag_colors,
+        window_tag_colors=window_tag_colors,
     )
 
 
@@ -88,9 +92,13 @@ def supply_aseprites(
     modified_time=make_time(),
     processed_time=None,
     relative_dest=Path("anims"),
-    anim_tag_color="green",
-    window_tag_color="orange",
+    anim_tag_colors=None,
+    window_tag_colors=None,
 ):
+    if not anim_tag_colors:
+        anim_tag_colors = ["green"]
+    if not window_tag_colors:
+        window_tag_colors = ["orange"]
     dest = Path(tmp.path) / relative_dest
     dest.mkdir(parents=True, exist_ok=True)
     shutil.copy(Path("tests/assets/sprites") / name, dest)
@@ -98,8 +106,8 @@ def supply_aseprites(
         path=dest / name,
         modified_time=modified_time,
         processed_time=processed_time,
-        anim_tag_color=anim_tag_color,
-        window_tag_color=window_tag_color,
+        anim_tag_colors=anim_tag_colors,
+        window_tag_colors=window_tag_colors,
     )
 
 

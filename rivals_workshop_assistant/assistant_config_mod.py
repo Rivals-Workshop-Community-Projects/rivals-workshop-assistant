@@ -68,12 +68,20 @@ WINDOW_TAG_COLOR_FIELD = "window_tag_color"
 WINDOW_TAG_COLOR_DEFAULT = "red"
 
 
-def get_anim_tag_color(config: dict) -> "TagColor":
-    return config.get(ANIM_TAG_COLOR_FIELD, ANIM_TAG_COLOR_DEFAULT)
+def get_anim_tag_color(config: dict) -> List["TagColor"]:
+    color = config.get(ANIM_TAG_COLOR_FIELD, ANIM_TAG_COLOR_DEFAULT)
+    if isinstance(color, str):
+        return [color]
+    else:
+        return color
 
 
-def get_window_tag_color(config: dict) -> "TagColor":
-    return config.get(WINDOW_TAG_COLOR_FIELD, WINDOW_TAG_COLOR_DEFAULT)
+def get_window_tag_color(config: dict) -> List["TagColor"]:
+    color = config.get(WINDOW_TAG_COLOR_FIELD, WINDOW_TAG_COLOR_DEFAULT)
+    if isinstance(color, str):
+        return [color]
+    else:
+        return color
 
 
 WARNINGS_FIELD = "warnings"

@@ -196,8 +196,8 @@ class AsepriteData:
         self,
         name: str,
         num_frames: int,
-        anim_tag_color: TagColor,
-        window_tag_color: TagColor,
+        anim_tag_colors: List[TagColor],
+        window_tag_colors: List[TagColor],
         tags: List[AsepriteTag] = None,
         is_fresh: bool = False,
     ):
@@ -205,8 +205,8 @@ class AsepriteData:
         if tags is None:
             tags = []
         self.tags = tags
-        self.anim_tag_color = anim_tag_color
-        self.window_tag_color = window_tag_color
+        self.anim_tag_colors = anim_tag_colors
+        self.window_tag_colors = window_tag_colors
         self.is_fresh = is_fresh
 
         self.anims = self.get_anims(name)
@@ -216,8 +216,8 @@ class AsepriteData:
         cls,
         name: str,
         path: Path,
-        anim_tag_color: TagColor,
-        window_tag_color: TagColor,
+        anim_tag_colors: List[TagColor],
+        window_tag_colors: List[TagColor],
         is_fresh: bool,
     ):
         with open(path, "rb") as f:
@@ -229,8 +229,8 @@ class AsepriteData:
             name=name,
             tags=tags,
             num_frames=num_frames,
-            anim_tag_color=anim_tag_color,
-            window_tag_color=window_tag_color,
+            anim_tag_colors=anim_tag_colors,
+            window_tag_colors=window_tag_colors,
             is_fresh=is_fresh,
         )
 
@@ -240,7 +240,7 @@ class AsepriteData:
                 name=tag.name, start=tag.start, end=tag.end, is_fresh=self.is_fresh
             )
             for tag in self.tags
-            if tag.color == self.anim_tag_color
+            if tag.color in self.anim_tag_colors
         ]
         if tag_anims:
             return tag_anims
@@ -264,7 +264,7 @@ class AsepriteData:
         tags_in_frame_range = [
             window
             for window in self.tags
-            if window.color == self.window_tag_color
+            if window.color in self.window_tag_colors
             and start <= window.start <= end
             and start <= window.end <= end
         ]
@@ -279,15 +279,15 @@ class Aseprite(File):
     def __init__(
         self,
         path: Path,
-        anim_tag_color: TagColor,
-        window_tag_color: TagColor,
+        anim_tag_colors: List[TagColor],
+        window_tag_colors: List[TagColor],
         modified_time: datetime = None,
         processed_time: datetime = None,
         content=None,
     ):
         super().__init__(path, modified_time, processed_time)
-        self.anim_tag_color = anim_tag_color
-        self.window_tag_color = window_tag_color
+        self.anim_tag_colors = anim_tag_colors
+        self.window_tag_colors = window_tag_colors
         self._content = content
 
     @property
@@ -296,8 +296,8 @@ class Aseprite(File):
             self._content = AsepriteData.from_path(
                 name=self.path.stem,
                 path=self.path,
-                anim_tag_color=self.anim_tag_color,
-                window_tag_color=self.window_tag_color,
+                anim_tag_colors=self.anim_tag_colors,
+                window_tag_colors=self.window_tag_colors,
                 is_fresh=self.is_fresh,
             )
         return self._content
@@ -347,8 +347,8 @@ def read_aseprite(path: Path, dotfile: dict, assistant_config: dict):
         path=path,
         modified_time=_get_modified_time(path),
         processed_time=get_processed_time(dotfile=dotfile, path=path),
-        anim_tag_color=assistant_config_mod.get_anim_tag_color(assistant_config),
-        window_tag_color=assistant_config_mod.get_window_tag_color(assistant_config),
+        anim_tag_colors=assistant_config_mod.get_anim_tag_color(assistant_config),
+        window_tag_colors=assistant_config_mod.get_window_tag_color(assistant_config),
     )
     return aseprite
 

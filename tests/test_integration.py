@@ -315,8 +315,8 @@ def test__save_aseprites__multiple_tag_colors():
             supply_aseprites(
                 tmp_root_dir,
                 name="nair_multiple_colors.aseprite",
-                anim_tag_color=["blue", "yellow"],
-                window_tag_color=["red", "green"],
+                anim_tag_colors=["blue", "yellow"],
+                window_tag_colors=["red", "green"],
             )
         ]
 
@@ -328,7 +328,19 @@ def test__save_aseprites__multiple_tag_colors():
             has_small_sprites=False,
         )
 
-        assert_anim_matches_test_anim(root_dir)
+        assert_anim_matches_test_anim(
+            root_dir,
+            filename=f"anim1_strip1.png",
+            has_small_sprites=False,
+            num_frames=1,
+        )
+
+        assert_anim_matches_test_anim(
+            root_dir,
+            filename=f"bair_strip2.png",
+            has_small_sprites=False,
+            num_frames=2,
+        )
 
 
 @pytest.mark.aseprite
@@ -424,7 +436,7 @@ def test__save_aseprites__multiple_aseprites():
         root_dir = Path(tmp_root_dir.path)
         aseprites = [
             supply_aseprites(
-                tmp_root_dir, relative_dest=Path("anims"), anim_tag_color="blue"
+                tmp_root_dir, relative_dest=Path("anims"), anim_tag_colors="blue"
             )
         ]
 
