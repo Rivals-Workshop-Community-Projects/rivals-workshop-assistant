@@ -1,11 +1,11 @@
 import enum
-import typing
+from typing import List, TYPE_CHECKING, Optional
 from pathlib import Path
 
 import rivals_workshop_assistant.info_files as info_files
 from rivals_workshop_assistant.paths import ASSISTANT_FOLDER
 
-if typing.TYPE_CHECKING:
+if TYPE_CHECKING:
     from rivals_workshop_assistant.aseprite_handling import TagColor
 
 FILENAME = "assistant_config.yaml"
@@ -160,7 +160,7 @@ DEFAULT_CONFIG = f"""\
 """
 
 
-def get_aseprite_path(assistant_config: dict) -> typing.Optional[Path]:
+def get_aseprite_path(assistant_config: dict) -> Optional[Path]:
     path_string = assistant_config.get(ASEPRITE_PATH_FIELD, None)
     if path_string:
         return Path(path_string)
