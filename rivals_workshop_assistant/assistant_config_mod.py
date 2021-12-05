@@ -106,7 +106,7 @@ DEFAULT_CONFIG = f"""\
 
 
 {ASEPRITE_PATH_FIELD}: # TO USE ASEPRITE, PUT YOUR PATH BEFORE THE "#" <-
-    # ^ This should point to your Aseprite.exe absolute path, for example: 
+    # ^ This should point to your Aseprite.exe absolute path, with no quotes, for example: 
     # aseprite_path: C:/Program Files/Aseprite/aseprite.exe
     # If correct, copying the path into your file explorer address bar will open aseprite.
     # This is needed for the assistant to automatically export your animations to spritesheets.
@@ -118,6 +118,7 @@ DEFAULT_CONFIG = f"""\
     # *Aseprite Tag Color Configs*
     # Legal values are:
     #   black, red, orange, yellow, green, blue, purple, gray
+    # Can input multiple colors using sequence syntax https://learnxinyminutes.com/docs/yaml/#:~:text=2002%2D02%2D02%5D%0A%0A%23-,Sequences,
 {ANIM_TAG_COLOR_FIELD}: {ANIM_TAG_COLOR_DEFAULT}
     # The color of Aseprite tag representing an animation. 
     # If you keep multiple aseprite animations in a file, put each in a tag with this 
