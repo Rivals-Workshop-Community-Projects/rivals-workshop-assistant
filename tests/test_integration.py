@@ -1,5 +1,8 @@
+import contextlib
 import os
+import re
 import shutil
+import tempfile
 from pathlib import Path
 
 from PIL import Image
@@ -31,6 +34,24 @@ from rivals_workshop_assistant.injection.dependency_handling import Define
 import rivals_workshop_assistant.main as src
 
 pytestmark = pytest.mark.slow
+
+
+def recursive_delete_directory(root: Path):
+    if root.exists():
+        for path in root.iterdir():
+            if path.is_dir():
+                recursive_delete_directory(path)
+            else:
+                path.unlink()
+        root.rmdir()
+
+
+@contextlib.contextmanager
+def TempDirectoryWithSpace():
+    tmpfile_with_space = tempfile.mkdtemp(prefix="prefix ")
+    yield TempDirectory(path=tmpfile_with_space)
+    recursive_delete_directory(Path(tmpfile_with_space))
+
 
 script_1 = ScriptWithPath(
     path=Path("scripts/script_1.gml"),
@@ -114,7 +135,7 @@ def test_read_injection_library():
 
 
 def test_full_injection():
-    with TempDirectory() as tmp:
+    with TempDirectoryWithSpace() as tmp:
         create_script(tmp, script_1)
         create_script(tmp, script_subfolder)
         create_script(tmp, injection_at_root)
@@ -234,14 +255,14 @@ def test__make_basic_folder_structure__overwrites_config():
 
 
 def test__read_aseprites():
-    with TempDirectory() as tmp:
+    with TempDirectoryWithSpace() as tmp:
         supply_aseprites(tmp, TEST_ANIM_NAME)
 
         result = rivals_workshop_assistant.aseprite_handling.read_aseprites(
             root_dir=Path(tmp.path), dotfile={}, assistant_config={}
         )
         assert len(result) == 1
-        assert result[0].path == Path(tmp.path) / "anims" / TEST_ANIM_NAME
+        assert result[0].path == Path(tmp.path) / paths.ANIMS_FOLDER / TEST_ANIM_NAME
         assert result[0].is_fresh
 
 
@@ -269,7 +290,7 @@ def assert_anim_matches_test_anim(
 def test__save_aseprites(has_small_sprites):
     aseprite_path = get_aseprite_path()
 
-    with TempDirectory() as tmp_root_dir, TempDirectory() as exe_dir:
+    with TempDirectoryWithSpace() as tmp_root_dir, TempDirectoryWithSpace() as exe_dir:
         root_dir = Path(tmp_root_dir.path)
         aseprites = [supply_aseprites(tmp_root_dir)]
 
@@ -289,7 +310,7 @@ def test__save_aseprites__uses_subfolder_name():
     subfolder_name = "subfolder"
     aseprite_path = get_aseprite_path()
 
-    with TempDirectory() as tmp_root_dir, TempDirectory() as exe_dir:
+    with TempDirectoryWithSpace() as tmp_root_dir, TempDirectoryWithSpace() as exe_dir:
         root_dir = Path(tmp_root_dir.path)
         aseprites = [
             supply_aseprites(tmp_root_dir, relative_dest=Path("anims") / subfolder_name)

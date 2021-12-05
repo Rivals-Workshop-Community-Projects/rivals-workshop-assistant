@@ -145,7 +145,7 @@ class Anim(TagObject):
                 f'"{aseprite_path}"',
                 "-b",
                 f'-script-param filename="{aseprite_file_path}"',
-                f"-script-param dest={dest}",
+                f'-script-param dest="{dest}"',
                 f"-script-param startFrame={self.start + 1}",
                 f"-script-param endFrame={self.end + 1}",
             ]
@@ -361,7 +361,7 @@ def get_anims(aseprites: List[Aseprite]) -> List[Anim]:
 
 
 def save_scripts(root_dir: Path, scripts: List[Script]):
-    # Why is this in aseprite_handling? Move?
+    # TODO Why is this in aseprite_handling? Move?
     for script in scripts:
         script.save(root_dir)
 
