@@ -16,13 +16,12 @@ from rivals_workshop_assistant import (
 from rivals_workshop_assistant.character_config_mod import get_has_small_sprites
 from rivals_workshop_assistant.dotfile_mod import (
     update_dotfile_after_saving,
-    get_clients_for_injection,
 )
 from rivals_workshop_assistant.script_mod import (
     read_scripts,
     Script,
-    read_userinject,
-    read_libinject,
+    read_user_inject,
+    read_lib_inject,
 )
 from rivals_workshop_assistant.aseprite_handling import (
     read_aseprites,
@@ -40,7 +39,10 @@ from rivals_workshop_assistant.setup import (
     make_basic_folder_structure,
     get_assistant_folder_exists,
 )
-from rivals_workshop_assistant.injection import handle_injection
+from rivals_workshop_assistant.injection import (
+    handle_injection,
+    freshen_scripts_with_modified_dependencies,
+)
 from rivals_workshop_assistant.code_generation import handle_codegen
 from rivals_workshop_assistant.warning_handling import handle_warning
 
@@ -115,24 +117,16 @@ def update_files(exe_dir: Path, root_dir: Path, mode: Mode.ALL):
 
     scripts = read_scripts(root_dir, dotfile)
 
-    # TODO REFACTOR
-    userinject_scripts = read_userinject(root_dir, dotfile)
-    libinject_scripts = read_libinject(root_dir, dotfile)
+    user_inject_scripts = read_user_inject(root_dir, dotfile)
+    lib_inject_scripts = read_lib_inject(root_dir, dotfile)
 
-    for inject in userinject_scripts + libinject_scripts:
-        if inject.is_fresh:
-            # if a file in user_inject has been touched, mark its clients for update
-            clients = get_clients_for_injection(
-                dotfile=dotfile, injection_script=inject.path
-            )
-            for script in scripts:
-                if script.path in clients:
-                    script.is_fresh = True
-    # ---
-
-    aseprites = read_aseprites(
-        root_dir, dotfile=dotfile, assistant_config=assistant_config
+    freshen_scripts_with_modified_dependencies(
+        dotfile,
+        scripts=scripts,
+        inject_scripts=user_inject_scripts + lib_inject_scripts,
     )
+
+    aseprites = read_aseprites(root_dir, dotfile, assistant_config=assistant_config)
     anims = get_anims(aseprites)
 
     seen_files = []
@@ -163,7 +157,7 @@ def update_files(exe_dir: Path, root_dir: Path, mode: Mode.ALL):
     update_dotfile_after_saving(
         now=datetime.datetime.now(),
         dotfile=dotfile,
-        seen_files=seen_files + userinject_scripts,
+        seen_files=seen_files + user_inject_scripts,
     )
 
     assets = get_required_assets(scripts)

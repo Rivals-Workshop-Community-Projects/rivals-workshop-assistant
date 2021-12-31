@@ -66,13 +66,12 @@ def get_clients_for_injection(
     if INJECT_CLIENTS_FIELD not in dotfile:
         return []
 
-    str_path = injection_script.as_posix()
-    clientslist = []
+    path_string = injection_script.as_posix()
+    clients = []
     for key in dotfile[INJECT_CLIENTS_FIELD].keys():
-        if str_path in dotfile[INJECT_CLIENTS_FIELD][key]:
-            clientslist.append(Path(key))
-
-    return clientslist
+        if path_string in dotfile[INJECT_CLIENTS_FIELD][key]:
+            clients.append(Path(key))
+    return clients
 
 
 def get_processed_time(dotfile: dict, path: Path) -> typing.Optional[datetime]:
