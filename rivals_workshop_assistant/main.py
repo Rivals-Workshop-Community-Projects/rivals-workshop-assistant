@@ -33,6 +33,7 @@ from rivals_workshop_assistant.aseprite_handling import (
 from rivals_workshop_assistant.assistant_config_mod import (
     get_aseprite_path,
     get_hurtboxes_enabled,
+    get_is_ssl,
 )
 from rivals_workshop_assistant.asset_handling import get_required_assets, save_assets
 from rivals_workshop_assistant.setup import (
@@ -151,6 +152,7 @@ def update_files(exe_dir: Path, root_dir: Path, mode: Mode.ALL):
                 scripts=scripts, character_config=character_config
             ),
             hurtboxes_enabled=get_hurtboxes_enabled(config=assistant_config),
+            is_ssl=get_is_ssl(config=assistant_config),
         )
         seen_files += aseprites
 

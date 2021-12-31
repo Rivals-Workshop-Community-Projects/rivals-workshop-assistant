@@ -107,6 +107,14 @@ def get_hurtboxes_enabled(config: dict):
     return config.get(GENERATE_HURTBOXES_FIELD, GENERATE_HURTBOXES_DEFAULT)
 
 
+IS_SSL_FIELD = "is_ssl"
+IS_SSL_DEFAULT = False
+
+
+def get_is_ssl(config: dict):
+    return config.get(IS_SSL_FIELD, IS_SSL_DEFAULT)
+
+
 DEFAULT_CONFIG = f"""\
 # Format is <key name>: <value> (with a space after the : )
 # For example
@@ -165,6 +173,9 @@ DEFAULT_CONFIG = f"""\
 - {WARNING_RECURSIVE_SET_ATTACK}
     # Comment out any warnings you want to disable with `#`.
     # Learn more about warnings at https://rivalslib.com/assistant/warnings/
+    
+{IS_SSL_FIELD}: {IS_SSL_DEFAULT}
+    # If the character is for SSL mode (doubles sprite size)
 """
 
 

@@ -85,12 +85,16 @@ class Anim(TagObject):
         aseprite_file_path: Path,
         has_small_sprites: bool,
         hurtboxes_enabled: bool,
+        is_ssl: bool,
     ):
         root_name = get_anim_file_name_root(root_dir, aseprite_file_path, self.name)
         if has_small_sprites and self._cares_about_small_sprites():
             scale_param = 1
         else:
             scale_param = 2
+        if is_ssl:
+            scale_param *= 2
+
         self._run_lua_export(
             exe_dir=exe_dir,
             root_dir=root_dir,
@@ -313,6 +317,7 @@ class Aseprite(File):
         aseprite_path: Path,
         has_small_sprites: bool = False,
         hurtboxes_enabled=False,
+        is_ssl=False,
     ):
         for anim in self.content.anims:
             anim.save(
@@ -322,6 +327,7 @@ class Aseprite(File):
                 aseprite_file_path=self.path,
                 has_small_sprites=has_small_sprites,
                 hurtboxes_enabled=hurtboxes_enabled,
+                is_ssl=is_ssl,
             )
 
 
@@ -373,6 +379,7 @@ def save_anims(
     aseprites: List[Aseprite],
     has_small_sprites: bool,
     hurtboxes_enabled: bool = False,
+    is_ssl: bool = False,
 ):
     if not aseprite_path:
         print(
@@ -389,4 +396,5 @@ def save_anims(
                 aseprite_path=aseprite_path,
                 has_small_sprites=has_small_sprites,
                 hurtboxes_enabled=hurtboxes_enabled,
+                is_ssl=is_ssl,
             )
