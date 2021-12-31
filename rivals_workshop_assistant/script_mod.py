@@ -15,6 +15,7 @@ from rivals_workshop_assistant.paths import (
     USER_INJECT_FOLDER,
 )
 
+
 class Script(File):
     def __init__(
         self,
@@ -71,7 +72,9 @@ class Script(File):
         )
 
 
-def read_scripts(root_dir: Path, dotfile: dict, folder:str = SCRIPTS_FOLDER) -> List[Script]:
+def read_scripts(
+    root_dir: Path, dotfile: dict, folder: str = SCRIPTS_FOLDER
+) -> List[Script]:
     """Returns all Scripts in a given directory (defaults to the scripts folder)."""
     gml_paths = list((root_dir / folder).rglob("*.gml"))
 
@@ -86,10 +89,12 @@ def read_scripts(root_dir: Path, dotfile: dict, folder:str = SCRIPTS_FOLDER) -> 
 
     return scripts
 
-def read_userinject(root_dir: Path, dotfile: dict) -> List[Script]:
+
+def read_user_inject(root_dir: Path, dotfile: dict) -> List[Script]:
     """Returns all Scripts in the user_inject directory."""
     return read_scripts(root_dir=root_dir, dotfile=dotfile, folder=USER_INJECT_FOLDER)
-    
-def read_libinject(root_dir: Path, dotfile: dict) -> List[Script]:
+
+
+def read_lib_inject(root_dir: Path, dotfile: dict) -> List[Script]:
     """Returns all Scripts in the .inject directory."""
     return read_scripts(root_dir=root_dir, dotfile=dotfile, folder=INJECT_FOLDER)
