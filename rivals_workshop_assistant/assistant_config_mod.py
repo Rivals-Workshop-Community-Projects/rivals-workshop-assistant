@@ -179,7 +179,7 @@ DEFAULT_CONFIG = f"""\
 """
 
 
-def get_aseprite_path(assistant_config: dict) -> Optional[Path]:
+def get_aseprite_program_path(assistant_config: dict) -> Optional[Path]:
     path_string = assistant_config.get(ASEPRITE_PATH_FIELD, None)
     if path_string:
         return Path(path_string)

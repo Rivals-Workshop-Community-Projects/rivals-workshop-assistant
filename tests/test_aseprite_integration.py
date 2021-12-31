@@ -7,6 +7,8 @@ from testfixtures import TempDirectory
 from rivals_workshop_assistant import paths
 from rivals_workshop_assistant.aseprite_handling import (
     read_aseprite,
+    AsepritePathParams,
+    AsepriteConfigParams,
 )
 from rivals_workshop_assistant.assistant_config_mod import ANIM_TAG_COLOR_FIELD
 from tests.testing_helpers import (
@@ -50,11 +52,15 @@ def assert_aseprite_saves_right_anims(
     with TempDirectory() as root_dir, TempDirectory() as exe_dir:
         root_dir = Path(root_dir.path)
         aseprite.save(
-            exe_dir=Path(exe_dir.path),
-            root_dir=root_dir,
-            aseprite_path=aseprite_path,
-            has_small_sprites=has_small_sprites,
-            hurtboxes_enabled=hurtboxes_enabled,
+            path_params=AsepritePathParams(
+                exe_dir=Path(exe_dir.path),
+                root_dir=root_dir,
+                aseprite_program_path=aseprite_path,
+            ),
+            config_params=AsepriteConfigParams(
+                has_small_sprites=has_small_sprites,
+                hurtboxes_enabled=hurtboxes_enabled,
+            ),
         )
 
         for save_file_name, expected_file_name in zip(

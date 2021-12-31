@@ -1,6 +1,7 @@
 import itertools
 import os
 import subprocess
+from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
 from typing import List
@@ -52,6 +53,20 @@ def supply_lua_script(path: Path):
     create_file(path=path, content=script_content, overwrite=False)
 
 
+@dataclass
+class AsepritePathParams:
+    exe_dir: Path
+    root_dir: Path
+    aseprite_program_path: Path
+
+
+@dataclass
+class AsepriteConfigParams:
+    has_small_sprites: bool = False
+    hurtboxes_enabled: bool = False
+    is_ssl: bool = False
+
+
 class Anim(TagObject):
     def __init__(
         self,
@@ -79,54 +94,46 @@ class Anim(TagObject):
 
     def save(
         self,
-        exe_dir: Path,
-        root_dir: Path,
-        aseprite_path: Path,
+        path_params: AsepritePathParams,
+        config_params: AsepriteConfigParams,
         aseprite_file_path: Path,
-        has_small_sprites: bool,
-        hurtboxes_enabled: bool,
-        is_ssl: bool,
     ):
-        root_name = get_anim_file_name_root(root_dir, aseprite_file_path, self.name)
-        if has_small_sprites and self._cares_about_small_sprites():
+        root_name = get_anim_file_name_root(
+            path_params.root_dir, aseprite_file_path, self.name
+        )
+        if config_params.has_small_sprites and self._cares_about_small_sprites():
             scale_param = 1
         else:
             scale_param = 2
-        if is_ssl:
+        if config_params.is_ssl:
             scale_param *= 2
 
         self._run_lua_export(
-            exe_dir=exe_dir,
-            root_dir=root_dir,
+            path_params=path_params,
             aseprite_file_path=aseprite_file_path,
-            aseprite_path=aseprite_path,
             base_name=root_name,
             script_name="export_aseprite.lua",
             lua_params={"scale": scale_param},
         )
 
-        if hurtboxes_enabled and self._gets_a_hurtbox():
+        if config_params.hurtboxes_enabled and self._gets_a_hurtbox():
             self._run_lua_export(
-                exe_dir=exe_dir,
-                root_dir=root_dir,
+                path_params=path_params,
                 aseprite_file_path=aseprite_file_path,
-                aseprite_path=aseprite_path,
                 base_name=f"{root_name}_hurt",
                 script_name="create_hurtbox.lua",
             )
 
     def _run_lua_export(
         self,
-        exe_dir: Path,
-        root_dir: Path,
+        path_params: AsepritePathParams,
         aseprite_file_path: Path,
-        aseprite_path: Path,
         base_name: str,
         script_name: str,
         lua_params: dict = None,
     ):
         full_script_path = (
-            exe_dir / ASEPRITE_LUA_SCRIPTS_FOLDER / script_name
+            path_params.exe_dir / ASEPRITE_LUA_SCRIPTS_FOLDER / script_name
         ).absolute()
         supply_lua_script(
             path=full_script_path,
@@ -136,17 +143,17 @@ class Anim(TagObject):
             lua_params = {}
 
         _delete_paths_from_glob(
-            root_dir,
+            path_params.root_dir,
             f"{base_name}" + "_strip*.png",
         )
 
         dest_name = f"{base_name}" + f"_strip{self.num_frames}.png"
-        dest = root_dir / paths.SPRITES_FOLDER / dest_name
+        dest = path_params.root_dir / paths.SPRITES_FOLDER / dest_name
         dest.parent.mkdir(parents=True, exist_ok=True)
 
         command_parts = (
             [
-                f'"{aseprite_path}"',
+                f'"{path_params.aseprite_program_path}"',
                 "-b",
                 f'-script-param filename="{aseprite_file_path}"',
                 f'-script-param dest="{dest}"',
@@ -165,7 +172,7 @@ class Anim(TagObject):
             if result.returncode != 0:
                 print(f"ERROR: Lua script command failed. {export_command}")
         except FileNotFoundError:
-            print(f"ERROR: Aseprite not found at {aseprite_path}")
+            print(f"ERROR: Aseprite not found at {path_params.aseprite_program_path}")
 
     def _cares_about_small_sprites(self):
         return self.name in ANIMS_WHICH_CARE_ABOUT_SMALL_SPRITES
@@ -312,23 +319,11 @@ class Aseprite(File):
 
     def save(
         self,
-        exe_dir: Path,
-        root_dir: Path,
-        aseprite_path: Path,
-        has_small_sprites: bool = False,
-        hurtboxes_enabled=False,
-        is_ssl=False,
+        path_params: AsepritePathParams,
+        config_params: AsepriteConfigParams,
     ):
         for anim in self.content.anims:
-            anim.save(
-                exe_dir=exe_dir,
-                root_dir=root_dir,
-                aseprite_path=aseprite_path,
-                aseprite_file_path=self.path,
-                has_small_sprites=has_small_sprites,
-                hurtboxes_enabled=hurtboxes_enabled,
-                is_ssl=is_ssl,
-            )
+            anim.save(path_params, config_params, aseprite_file_path=self.path)
 
 
 def read_aseprites(
@@ -348,7 +343,7 @@ def read_aseprites(
     return aseprites
 
 
-def read_aseprite(path: Path, dotfile: dict, assistant_config: dict):
+def read_aseprite(path: Path, dotfile: dict, assistant_config: dict) -> Aseprite:
     aseprite = Aseprite(
         path=path,
         modified_time=_get_modified_time(path),
@@ -373,15 +368,11 @@ def save_scripts(root_dir: Path, scripts: List[Script]):
 
 
 def save_anims(
-    exe_dir: Path,
-    root_dir: Path,
-    aseprite_path: Path,
+    path_params: AsepritePathParams,
+    config_params: AsepriteConfigParams,
     aseprites: List[Aseprite],
-    has_small_sprites: bool,
-    hurtboxes_enabled: bool = False,
-    is_ssl: bool = False,
 ):
-    if not aseprite_path:
+    if not path_params.aseprite_program_path:
         print(
             "WARN: Not saving anims, because no aseprite path has been supplied.\n"
             "Add a path to your aseprite.exe in assistant/assistant_config.yaml to "
@@ -390,11 +381,4 @@ def save_anims(
         return
     for aseprite in aseprites:
         if aseprite.is_fresh:
-            aseprite.save(
-                exe_dir=exe_dir,
-                root_dir=root_dir,
-                aseprite_path=aseprite_path,
-                has_small_sprites=has_small_sprites,
-                hurtboxes_enabled=hurtboxes_enabled,
-                is_ssl=is_ssl,
-            )
+            aseprite.save(path_params=path_params, config_params=config_params)

@@ -32,6 +32,10 @@ from rivals_workshop_assistant.injection import apply_injection
 from rivals_workshop_assistant.paths import INJECT_FOLDER, USER_INJECT_FOLDER
 from rivals_workshop_assistant.injection.dependency_handling import Define
 import rivals_workshop_assistant.main as src
+from rivals_workshop_assistant.aseprite_handling import (
+    AsepritePathParams,
+    AsepriteConfigParams,
+)
 
 pytestmark = pytest.mark.slow
 
@@ -295,11 +299,15 @@ def test__save_aseprites(has_small_sprites):
         aseprites = [supply_aseprites(tmp_root_dir)]
 
         rivals_workshop_assistant.aseprite_handling.save_anims(
-            exe_dir=Path(exe_dir.path),
-            root_dir=root_dir,
-            aseprite_path=Path(aseprite_path),
+            path_params=AsepritePathParams(
+                exe_dir=Path(exe_dir.path),
+                root_dir=root_dir,
+                aseprite_program_path=Path(aseprite_path),
+            ),
+            config_params=AsepriteConfigParams(
+                has_small_sprites=has_small_sprites,
+            ),
             aseprites=aseprites,
-            has_small_sprites=has_small_sprites,
         )
 
         assert_anim_matches_test_anim(root_dir, has_small_sprites=has_small_sprites)
@@ -321,11 +329,13 @@ def test__save_aseprites__multiple_tag_colors():
         ]
 
         rivals_workshop_assistant.aseprite_handling.save_anims(
-            exe_dir=Path(exe_dir.path),
-            root_dir=root_dir,
-            aseprite_path=Path(aseprite_path),
+            path_params=AsepritePathParams(
+                exe_dir=Path(exe_dir.path),
+                root_dir=root_dir,
+                aseprite_program_path=Path(aseprite_path),
+            ),
+            config_params=AsepriteConfigParams(),
             aseprites=aseprites,
-            has_small_sprites=False,
         )
 
         assert_anim_matches_test_anim(
@@ -355,11 +365,13 @@ def test__save_aseprites__uses_subfolder_name():
         ]
 
         rivals_workshop_assistant.aseprite_handling.save_anims(
-            exe_dir=Path(exe_dir.path),
-            root_dir=root_dir,
-            aseprite_path=Path(aseprite_path),
+            path_params=AsepritePathParams(
+                exe_dir=Path(exe_dir.path),
+                root_dir=root_dir,
+                aseprite_program_path=Path(aseprite_path),
+            ),
+            config_params=AsepriteConfigParams(),
             aseprites=aseprites,
-            has_small_sprites=False,
         )
 
         assert_anim_matches_test_anim(
@@ -384,11 +396,13 @@ def test__save_aseprites__removes_old_spritesheet():
         make_empty_file(other_filename)
 
         rivals_workshop_assistant.aseprite_handling.save_anims(
-            exe_dir=Path(exe_dir.path),
-            root_dir=root_dir,
-            aseprite_path=Path(aseprite_path),
+            path_params=AsepritePathParams(
+                exe_dir=Path(exe_dir.path),
+                root_dir=root_dir,
+                aseprite_program_path=Path(aseprite_path),
+            ),
+            config_params=AsepriteConfigParams(),
             aseprites=aseprites,
-            has_small_sprites=False,
         )
 
         assert not old_filename.exists()
@@ -417,11 +431,13 @@ def test__save_aseprites__removes_old_spritesheet__with_subfolder():
         make_empty_file(other_filename)
 
         rivals_workshop_assistant.aseprite_handling.save_anims(
-            exe_dir=Path(exe_dir.path),
-            root_dir=root_dir,
-            aseprite_path=Path(aseprite_path),
+            path_params=AsepritePathParams(
+                exe_dir=Path(exe_dir.path),
+                root_dir=root_dir,
+                aseprite_program_path=Path(aseprite_path),
+            ),
+            config_params=AsepriteConfigParams(),
             aseprites=aseprites,
-            has_small_sprites=False,
         )
 
         assert not old_filename.exists()
@@ -441,11 +457,13 @@ def test__save_aseprites__multiple_aseprites():
         ]
 
         rivals_workshop_assistant.aseprite_handling.save_anims(
-            exe_dir=Path(exe_dir.path),
-            root_dir=root_dir,
-            aseprite_path=Path(aseprite_path),
+            path_params=AsepritePathParams(
+                exe_dir=Path(exe_dir.path),
+                root_dir=root_dir,
+                aseprite_program_path=Path(aseprite_path),
+            ),
+            config_params=AsepriteConfigParams(),
             aseprites=aseprites,
-            has_small_sprites=False,
         )
 
         assert_anim_matches_test_anim(

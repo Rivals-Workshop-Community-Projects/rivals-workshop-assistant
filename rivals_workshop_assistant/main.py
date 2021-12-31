@@ -29,9 +29,11 @@ from rivals_workshop_assistant.aseprite_handling import (
     save_scripts,
     save_anims,
     Anim,
+    AsepriteConfigParams,
+    AsepritePathParams,
 )
 from rivals_workshop_assistant.assistant_config_mod import (
-    get_aseprite_path,
+    get_aseprite_program_path,
     get_hurtboxes_enabled,
     get_is_ssl,
 )
@@ -144,15 +146,19 @@ def update_files(exe_dir: Path, root_dir: Path, mode: Mode.ALL):
 
     if mode in (mode.ALL, mode.ANIMS):
         save_anims(
-            exe_dir=exe_dir,
-            root_dir=root_dir,
-            aseprite_path=get_aseprite_path(assistant_config),
-            aseprites=aseprites,
-            has_small_sprites=get_has_small_sprites(
-                scripts=scripts, character_config=character_config
+            path_params=AsepritePathParams(
+                exe_dir=exe_dir,
+                root_dir=root_dir,
+                aseprite_program_path=get_aseprite_program_path(assistant_config),
             ),
-            hurtboxes_enabled=get_hurtboxes_enabled(config=assistant_config),
-            is_ssl=get_is_ssl(config=assistant_config),
+            config_params=AsepriteConfigParams(
+                has_small_sprites=get_has_small_sprites(
+                    scripts=scripts, character_config=character_config
+                ),
+                hurtboxes_enabled=get_hurtboxes_enabled(config=assistant_config),
+                is_ssl=get_is_ssl(config=assistant_config),
+            ),
+            aseprites=aseprites,
         )
         seen_files += aseprites
 
