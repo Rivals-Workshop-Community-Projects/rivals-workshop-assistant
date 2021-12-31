@@ -3,9 +3,11 @@ import typing
 from typing import List
 
 from .dependency_handling import GmlInjection
-from rivals_workshop_assistant.script_mod import Script
-from rivals_workshop_assistant.dotfile_mod import update_dotfile_injection_clients
+from rivals_workshop_assistant.dotfile_mod import update_all_dotfile_injection_clients
 from ..aseprite_handling import Anim
+
+if typing.TYPE_CHECKING:
+    from rivals_workshop_assistant.script_mod import Script
 
 OLD_INJECTION_START_MARKERS = ["// vvv LIBRARY DEFINES AND MACROS vvv\n"]
 INJECTION_START_MARKER = "// #region vvv LIBRARY DEFINES AND MACROS vvv\n"
@@ -27,7 +29,7 @@ INJECTION_END_HEADER = (
 
 
 def apply_injection(
-    scripts: List[Script],
+    scripts: List["Script"],
     injection_library: List[GmlInjection],
     anims: List[Anim],
     dotfile: dict = None,
@@ -40,7 +42,7 @@ def apply_injection(
 
 
 def _apply_injection_to_script(
-    script: Script,
+    script: "Script",
     injection_library: List[GmlInjection],
     anim: Anim,
     dotfile: dict = None,
@@ -52,20 +54,11 @@ def _apply_injection_to_script(
             gml=_get_script_contents(script.working_content),
             injection_library=injection_library,
         )
-
-        # TODO refactor code below this point
-        # need to map script-to-script dependencies into the dotfile
-        if dotfile is not None:
-            inject_scripts = []
-            for injection in needed_injects:
-                if not (
-                    injection.filepath is None or injection.filepath in inject_scripts
-                ):
-                    inject_scripts.append(injection.filepath)
-
-            update_dotfile_injection_clients(
-                dotfile=dotfile, client_script=script.path, dependencies=inject_scripts
-            )
+        update_all_dotfile_injection_clients(
+            dotfile=dotfile,
+            needed_injects=needed_injects,
+            script=script,
+        )
 
         needed_gmls = [
             injection.gml for injection in needed_injects
@@ -87,21 +80,16 @@ def _get_anim_data_gmls_needed_in_gml(anim: Anim):
     return window_gmls
 
 
-def _get_anim_for_script(script: Script, anims: List[Anim]) -> typing.Optional[Anim]:
+def _get_anim_for_script(script: "Script", anims: List[Anim]) -> typing.Optional[Anim]:
     if script.path.parent.name != "attacks":
         return None
     anim = next((anim for anim in anims if anim.name == script.path.stem), None)
     return anim
 
 
-def _get_inject_gmls_needed_in_gml(
+def _get_injects_needed_in_gml(
     gml: str, injection_library: List[GmlInjection]
-) -> List[str]:
-    needed_injects = _get_injects_needed_in_gml(gml, injection_library)
-    return [injection.gml for injection in needed_injects]
-
-
-def _get_injects_needed_in_gml(gml: str, injection_library: List[GmlInjection]):
+) -> List[GmlInjection]:
     used_injects = _get_injects_used_in_gml(gml, injection_library)
     needed_injects = [
         inject for inject in used_injects if not _gml_supplies_inject(gml, inject)

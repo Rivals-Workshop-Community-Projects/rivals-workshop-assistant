@@ -1,9 +1,11 @@
 import re
+import typing
 from pathlib import Path
 from configparser import ConfigParser
 from typing import List
 
-from rivals_workshop_assistant.script_mod import Script
+if typing.TYPE_CHECKING:
+    from rivals_workshop_assistant.script_mod import Script
 
 FILENAME = "config.ini"
 PATH = FILENAME
@@ -26,7 +28,7 @@ def get_config_truth_value(config_value: str) -> bool:
     return bool(config_value)
 
 
-def get_has_small_sprites(scripts: List[Script], character_config: ConfigParser):
+def get_has_small_sprites(scripts: List["Script"], character_config: ConfigParser):
     in_character_config = character_config.get(
         "general", SMALL_SPRITES_FIELD, fallback=None
     )

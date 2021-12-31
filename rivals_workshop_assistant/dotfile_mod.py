@@ -6,6 +6,11 @@ import rivals_workshop_assistant.info_files as info_files
 from rivals_workshop_assistant.file_handling import File
 from rivals_workshop_assistant.paths import ASSISTANT_FOLDER
 
+if typing.TYPE_CHECKING:
+    from rivals_workshop_assistant.script_mod import Script
+    from rivals_workshop_assistant.injection.dependency_handling import GmlInjection
+
+
 FILENAME = ".assistant"
 PATH = ASSISTANT_FOLDER / FILENAME
 
@@ -44,6 +49,22 @@ def update_dotfile_after_saving(
 ):
     dotfile[PROCESSED_TIME_FIELD] = now
     dotfile[SEEN_FILES_FIELD] = [file.path.as_posix() for file in seen_files]
+
+
+def update_all_dotfile_injection_clients(
+    dotfile: dict,
+    needed_injects: typing.List["GmlInjection"],
+    script: "Script",
+):
+    if dotfile is not None:
+        inject_scripts = []
+        for injection in needed_injects:
+            if not (injection.filepath is None or injection.filepath in inject_scripts):
+                inject_scripts.append(injection.filepath)
+
+        update_dotfile_injection_clients(
+            dotfile=dotfile, client_script=script.path, dependencies=inject_scripts
+        )
 
 
 def update_dotfile_injection_clients(
