@@ -206,21 +206,25 @@ class AsepriteData:
     def __init__(
         self,
         name: str,
-        num_frames: int,
         anim_tag_colors: List[TagColor],
         window_tag_colors: List[TagColor],
-        tags: List[AsepriteTag] = None,
+        file_data: RawAsepriteFile,
         is_fresh: bool = False,
     ):
-        self.num_frames = num_frames
-        if tags is None:
-            tags = []
-        self.tags = tags
+        self.file_data = file_data
         self.anim_tag_colors = anim_tag_colors
         self.window_tag_colors = window_tag_colors
         self.is_fresh = is_fresh
 
         self.anims = self.get_anims(name)
+
+    @property
+    def num_frames(self):
+        return self.file_data.get_num_frames()
+
+    @property
+    def tags(self):
+        return self.file_data.get_tags()
 
     @classmethod
     def from_path(
@@ -234,12 +238,9 @@ class AsepriteData:
         with open(path, "rb") as f:
             contents = f.read()
             raw_aseprite_file = RawAsepriteFile(contents)
-        tags = raw_aseprite_file.get_tags()
-        num_frames = raw_aseprite_file.get_num_frames()
         return cls(
             name=name,
-            tags=tags,
-            num_frames=num_frames,
+            file_data=raw_aseprite_file,
             anim_tag_colors=anim_tag_colors,
             window_tag_colors=window_tag_colors,
             is_fresh=is_fresh,

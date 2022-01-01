@@ -1,4 +1,3 @@
-# language=lua
 from pathlib import Path
 
 from rivals_workshop_assistant import paths

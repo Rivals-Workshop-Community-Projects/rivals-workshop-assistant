@@ -1,3 +1,5 @@
+from typing import List
+
 import pytest
 from configparser import ConfigParser
 from pathlib import Path
@@ -10,12 +12,35 @@ from rivals_workshop_assistant.aseprite_handling import (
     AsepriteTag,
     Anim,
     Window,
+    TagColor,
 )
 from tests.testing_helpers import (
     make_script,
     make_time,
 )
 from rivals_workshop_assistant import character_config_mod
+
+
+class FakeAsepriteData(AsepriteData):
+    def __init__(
+        self,
+        name,
+        num_frames,
+        tags,
+        anim_tag_colors: List[TagColor],
+        window_tag_colors: List[TagColor],
+    ):
+        self._num_frames = num_frames
+        self._tags = tags
+        super().__init__(name, anim_tag_colors, window_tag_colors, file_data=None)
+
+    @property
+    def num_frames(self):
+        return self._num_frames
+
+    @property
+    def tags(self):
+        return self._tags
 
 
 def make_fake_aseprite(
@@ -31,7 +56,7 @@ def make_fake_aseprite(
     if not window_tag_color:
         window_tag_color = ["orange"]
 
-    aseprite_data = AsepriteData(
+    aseprite_data = FakeAsepriteData(
         name=name,
         num_frames=num_frames,
         tags=tags,
