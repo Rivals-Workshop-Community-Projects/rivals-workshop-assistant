@@ -155,12 +155,12 @@ class Anim(TagObject):
             [
                 f'"{path_params.aseprite_program_path}"',
                 "-b",
-                f'-script-param filename="{aseprite_file_path}"',
-                f'-script-param dest="{dest}"',
-                f"-script-param startFrame={self.start + 1}",
-                f"-script-param endFrame={self.end + 1}",
+                _format_param("filename", aseprite_file_path),
+                _format_param("dest", dest),
+                _format_param("startFrame", self.start + 1),
+                _format_param("endFrame", self.end + 1),
             ]
-            + [f"-script-param {key}={value}" for key, value in lua_params.items()]
+            + [_format_param(key, value) for key, value in lua_params.items()]
             + [
                 f'-script "{full_script_path}"',
             ]
@@ -179,6 +179,13 @@ class Anim(TagObject):
 
     def _gets_a_hurtbox(self):
         return self.name in ANIMS_WHICH_GET_HURTBOXES
+
+
+def _format_param(param_name, value):
+    if isinstance(value, list):
+        # Format list as `a,b,c` instead of `[a, b, c]` for easier parsing.
+        value = ",".join(str(item) for item in value)
+    return f'-script-param {param_name}="{value}"'
 
 
 def _delete_paths_from_glob(root_dir: Path, paths_glob: str):
