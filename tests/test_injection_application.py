@@ -4,8 +4,9 @@ from pathlib import Path
 import pytest
 
 import rivals_workshop_assistant.injection.application as application
-from rivals_workshop_assistant.aseprite_handling import Anim, Window
+from rivals_workshop_assistant.aseprite_handling import Window
 from rivals_workshop_assistant.injection.dependency_handling import Define, Macro
+from tests.test_aseprite_handling import make_anim
 from tests.testing_helpers import (
     make_script,
     make_time,
@@ -304,7 +305,7 @@ def test_get_anim_data_gmls_needed_in_gml():
     script = make_script(path=path, original_content=orig_content)
     scripts = [script]
 
-    anim = Anim(name="dattack", start=0, end=4)
+    anim = make_anim(name="dattack", start=0, end=4)
     anim.windows = [Window("window", 2, 3)]
     anims = [anim]
 

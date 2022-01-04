@@ -1,8 +1,8 @@
 from typing import List
-
-import pytest
 from configparser import ConfigParser
 from pathlib import Path
+
+import pytest
 
 import rivals_workshop_assistant.assistant_config_mod
 import rivals_workshop_assistant.character_config_mod
@@ -32,6 +32,7 @@ class FakeAsepriteData(AsepriteData):
     ):
         self._num_frames = num_frames
         self._tags = tags
+        # noinspection PyTypeChecker
         super().__init__(name, anim_tag_colors, window_tag_colors, file_data=None)
 
     @property
@@ -122,13 +123,19 @@ def test_get_has_small_sprites(init_content, character_config_str, expected):
     assert result == expected
 
 
+def make_anim(name, start, end, windows=None, content=None):
+    return Anim(
+        name=name, start=start, end=end, windows=windows, content=content
+    )  # todo replace none with fake
+
+
 @pytest.mark.parametrize(
     "tags, expected",
     [
-        pytest.param([], [Anim(name="name", start=1, end=1)]),
+        pytest.param([], [make_anim(name="name", start=1, end=1)]),
         pytest.param(
             [AsepriteTag(name="name", start=1, end=2, color="red")],
-            [Anim(name="name", start=1, end=2)],
+            [make_anim(name="name", start=1, end=2)],
         ),
         pytest.param(
             [
@@ -136,7 +143,7 @@ def test_get_has_small_sprites(init_content, character_config_str, expected):
                 AsepriteTag(name="window_name", start=2, end=2, color="orange"),
             ],
             [
-                Anim(
+                make_anim(
                     name="anim_name",
                     start=1,
                     end=1,

@@ -73,6 +73,7 @@ class Anim(TagObject):
         name: str,
         start: int,
         end: int,
+        content: "AsepriteData",
         windows: List[Window] = None,
         is_fresh=False,
     ):
@@ -80,6 +81,7 @@ class Anim(TagObject):
         An Aseprite file may contain multiple anims.
         """
         super().__init__(name, start, end)
+        self.content = content
         if windows is None:
             windows = []
         self.windows = windows
@@ -113,7 +115,10 @@ class Anim(TagObject):
             aseprite_file_path=aseprite_file_path,
             base_name=root_name,
             script_name="export_aseprite.lua",
-            lua_params={"scale": scale_param},
+            lua_params={
+                "scale": scale_param,
+                "targetLayers": [1, 3],  # fixme dont hardcode
+            },
         )
 
         if config_params.hurtboxes_enabled and self._gets_a_hurtbox():
@@ -256,7 +261,11 @@ class AsepriteData:
     def get_anims(self, name: str):
         tag_anims = [
             self.make_anim(
-                name=tag.name, start=tag.start, end=tag.end, is_fresh=self.is_fresh
+                name=tag.name,
+                start=tag.start,
+                end=tag.end,
+                is_fresh=self.is_fresh,
+                content=self,
             )
             for tag in self.tags
             if tag.color in self.anim_tag_colors
@@ -266,17 +275,24 @@ class AsepriteData:
         else:
             return [
                 self.make_anim(
-                    name=name, start=0, end=self.num_frames - 1, is_fresh=self.is_fresh
+                    name=name,
+                    start=0,
+                    end=self.num_frames - 1,
+                    is_fresh=self.is_fresh,
+                    content=self,
                 )
             ]
 
-    def make_anim(self, name: str, start: int, end: int, is_fresh: bool):
+    def make_anim(
+        self, name: str, start: int, end: int, is_fresh: bool, content: "AsepriteData"
+    ):
         return Anim(
             name=name,
             start=start,
             end=end,
             windows=self.get_windows_in_frame_range(start=start, end=end),
             is_fresh=is_fresh,
+            content=content,
         )
 
     def get_windows_in_frame_range(self, start: int, end: int):
