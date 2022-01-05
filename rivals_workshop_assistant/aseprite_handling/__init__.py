@@ -115,22 +115,27 @@ class Anim(TagObject):
         if config_params.is_ssl:
             scale_param *= 2
 
-        normal_run_params = [(root_name, self.content.layers.normals)]
+        @dataclass
+        class ExportLayerParams:
+            name: str
+            target_layers: List[LayerChunk]
+
+        normal_run_params = [ExportLayerParams(root_name, self.content.layers.normals)]
         splits_run_params = [
-            (f"{root_name}_{split_name}", layers)
+            ExportLayerParams(f"{root_name}_{split_name}", layers)
             for split_name, layers in self.content.layers.splits.items()
         ]
-        run_params = normal_run_params + splits_run_params
+        all_run_params = normal_run_params + splits_run_params
 
-        for name, targetLayers in run_params:
+        for run_params in all_run_params:
             self._run_lua_export(
                 path_params=path_params,
                 aseprite_file_path=aseprite_file_path,
-                base_name=name,
+                base_name=run_params.name,
                 script_name=EXPORT_ASEPRITE_LUA_PATH,
                 lua_params={
                     "scale": scale_param,
-                    "targetLayers": _get_layer_indices(targetLayers),
+                    "targetLayers": _get_layer_indices(run_params.target_layers),
                 },
             )
 
