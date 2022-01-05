@@ -1,6 +1,7 @@
 import itertools
 import os
 import subprocess
+from collections import namedtuple
 from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
@@ -67,6 +68,10 @@ class AsepriteConfigParams:
     is_ssl: bool = False
 
 
+EXPORT_ASEPRITE_LUA_PATH = "export_aseprite.lua"
+CREATE_HURTBOX_LUA_PATH = "create_hurtbox.lua"
+
+
 class Anim(TagObject):
     def __init__(
         self,
@@ -110,26 +115,22 @@ class Anim(TagObject):
         if config_params.is_ssl:
             scale_param *= 2
 
-        self._run_lua_export(
-            path_params=path_params,
-            aseprite_file_path=aseprite_file_path,
-            base_name=root_name,
-            script_name="export_aseprite.lua",
-            lua_params={
-                "scale": scale_param,
-                "targetLayers": _get_layer_indices(self.content.layers.normals),
-            },
-        )
+        normal_run_params = [(root_name, self.content.layers.normals)]
+        splits_run_params = [
+            (f"{root_name}_{split_name}", layers)
+            for split_name, layers in self.content.layers.splits.items()
+        ]
+        run_params = normal_run_params + splits_run_params
 
-        for split_name, layers in self.content.layers.splits.items():
+        for name, targetLayers in run_params:
             self._run_lua_export(
                 path_params=path_params,
                 aseprite_file_path=aseprite_file_path,
-                base_name=f"{root_name}_{split_name}",
-                script_name="export_aseprite.lua",
+                base_name=name,
+                script_name=EXPORT_ASEPRITE_LUA_PATH,
                 lua_params={
                     "scale": scale_param,
-                    "targetLayers": _get_layer_indices(layers),
+                    "targetLayers": _get_layer_indices(targetLayers),
                 },
             )
 
@@ -138,7 +139,7 @@ class Anim(TagObject):
                 path_params=path_params,
                 aseprite_file_path=aseprite_file_path,
                 base_name=f"{root_name}_hurt",
-                script_name="create_hurtbox.lua",
+                script_name=CREATE_HURTBOX_LUA_PATH,
             )
 
     def _run_lua_export(
