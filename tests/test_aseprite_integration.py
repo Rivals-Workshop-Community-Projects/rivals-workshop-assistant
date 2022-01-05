@@ -345,6 +345,16 @@ def test_aseprite_save_hurtbox__with_nohurt_layers(
             ["split_blah1_normal", "split_blah1_blahleftright"],
             [],
         ),
+        pytest.param(
+            "split_foobar1",
+            [
+                "split_foobar1_strip1",
+                "split_foobar1_foo_strip1",
+                "split_foobar1_bar_strip1",
+            ],
+            ["split_blah1_normal", "split_blah1_blah", "split_foobar_bar"],
+            [],
+        ),
     ],
 )
 @pytest.mark.aseprite
