@@ -14,6 +14,7 @@ from .constants import (
     HURTBOX_LAYER_NAME,
     ANIMS_WHICH_GET_HURTBOXES,
 )
+from .layers import AsepriteLayers
 from .lua_scripts import LUA_SCRIPTS
 from ..file_handling import File, _get_modified_time, create_file
 from ..dotfile_mod import get_processed_time
@@ -110,12 +111,6 @@ class Anim(TagObject):
         if config_params.is_ssl:
             scale_param *= 2
 
-        target_layers = [
-            layer
-            for layer in self.content.file_data.layers
-            if layer.name not in ("HURTMASK", "HURTBOX")
-        ]
-
         self._run_lua_export(
             path_params=path_params,
             aseprite_file_path=aseprite_file_path,
@@ -123,9 +118,21 @@ class Anim(TagObject):
             script_name="export_aseprite.lua",
             lua_params={
                 "scale": scale_param,
-                "targetLayers": _get_layer_indices(target_layers),
+                "targetLayers": _get_layer_indices(self.content.layers.normals),
             },
         )
+
+        for split_name, layers in self.content.layers.splits.items():
+            self._run_lua_export(
+                path_params=path_params,
+                aseprite_file_path=aseprite_file_path,
+                base_name=f"{root_name}_{split_name}",
+                script_name="export_aseprite.lua",
+                lua_params={
+                    "scale": scale_param,
+                    "targetLayers": _get_layer_indices(layers),
+                },
+            )
 
         if config_params.hurtboxes_enabled and self._gets_a_hurtbox():
             self._run_lua_export(
@@ -233,6 +240,7 @@ class AsepriteData:
         window_tag_colors: List[TagColor],
         file_data: RawAsepriteFile,
         is_fresh: bool = False,
+        layers: AsepriteLayers = None,  # just so it can be mocked
     ):
         self.file_data = file_data
         self.anim_tag_colors = anim_tag_colors
@@ -240,6 +248,8 @@ class AsepriteData:
         self.is_fresh = is_fresh
 
         self.anims = self.get_anims(name)
+        if layers is None and file_data is not None:
+            self.layers = AsepriteLayers.from_file(self.file_data)
 
     @property
     def num_frames(self):
