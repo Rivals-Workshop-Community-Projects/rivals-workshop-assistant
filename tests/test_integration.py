@@ -11,6 +11,7 @@ from testfixtures import TempDirectory
 
 import rivals_workshop_assistant.aseprite_handling
 import rivals_workshop_assistant.assistant_config_mod
+import rivals_workshop_assistant.file_handling
 import rivals_workshop_assistant.script_mod
 import rivals_workshop_assistant.dotfile_mod
 import rivals_workshop_assistant.character_config_mod as character_config
@@ -181,7 +182,7 @@ def test_full_injection():
             ),
         ]
 
-        rivals_workshop_assistant.aseprite_handling.save_scripts(
+        rivals_workshop_assistant.file_handling.save_scripts(
             root_dir=Path(tmp.path), scripts=scripts
         )
 

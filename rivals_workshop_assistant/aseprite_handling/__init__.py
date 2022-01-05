@@ -20,7 +20,6 @@ from ..file_handling import File, _get_modified_time, create_file
 from ..dotfile_mod import get_processed_time
 from .types import AsepriteTag, TagColor
 from ..paths import ASEPRITE_LUA_SCRIPTS_FOLDER
-from ..script_mod import Script
 
 
 class TagObject:
@@ -404,12 +403,6 @@ def get_anims(aseprites: List[Aseprite]) -> List[Anim]:
     # Unfortunately this involves reading every aseprite file...
     # If we demand that multi-anim files have a name prefix,
     # we could get away with reading fewer files.
-
-
-def save_scripts(root_dir: Path, scripts: List[Script]):
-    # TODO Why is this in aseprite_handling? Move?
-    for script in scripts:
-        script.save(root_dir)
 
 
 def save_anims(
