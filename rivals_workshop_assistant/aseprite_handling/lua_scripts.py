@@ -2,6 +2,7 @@ from pathlib import Path
 
 from rivals_workshop_assistant import paths
 
+#  language=lua
 EXPORT_ASEPRITE = """\
 local sprite = app.open(app.params["filename"])
     
@@ -9,8 +10,27 @@ local startFrame = tonumber(app.params["startFrame"])
 local endFrame = tonumber(app.params["endFrame"])
 local scale = tonumber(app.params["scale"])
 
-for _, layer in ipairs(sprite.layers) do
-    if layer.name == "HURTMASK" or layer.name == "HURTBOX" then
+local function splitInts(string, delimiter)
+    result = {};
+    for match in (string..delimiter):gmatch("(.-)"..delimiter) do
+        table.insert(result, tonumber(match));
+    end
+    return result;
+end
+
+local function contains(array, query)
+    for index, value in ipairs(array) do
+        if value == query then
+            return true
+        end
+    end
+    return false
+end
+
+local targetLayerIndices = splitInts(app.params["targetLayers"], ",")
+
+for layerIndex, layer in ipairs(sprite.layers) do
+    if not contains(targetLayerIndices, layerIndex) then
         app.range.layers = { layer }
         app.command.removeLayer()
     end

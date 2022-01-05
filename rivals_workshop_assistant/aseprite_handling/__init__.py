@@ -7,7 +7,7 @@ from pathlib import Path
 from typing import List
 
 from rivals_workshop_assistant import paths, assistant_config_mod
-from ._aseprite_loading import RawAsepriteFile
+from ._aseprite_loading import RawAsepriteFile, LayerChunk
 from .constants import (
     ANIMS_WHICH_CARE_ABOUT_SMALL_SPRITES,
     HURTMASK_LAYER_NAME,
@@ -110,6 +110,12 @@ class Anim(TagObject):
         if config_params.is_ssl:
             scale_param *= 2
 
+        target_layers = [
+            layer
+            for layer in self.content.file_data.layers
+            if layer.name not in ("HURTMASK", "HURTBOX")
+        ]
+
         self._run_lua_export(
             path_params=path_params,
             aseprite_file_path=aseprite_file_path,
@@ -117,7 +123,7 @@ class Anim(TagObject):
             script_name="export_aseprite.lua",
             lua_params={
                 "scale": scale_param,
-                "targetLayers": [1, 3],  # fixme dont hardcode
+                "targetLayers": _get_layer_indices(target_layers),
             },
         )
 
@@ -184,6 +190,11 @@ class Anim(TagObject):
 
     def _gets_a_hurtbox(self):
         return self.name in ANIMS_WHICH_GET_HURTBOXES
+
+
+def _get_layer_indices(layers: List[LayerChunk]) -> List[int]:
+    # change to 1-indexing
+    return [layer.layer_index + 1 for layer in layers]
 
 
 def _format_param(param_name, value):
