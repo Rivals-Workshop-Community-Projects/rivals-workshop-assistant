@@ -26,12 +26,12 @@ from rivals_workshop_assistant.script_mod import (
 from rivals_workshop_assistant.aseprite_handling import (
     read_aseprites,
     get_anims,
-    save_scripts,
     save_anims,
     Anim,
     AsepriteConfigParams,
     AsepritePathParams,
 )
+from rivals_workshop_assistant.file_handling import save_scripts
 from rivals_workshop_assistant.assistant_config_mod import (
     get_aseprite_program_path,
     get_hurtboxes_enabled,
