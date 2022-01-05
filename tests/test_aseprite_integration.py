@@ -339,6 +339,12 @@ def test_aseprite_save_hurtbox__with_nohurt_layers(
             ["split_blah1_blah"],
             [],
         ),
+        pytest.param(
+            "split_blah1_2layers",
+            ["split_blah1_2layers_strip1", "split_blah1_2layers_blah_strip1"],
+            ["split_blah1_normal", "split_blah1_blahleftright"],
+            [],
+        ),
     ],
 )
 @pytest.mark.aseprite
