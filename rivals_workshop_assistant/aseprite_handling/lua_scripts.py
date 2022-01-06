@@ -72,7 +72,6 @@ if #irrelevantFrames > 0 then
     app.command.RemoveFrame()
 end
 
-
 app.activeSprite = sprite
 
 app.command.SpriteSize {
@@ -94,6 +93,23 @@ local sprite = app.open(app.params["filename"])
 
 app.command.ChangePixelFormat{ui=false, format="rgb", dithering="none"}
 
+local function splitInts(string, delimiter)
+    local result = {}
+    for match in (string..delimiter):gmatch("(.-)"..delimiter) do
+        table.insert(result, tonumber(match));
+    end
+    return result;
+end
+
+local function contains(array, query)
+    for index, value in ipairs(array) do
+        if value == query then
+            return true
+        end
+    end
+    return false
+end
+
 local function flattenLayers(layers)
     -- recursively put the layers in a list and return.
     local flattened = {}
@@ -112,51 +128,6 @@ end
 
 local function getLayers() 
     return flattenLayers(sprite.layers)
-end
-
-local startFrame = tonumber(app.params["startFrame"])
-local endFrame = tonumber(app.params["endFrame"])
-local scale = 2
-
-local NIL_CONSTANT = "nil"
-
--- Hurtmask layer is subtracted from the hurtbox
-local hurtmaskLayer = nil
-
--- Hurtbox layer, if present, is used as the initial hurtbox
---  (rather than the sprite's silhouette)
-local hurtboxLayer = nil
-
--- All the actual content of the sprite, not special purpose utility layers.
-local contentLayers = {}
-for _, layer in ipairs(getLayers()) do --todo use flattenLayers / getLayers()
-    if layer.name == "HURTMASK" then
-        hurtmaskLayer = layer
-    elseif layer.name == "HURTBOX" then
-        hurtboxLayer = layer
-    else
-        if layer.isVisible then
-            table.insert(contentLayers, layer)
-        else
-            app.range.layers = { layer }
-            app.command.removeLayer()
-        end
-    end
-end
-
--- Deletes frames that aren't in the given range.
-local _irrelevantFrames = {}
-local _workingFrames = {}
-for frameIndex, frame in ipairs(sprite.frames) do
-    if startFrame <= frameIndex  and frameIndex <= endFrame then
-        table.insert(_workingFrames, frame)
-    else
-        table.insert(_irrelevantFrames, frame)
-    end
-end
-if #_irrelevantFrames > 0 then
-    app.range.frames = _irrelevantFrames
-    app.command.RemoveFrame()
 end
 
 local function isNonTransparent(pixel)
@@ -197,10 +168,54 @@ local function convertLayerToSelections(layer)
     return selections
 end
 
+
+local targetLayerIndices = splitInts(app.params["targetLayers"], ",")
+
+local startFrame = tonumber(app.params["startFrame"])
+local endFrame = tonumber(app.params["endFrame"])
+local scale = 2
+
+local NIL_CONSTANT = "nil"
+
+local hurtmaskSelections = {}
+local hurtboxSelections = {}
+
+-- All the actual content of the sprite, not special purpose utility layers.
+local contentLayers = {}
+for layerIndex, layer in ipairs(getLayers()) do
+    if layer.name == "HURTMASK" then -- TODO pass in indexes instead
+        hurtmaskSelections = convertLayerToSelections(layer)
+    elseif layer.name == "HURTBOX" then
+        hurtboxSelections = convertLayerToSelections(layer)
+    else
+        if contains(targetLayerIndices, layerIndex) then
+            table.insert(contentLayers, layer)
+        else
+            app.range.layers = { layer }
+            app.command.removeLayer()
+        end
+    end
+end
+
+
+-- Deletes frames that aren't in the given range.
+local _irrelevantFrames = {}
+local _workingFrames = {}
+for frameIndex, frame in ipairs(sprite.frames) do
+    if startFrame <= frameIndex  and frameIndex <= endFrame then
+        table.insert(_workingFrames, frame)
+    else
+        table.insert(_irrelevantFrames, frame)
+    end
+end
+if #_irrelevantFrames > 0 then
+    app.range.frames = _irrelevantFrames
+    app.command.RemoveFrame()
+end
+
 app.activeSprite = sprite
 
-hurtmaskSelections = convertLayerToSelections(hurtmaskLayer)
-hurtboxSelections = convertLayerToSelections(hurtboxLayer)
+
 
 local function startsWith(str, prefix)
     return string.sub(str, 1, string.len(prefix)) == prefix
@@ -208,7 +223,7 @@ end
 
 -- Hide layers with NOHURT prefix
 local NOHURT = "NOHURT"
-for _, layer in ipairs(sprite.layers) do
+for _, layer in ipairs(getLayers()) do
     if startsWith(layer.name, NOHURT) or string.find(layer.data, NOHURT) then
         app.range.layers = { layer }
         app.command.removeLayer()
@@ -223,7 +238,7 @@ app.command.FlattenLayers {
 
 -- Get content_layer
 local contentLayer = nil
-for _, layer in ipairs(sprite.layers) do
+for _, layer in ipairs(getLayers()) do
     if layer.name == "Flattened" then
         contentLayer = layer
     end

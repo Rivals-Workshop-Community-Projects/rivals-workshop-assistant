@@ -128,6 +128,7 @@ class Anim(TagObject):
         all_run_params = normal_run_params + splits_run_params
 
         for run_params in all_run_params:
+            target_layers = _get_layer_indices(run_params.target_layers)
             self._run_lua_export(
                 path_params=path_params,
                 aseprite_file_path=aseprite_file_path,
@@ -135,17 +136,18 @@ class Anim(TagObject):
                 script_name=EXPORT_ASEPRITE_LUA_PATH,
                 lua_params={
                     "scale": scale_param,
-                    "targetLayers": _get_layer_indices(run_params.target_layers),
+                    "targetLayers": target_layers,
                 },
             )
 
-        if config_params.hurtboxes_enabled and self._gets_a_hurtbox():
-            self._run_lua_export(
-                path_params=path_params,
-                aseprite_file_path=aseprite_file_path,
-                base_name=f"{root_name}_hurt",
-                script_name=CREATE_HURTBOX_LUA_PATH,
-            )
+            if config_params.hurtboxes_enabled and self._gets_a_hurtbox():
+                self._run_lua_export(
+                    path_params=path_params,
+                    aseprite_file_path=aseprite_file_path,
+                    base_name=f"{run_params.name}_hurt",
+                    script_name=CREATE_HURTBOX_LUA_PATH,
+                    lua_params={"targetLayers": target_layers},
+                )
 
     def _run_lua_export(
         self,
