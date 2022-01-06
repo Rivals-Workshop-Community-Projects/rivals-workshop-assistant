@@ -86,6 +86,7 @@ def assert_aseprite_saves_right_anims(
     [
         pytest.param("1frame", ["1frame_strip1"], ["1frame"]),
         pytest.param("2frame", ["2frame_strip2"], ["2frame"]),
+        pytest.param("2frame_with_groups", ["2frame_with_groups_strip2"], ["2frame"]),
         pytest.param(
             "1frame_2frame", ["1frame_strip1", "2frame_strip2"], ["1frame", "2frame"]
         ),
