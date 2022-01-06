@@ -182,6 +182,17 @@ DEFAULT_CONFIG = f"""\
 def get_aseprite_program_path(assistant_config: dict) -> Optional[Path]:
     path_string = assistant_config.get(ASEPRITE_PATH_FIELD, None)
     if path_string:
-        return Path(path_string)
+        path = Path(path_string)
+        if not path.exists():
+            print(
+                f"ERROR: {ASEPRITE_PATH_FIELD} in your assistant config "
+                f"doesn't point to an existing file."
+            )
+        if path.is_dir():
+            print(
+                f"ERROR: {ASEPRITE_PATH_FIELD} in your assistant config "
+                f"is a directory. It should be the full path of the aseprite.exe."
+            )
+        return path
     else:
         return None
