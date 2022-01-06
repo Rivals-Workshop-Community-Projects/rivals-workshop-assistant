@@ -92,6 +92,9 @@ class LayerChunk(Chunk):
         _, self.name = parse_string(data, data_offset + 6 + layer_struct.size)
         self.layer_index = layer_index
 
+    def __str__(self):
+        return self.name
+
 
 class LayerGroupChunk(LayerChunk):
     def __init__(self, base_layer: LayerChunk):

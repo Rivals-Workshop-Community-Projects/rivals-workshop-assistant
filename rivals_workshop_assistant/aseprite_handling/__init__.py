@@ -167,10 +167,10 @@ class Anim(TagObject):
 
         _delete_paths_from_glob(
             path_params.root_dir,
-            f"{base_name}" + "_strip*.png",
+            f"{base_name}_strip*.png",
         )
 
-        dest_name = f"{base_name}" + f"_strip{self.num_frames}.png"
+        dest_name = f"{base_name}_strip{self.num_frames}.png"
         dest = path_params.root_dir / paths.SPRITES_FOLDER / dest_name
         dest.parent.mkdir(parents=True, exist_ok=True)
 

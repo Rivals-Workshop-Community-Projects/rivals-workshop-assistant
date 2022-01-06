@@ -11,7 +11,7 @@ local endFrame = tonumber(app.params["endFrame"])
 local scale = tonumber(app.params["scale"])
 
 local function splitInts(string, delimiter)
-    result = {};
+    local result = {}
     for match in (string..delimiter):gmatch("(.-)"..delimiter) do
         table.insert(result, tonumber(match));
     end
@@ -27,9 +27,31 @@ local function contains(array, query)
     return false
 end
 
+
+local function flattenLayers(layers)
+    -- recursively put the layers in a list and return.
+    local flattened = {}
+    for i, layer in ipairs(layers) do
+        if layer.isGroup then 
+            local innerLayers = flattenLayers(layer.layers)
+            for _, innerLayer in ipairs(innerLayers) do 
+                table.insert(flattened, innerLayer)
+            end
+        else
+            table.insert(flattened, layer)    
+        end
+    end
+    return flattened
+end
+
+local function getLayers() 
+    return flattenLayers(sprite.layers)
+end
+
 local targetLayerIndices = splitInts(app.params["targetLayers"], ",")
 
-for layerIndex, layer in ipairs(sprite.layers) do
+
+for layerIndex, layer in ipairs(getLayers()) do
     if not contains(targetLayerIndices, layerIndex) then
         app.range.layers = { layer }
         app.command.removeLayer()
@@ -88,7 +110,7 @@ local hurtboxLayer = nil
 
 -- All the actual content of the sprite, not special purpose utility layers.
 local contentLayers = {}
-for _, layer in ipairs(sprite.layers) do
+for _, layer in ipairs(sprite.layers) do --todo use flattenLayers / getLayers()
     if layer.name == "HURTMASK" then
         hurtmaskLayer = layer
     elseif layer.name == "HURTBOX" then

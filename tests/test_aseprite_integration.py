@@ -355,10 +355,20 @@ def test_aseprite_save_hurtbox__with_nohurt_layers(
             ["split_blah1_normal", "split_blah1_blah", "split_foobar_bar"],
             [],
         ),
+        pytest.param(
+            "split_foobar1_groups",
+            [
+                "split_foobar1_groups_strip1",
+                "split_foobar1_groups_foo_strip1",
+                "split_foobar1_groups_bar_strip1",
+            ],
+            ["split_blah1_normal", "split_blah1_blah", "split_foobar_bar"],
+            [],
+        ),
     ],
 )
 @pytest.mark.aseprite
-def test_aseprite_save_hurtbox__with_nohurt_layers(
+def test_aseprite_export__with_splits(
     aseprite_file_name,
     save_file_names,
     expected_file_names,
