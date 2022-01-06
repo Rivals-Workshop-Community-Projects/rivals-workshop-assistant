@@ -27,7 +27,6 @@ local function contains(array, query)
     return false
 end
 
-
 local function flattenLayers(layers)
     -- recursively put the layers in a list and return.
     local flattened = {}
@@ -95,6 +94,26 @@ local sprite = app.open(app.params["filename"])
 
 app.command.ChangePixelFormat{ui=false, format="rgb", dithering="none"}
 
+local function flattenLayers(layers)
+    -- recursively put the layers in a list and return.
+    local flattened = {}
+    for i, layer in ipairs(layers) do
+        if layer.isGroup then 
+            local innerLayers = flattenLayers(layer.layers)
+            for _, innerLayer in ipairs(innerLayers) do 
+                table.insert(flattened, innerLayer)
+            end
+        else
+            table.insert(flattened, layer)    
+        end
+    end
+    return flattened
+end
+
+local function getLayers() 
+    return flattenLayers(sprite.layers)
+end
+
 local startFrame = tonumber(app.params["startFrame"])
 local endFrame = tonumber(app.params["endFrame"])
 local scale = 2
@@ -110,7 +129,7 @@ local hurtboxLayer = nil
 
 -- All the actual content of the sprite, not special purpose utility layers.
 local contentLayers = {}
-for _, layer in ipairs(sprite.layers) do --todo use flattenLayers / getLayers()
+for _, layer in ipairs(getLayers()) do --todo use flattenLayers / getLayers()
     if layer.name == "HURTMASK" then
         hurtmaskLayer = layer
     elseif layer.name == "HURTBOX" then
