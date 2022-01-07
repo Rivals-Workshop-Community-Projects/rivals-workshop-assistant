@@ -33,6 +33,8 @@ class AsepriteLayers:
         hurtmask = None
         splits = defaultdict(list)
 
+        # TODO ONLY USE VISIBLE LAYERS
+
         layers = [
             layer for layer in file_data.layers if layer.layer_type == NORMAL_LAYER_TYPE
         ]

@@ -146,7 +146,11 @@ class Anim(TagObject):
                     aseprite_file_path=aseprite_file_path,
                     base_name=f"{run_params.name}_hurt",
                     script_name=CREATE_HURTBOX_LUA_PATH,
-                    lua_params={"targetLayers": target_layers},
+                    lua_params={
+                        "targetLayers": target_layers,
+                        "hurtboxLayer": self.content.layers.hurtbox,
+                        "hurtmaskLayer": self.content.layers.hurtmask,
+                    },
                 )
 
     def _run_lua_export(
@@ -198,6 +202,8 @@ class Anim(TagObject):
                 print(f"ERROR: Lua script command failed. {export_command}")
         except FileNotFoundError:
             print(f"ERROR: Aseprite not found at {path_params.aseprite_program_path}")
+        except PermissionError as e:
+            print(repr(e))
 
     def _cares_about_small_sprites(self):
         return self.name in ANIMS_WHICH_CARE_ABOUT_SMALL_SPRITES

@@ -170,6 +170,8 @@ end
 
 
 local targetLayerIndices = splitInts(app.params["targetLayers"], ",")
+local hurtboxLayerIndex = tonumber(app.params["hurtboxLayer"])
+local hurtmaskLayerIndex = tonumber(app.params["hurtmaskLayer"])
 
 local startFrame = tonumber(app.params["startFrame"])
 local endFrame = tonumber(app.params["endFrame"])
@@ -183,9 +185,9 @@ local hurtboxSelections = {}
 -- All the actual content of the sprite, not special purpose utility layers.
 local contentLayers = {}
 for layerIndex, layer in ipairs(getLayers()) do
-    if layer.name == "HURTMASK" then -- TODO pass in indexes instead
+    if layerIndex == hurtmaskLayerIndex then
         hurtmaskSelections = convertLayerToSelections(layer)
-    elseif layer.name == "HURTBOX" then
+    elseif layerIndex == hurtmaskLayerIndex then
         hurtboxSelections = convertLayerToSelections(layer)
     else
         if contains(targetLayerIndices, layerIndex) then
