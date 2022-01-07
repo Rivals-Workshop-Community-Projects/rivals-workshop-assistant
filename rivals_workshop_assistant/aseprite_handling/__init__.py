@@ -177,6 +177,8 @@ class Anim(TagObject):
                 print(f"ERROR: Lua script command failed. {export_command}")
         except FileNotFoundError:
             print(f"ERROR: Aseprite not found at {path_params.aseprite_program_path}")
+        except PermissionError as e:
+            print(e)
 
     def _cares_about_small_sprites(self):
         return self.name in ANIMS_WHICH_CARE_ABOUT_SMALL_SPRITES

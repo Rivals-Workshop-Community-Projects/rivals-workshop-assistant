@@ -49,7 +49,7 @@ from rivals_workshop_assistant.injection import (
 from rivals_workshop_assistant.code_generation import handle_codegen
 from rivals_workshop_assistant.warning_handling import handle_warning
 
-__version__ = "1.2.3"
+__version__ = "1.2.4"
 
 
 class Mode(Enum):
