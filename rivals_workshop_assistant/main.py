@@ -209,4 +209,7 @@ if __name__ == "__main__":
     print(f"Project dir: {root_dir}")
     print(f"Mode: {mode.name}")
 
-    main(exe_dir, root_dir, mode=mode)
+    try:
+        main(exe_dir, root_dir, mode=mode)
+    except Exception as e:
+        print(e)
