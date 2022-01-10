@@ -230,11 +230,9 @@ def test_aseprite_save_hurtbox(
     "save_file_names, "
     "expected_file_names, "
     "expected_missing_file_names",
-    [
+    [  # Note that each input needs to have an attack name, or it won't generate a hurtbox
         pytest.param("fair", ["fair_hurt_strip1"], ["fair_hurt"], []),
-        pytest.param(
-            "fair_with_groups", ["fair_with_groups_hurt_strip1"], ["fair_hurt"], []
-        ),
+        pytest.param("dair", ["dair_hurt_strip1"], ["fair_hurt"], []),
         pytest.param(
             "1blah_1fair", ["fair_hurt_strip1"], ["fair_hurt"], ["blah_hurt_strip1"]
         ),
