@@ -7,13 +7,14 @@ from pathlib import Path
 from typing import List
 
 from rivals_workshop_assistant import paths, assistant_config_mod
-from ._aseprite_loading import RawAsepriteFile
+from ._aseprite_loading import RawAsepriteFile, LayerChunk
 from .constants import (
     ANIMS_WHICH_CARE_ABOUT_SMALL_SPRITES,
     HURTMASK_LAYER_NAME,
     HURTBOX_LAYER_NAME,
     ANIMS_WHICH_GET_HURTBOXES,
 )
+from .layers import AsepriteLayers
 from .lua_scripts import LUA_SCRIPTS
 from ..file_handling import File, _get_modified_time, create_file
 from ..dotfile_mod import get_processed_time
@@ -66,6 +67,10 @@ class AsepriteConfigParams:
     is_ssl: bool = False
 
 
+EXPORT_ASEPRITE_LUA_PATH = "export_aseprite.lua"
+CREATE_HURTBOX_LUA_PATH = "create_hurtbox.lua"
+
+
 class Anim(TagObject):
     def __init__(
         self,
@@ -109,24 +114,43 @@ class Anim(TagObject):
         if config_params.is_ssl:
             scale_param *= 2
 
-        self._run_lua_export(
-            path_params=path_params,
-            aseprite_file_path=aseprite_file_path,
-            base_name=root_name,
-            script_name="export_aseprite.lua",
-            lua_params={
-                "scale": scale_param,
-                "targetLayers": [1, 3],  # fixme dont hardcode
-            },
-        )
+        @dataclass
+        class ExportLayerParams:
+            name: str
+            target_layers: List[LayerChunk]
 
-        if config_params.hurtboxes_enabled and self._gets_a_hurtbox():
+        normal_run_params = [ExportLayerParams(root_name, self.content.layers.normals)]
+        splits_run_params = [
+            ExportLayerParams(f"{root_name}_{split_name}", layers)
+            for split_name, layers in self.content.layers.splits.items()
+        ]
+        all_run_params = normal_run_params + splits_run_params
+
+        for run_params in all_run_params:
+            target_layers = _get_layer_indices(run_params.target_layers)
             self._run_lua_export(
                 path_params=path_params,
                 aseprite_file_path=aseprite_file_path,
-                base_name=f"{root_name}_hurt",
-                script_name="create_hurtbox.lua",
+                base_name=run_params.name,
+                script_name=EXPORT_ASEPRITE_LUA_PATH,
+                lua_params={
+                    "scale": scale_param,
+                    "targetLayers": target_layers,
+                },
             )
+
+            if config_params.hurtboxes_enabled and self._gets_a_hurtbox():
+                self._run_lua_export(
+                    path_params=path_params,
+                    aseprite_file_path=aseprite_file_path,
+                    base_name=f"{run_params.name}_hurt",
+                    script_name=CREATE_HURTBOX_LUA_PATH,
+                    lua_params={
+                        "targetLayers": target_layers,
+                        "hurtboxLayer": self.content.layers.hurtbox,
+                        "hurtmaskLayer": self.content.layers.hurtmask,
+                    },
+                )
 
     def _run_lua_export(
         self,
@@ -148,10 +172,10 @@ class Anim(TagObject):
 
         _delete_paths_from_glob(
             path_params.root_dir,
-            f"{base_name}" + "_strip*.png",
+            f"{base_name}_strip*.png",
         )
 
-        dest_name = f"{base_name}" + f"_strip{self.num_frames}.png"
+        dest_name = f"{base_name}_strip{self.num_frames}.png"
         dest = path_params.root_dir / paths.SPRITES_FOLDER / dest_name
         dest.parent.mkdir(parents=True, exist_ok=True)
 
@@ -178,13 +202,18 @@ class Anim(TagObject):
         except FileNotFoundError:
             print(f"ERROR: Aseprite not found at {path_params.aseprite_program_path}")
         except PermissionError as e:
-            print(e)
+            print(repr(e))
 
     def _cares_about_small_sprites(self):
         return self.name in ANIMS_WHICH_CARE_ABOUT_SMALL_SPRITES
 
     def _gets_a_hurtbox(self):
         return self.name in ANIMS_WHICH_GET_HURTBOXES
+
+
+def _get_layer_indices(layers: List[LayerChunk]) -> List[int]:
+    # change to 1-indexing
+    return [layer.layer_index + 1 for layer in layers]
 
 
 def _format_param(param_name, value):
@@ -223,6 +252,7 @@ class AsepriteData:
         window_tag_colors: List[TagColor],
         file_data: RawAsepriteFile,
         is_fresh: bool = False,
+        layers: AsepriteLayers = None,  # just so it can be mocked
     ):
         self.file_data = file_data
         self.anim_tag_colors = anim_tag_colors
@@ -230,6 +260,8 @@ class AsepriteData:
         self.is_fresh = is_fresh
 
         self.anims = self.get_anims(name)
+        if layers is None and file_data is not None:
+            self.layers = AsepriteLayers.from_file(self.file_data)
 
     @property
     def num_frames(self):

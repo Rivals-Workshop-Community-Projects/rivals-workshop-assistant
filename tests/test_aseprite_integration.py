@@ -86,6 +86,7 @@ def assert_aseprite_saves_right_anims(
     [
         pytest.param("1frame", ["1frame_strip1"], ["1frame"]),
         pytest.param("2frame", ["2frame_strip2"], ["2frame"]),
+        pytest.param("2frame_with_groups", ["2frame_with_groups_strip2"], ["2frame"]),
         pytest.param(
             "1frame_2frame", ["1frame_strip1", "2frame_strip2"], ["1frame", "2frame"]
         ),
@@ -229,8 +230,9 @@ def test_aseprite_save_hurtbox(
     "save_file_names, "
     "expected_file_names, "
     "expected_missing_file_names",
-    [
+    [  # Note that each input needs to have an attack name, or it won't generate a hurtbox
         pytest.param("fair", ["fair_hurt_strip1"], ["fair_hurt"], []),
+        pytest.param("dair", ["dair_hurt_strip1"], ["fair_hurt"], []),
         pytest.param(
             "1blah_1fair", ["fair_hurt_strip1"], ["fair_hurt"], ["blah_hurt_strip1"]
         ),
@@ -312,6 +314,69 @@ def test_aseprite_save_hurtbox__with_nohurt_layers(
     expected_file_names,
     expected_missing_file_names,
 ):
+    assert_aseprite_saves_right_anims(
+        aseprite_file_name=aseprite_file_name,
+        save_file_names=save_file_names,
+        expected_file_names=expected_file_names,
+        expected_missing_file_names=expected_missing_file_names,
+        hurtboxes_enabled=True,
+    )
+
+
+@pytest.mark.parametrize(
+    "aseprite_file_name, "
+    "save_file_names, "
+    "expected_file_names, "
+    "expected_missing_file_names",
+    [
+        pytest.param(
+            "split_blah1",
+            ["split_blah1_strip1", "split_blah1_blah_strip1"],
+            ["split_blah1_normal", "split_blah1_blah"],
+            [],
+        ),
+        pytest.param(
+            "split_onlyblah_blah1",
+            ["split_onlyblah_blah1_blah_strip1"],
+            ["split_blah1_blah"],
+            [],
+        ),
+        pytest.param(
+            "split_blah1_2layers",
+            ["split_blah1_2layers_strip1", "split_blah1_2layers_blah_strip1"],
+            ["split_blah1_normal", "split_blah1_blahleftright"],
+            [],
+        ),
+        pytest.param(
+            "split_foobar1",
+            [
+                "split_foobar1_strip1",
+                "split_foobar1_foo_strip1",
+                "split_foobar1_bar_strip1",
+            ],
+            ["split_blah1_normal", "split_blah1_blah", "split_foobar_bar"],
+            [],
+        ),
+        pytest.param(
+            "split_foobar1_groups",
+            [
+                "split_foobar1_groups_strip1",
+                "split_foobar1_groups_foo_strip1",
+                "split_foobar1_groups_bar_strip1",
+            ],
+            ["split_blah1_normal", "split_blah1_blah", "split_foobar_bar"],
+            [],
+        ),
+    ],
+)
+@pytest.mark.aseprite
+def test_aseprite_export__with_splits(
+    aseprite_file_name,
+    save_file_names,
+    expected_file_names,
+    expected_missing_file_names,
+):
+
     assert_aseprite_saves_right_anims(
         aseprite_file_name=aseprite_file_name,
         save_file_names=save_file_names,

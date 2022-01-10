@@ -29,11 +29,18 @@ class FakeAsepriteData(AsepriteData):
         tags,
         anim_tag_colors: List[TagColor],
         window_tag_colors: List[TagColor],
+        layers,
     ):
         self._num_frames = num_frames
         self._tags = tags
         # noinspection PyTypeChecker
-        super().__init__(name, anim_tag_colors, window_tag_colors, file_data=None)
+        super().__init__(
+            name,
+            anim_tag_colors,
+            window_tag_colors,
+            file_data=None,
+            layers=layers,
+        )
 
     @property
     def num_frames(self):
@@ -51,6 +58,7 @@ def make_fake_aseprite(
     tags=None,
     anim_tag_color=None,
     window_tag_color=None,
+    layers=None,
 ) -> Aseprite:
     if not anim_tag_color:
         anim_tag_color = ["green"]
@@ -63,6 +71,7 @@ def make_fake_aseprite(
         tags=tags,
         anim_tag_colors=anim_tag_color,
         window_tag_colors=window_tag_color,
+        layers=layers,
     )
     aseprite = Aseprite(
         path=path,
