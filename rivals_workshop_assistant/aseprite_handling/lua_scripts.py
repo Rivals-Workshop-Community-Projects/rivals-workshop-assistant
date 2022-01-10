@@ -168,6 +168,16 @@ local function convertLayerToSelections(layer)
     return selections
 end
 
+local function removeGroups()
+    for i, layer in ipairs(sprite.layers) do
+        if layer.isGroup then
+            app.range.layers = { layer }
+            app.command.removeLayer()
+        end
+    end
+end 
+ 
+removeGroups()
 
 local targetLayerIndices = splitInts(app.params["targetLayers"], ",")
 local hurtboxLayerIndex = tonumber(app.params["hurtboxLayer"])
@@ -185,9 +195,9 @@ local hurtboxSelections = {}
 -- All the actual content of the sprite, not special purpose utility layers.
 local contentLayers = {}
 for layerIndex, layer in ipairs(getLayers()) do
-    if layerIndex == hurtmaskLayerIndex then
+    if layer.name == "HURTMASK" then -- TODO pass in indexes instead
         hurtmaskSelections = convertLayerToSelections(layer)
-    elseif layerIndex == hurtmaskLayerIndex then
+    elseif layer.name == "HURTBOX" then
         hurtboxSelections = convertLayerToSelections(layer)
     else
         if contains(targetLayerIndices, layerIndex) then
