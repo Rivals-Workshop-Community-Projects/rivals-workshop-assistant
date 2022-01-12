@@ -204,12 +204,16 @@ class Anim(TagObject):
         export_command = " ".join(command_parts)
         print(f"Running lua script: {export_command}")
         try:
-            result = subprocess.run(
-                export_command, stdout=subprocess.PIPE, stderr=subprocess.PIPE
+            proc = await asyncio.create_subprocess_shell(
+                export_command,
+                # stdout=asyncio.subprocess.PIPE,
+                stderr=asyncio.subprocess.PIPE,
             )
-            if result.returncode != 0:
+            stdout, stderr = await proc.communicate()
+            if proc.returncode != 0:
                 print(f"ERROR: Lua script command failed. {export_command}")
-                print(result.stderr)
+                if stderr:
+                    print(f"[stderr]\n{stderr.decode()}")
         except FileNotFoundError:
             print(f"ERROR: Aseprite not found at {path_params.aseprite_program_path}")
         except PermissionError as e:
