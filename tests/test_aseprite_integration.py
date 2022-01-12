@@ -26,7 +26,8 @@ def load_test_image(name: str):
         return img
 
 
-def assert_aseprite_saves_right_anims(
+@pytest.mark.asyncio
+async def assert_aseprite_saves_right_anims(
     aseprite_file_name: str,
     save_file_names: list[str],
     expected_file_names: list[str],
@@ -51,7 +52,7 @@ def assert_aseprite_saves_right_anims(
     )
     with TempDirectory() as root_dir, TempDirectory() as exe_dir:
         root_dir = Path(root_dir.path)
-        aseprite.save(
+        await aseprite.save(
             path_params=AsepritePathParams(
                 exe_dir=Path(exe_dir.path),
                 root_dir=root_dir,

@@ -138,7 +138,8 @@ def test_read_injection_library():
         assert result_library == [func, another_func, needs_other, other]
 
 
-def test_full_injection():
+@pytest.mark.asyncio
+async def test_full_injection():
     with TempDirectoryWithSpace() as tmp:
         create_script(tmp, script_1)
         create_script(tmp, script_subfolder)
@@ -291,14 +292,15 @@ def assert_anim_matches_test_anim(
 
 @pytest.mark.parametrize("has_small_sprites", [pytest.param(False), pytest.param(True)])
 @pytest.mark.aseprite
-def test__save_aseprites(has_small_sprites):
+@pytest.mark.asyncio
+async def test__save_aseprites(has_small_sprites):
     aseprite_path = get_aseprite_path()
 
     with TempDirectoryWithSpace() as tmp_root_dir, TempDirectoryWithSpace() as exe_dir:
         root_dir = Path(tmp_root_dir.path)
         aseprites = [supply_aseprites(tmp_root_dir)]
 
-        rivals_workshop_assistant.aseprite_handling.save_anims(
+        await rivals_workshop_assistant.aseprite_handling.save_anims(
             path_params=AsepritePathParams(
                 exe_dir=Path(exe_dir.path),
                 root_dir=root_dir,
@@ -314,7 +316,8 @@ def test__save_aseprites(has_small_sprites):
 
 
 @pytest.mark.aseprite
-def test__save_aseprites__multiple_tag_colors():
+@pytest.mark.asyncio
+async def test__save_aseprites__multiple_tag_colors():
     aseprite_path = get_aseprite_path()
 
     with TempDirectoryWithSpace() as tmp_root_dir, TempDirectoryWithSpace() as exe_dir:
@@ -328,7 +331,7 @@ def test__save_aseprites__multiple_tag_colors():
             )
         ]
 
-        rivals_workshop_assistant.aseprite_handling.save_anims(
+        await rivals_workshop_assistant.aseprite_handling.save_anims(
             path_params=AsepritePathParams(
                 exe_dir=Path(exe_dir.path),
                 root_dir=root_dir,
@@ -354,7 +357,8 @@ def test__save_aseprites__multiple_tag_colors():
 
 
 @pytest.mark.aseprite
-def test__save_aseprites__uses_subfolder_name():
+@pytest.mark.asyncio
+async def test__save_aseprites__uses_subfolder_name():
     subfolder_name = "subfolder"
     aseprite_path = get_aseprite_path()
 
@@ -364,7 +368,7 @@ def test__save_aseprites__uses_subfolder_name():
             supply_aseprites(tmp_root_dir, relative_dest=Path("anims") / subfolder_name)
         ]
 
-        rivals_workshop_assistant.aseprite_handling.save_anims(
+        await rivals_workshop_assistant.aseprite_handling.save_anims(
             path_params=AsepritePathParams(
                 exe_dir=Path(exe_dir.path),
                 root_dir=root_dir,
@@ -382,7 +386,8 @@ def test__save_aseprites__uses_subfolder_name():
 
 
 @pytest.mark.aseprite
-def test__save_aseprites__removes_old_spritesheet():
+@pytest.mark.asyncio
+async def test__save_aseprites__removes_old_spritesheet():
     aseprite_path = get_aseprite_path()
 
     with TempDirectory() as tmp_root_dir, TempDirectory() as exe_dir:
@@ -395,7 +400,7 @@ def test__save_aseprites__removes_old_spritesheet():
         other_filename = root_dir / paths.SPRITES_FOLDER / f"unrelated_strip2.png"
         make_empty_file(other_filename)
 
-        rivals_workshop_assistant.aseprite_handling.save_anims(
+        await rivals_workshop_assistant.aseprite_handling.save_anims(
             path_params=AsepritePathParams(
                 exe_dir=Path(exe_dir.path),
                 root_dir=root_dir,
@@ -410,7 +415,8 @@ def test__save_aseprites__removes_old_spritesheet():
 
 
 @pytest.mark.aseprite
-def test__save_aseprites__removes_old_spritesheet__with_subfolder():
+@pytest.mark.asyncio
+async def test__save_aseprites__removes_old_spritesheet__with_subfolder():
     aseprite_path = get_aseprite_path()
     subfolder_name = "subfolder"
 
@@ -430,7 +436,7 @@ def test__save_aseprites__removes_old_spritesheet__with_subfolder():
         )
         make_empty_file(other_filename)
 
-        rivals_workshop_assistant.aseprite_handling.save_anims(
+        await rivals_workshop_assistant.aseprite_handling.save_anims(
             path_params=AsepritePathParams(
                 exe_dir=Path(exe_dir.path),
                 root_dir=root_dir,
@@ -445,7 +451,8 @@ def test__save_aseprites__removes_old_spritesheet__with_subfolder():
 
 
 @pytest.mark.aseprite
-def test__save_aseprites__multiple_aseprites():
+@pytest.mark.asyncio
+async def test__save_aseprites__multiple_aseprites():
     aseprite_path = get_aseprite_path()
 
     with TempDirectory() as tmp_root_dir, TempDirectory() as exe_dir:
@@ -456,7 +463,7 @@ def test__save_aseprites__multiple_aseprites():
             )
         ]
 
-        rivals_workshop_assistant.aseprite_handling.save_anims(
+        await rivals_workshop_assistant.aseprite_handling.save_anims(
             path_params=AsepritePathParams(
                 exe_dir=Path(exe_dir.path),
                 root_dir=root_dir,
@@ -482,7 +489,8 @@ def test__save_aseprites__multiple_aseprites():
 
 
 @pytest.mark.aseprite
-def test__aseprites_set_window_data():
+@pytest.mark.asyncio
+async def test__aseprites_set_window_data():
     with TempDirectory() as tmp:
         root_dir = Path(tmp.path)
 
@@ -493,7 +501,7 @@ def test__aseprites_set_window_data():
         create_script(tmp, bair)
         supply_aseprites(tmp, TEST_ANIM_NAME)
 
-        src.main(exe_dir=root_dir, given_dir=root_dir, guarantee_root_dir=True)
+        await src.main(exe_dir=root_dir, given_dir=root_dir, guarantee_root_dir=True)
 
         assert_anim_matches_test_anim(
             root_dir,
@@ -532,7 +540,8 @@ def test__aseprites_set_window_data():
         )
 
 
-def test__backup_made():
+@pytest.mark.asyncio
+async def test__backup_made():
     with TempDirectory() as tmp:
         root_dir = Path(tmp.path)
 
@@ -548,7 +557,7 @@ def test__backup_made():
             root_dir / paths.SPRITES_FOLDER,
         )
 
-        src.main(exe_dir=root_dir, given_dir=root_dir, guarantee_root_dir=True)
+        await src.main(exe_dir=root_dir, given_dir=root_dir, guarantee_root_dir=True)
         assert_anim_matches_test_anim(
             root_dir,
             filename=f"anim1_strip1.png",
@@ -566,7 +575,8 @@ def test__backup_made():
         )
 
 
-def test__empty_project_just_inits():
+@pytest.mark.asyncio
+async def test__empty_project_just_inits():
     with TempDirectory() as tmp:
         root_dir = Path(tmp.path)
 
@@ -576,7 +586,7 @@ def test__empty_project_just_inits():
         testing_helpers.make_empty_file(root_dir / character_config.FILENAME)
         create_script(tmp, script_1)
 
-        src.main(exe_dir=tmp_exe_dir, given_dir=root_dir, guarantee_root_dir=True)
+        await src.main(exe_dir=tmp_exe_dir, given_dir=root_dir, guarantee_root_dir=True)
 
         assert {path.name for path in root_dir.glob("*")} == {
             "anims",

@@ -24,7 +24,8 @@ def test_sprite_supply_nothing_needed():
         tmp.check_dir(sprite_path.as_posix())
 
 
-def test_sprite_supply():
+@pytest.mark.asyncio
+async def test_sprite_supply():
     with TempDirectory() as tmp:
         color = "red"
         width = 3
@@ -33,7 +34,7 @@ def test_sprite_supply():
         sprite = src.Sprite(file_name)
         root_dir = Path(tmp.path)
 
-        sprite.supply(root_dir)
+        await sprite.supply(root_dir)
 
         expected = make_canvas(width, height)
         ImageDraw.Draw(expected).rectangle(
