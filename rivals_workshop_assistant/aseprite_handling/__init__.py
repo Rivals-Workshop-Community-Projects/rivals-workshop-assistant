@@ -204,9 +204,12 @@ class Anim(TagObject):
         export_command = " ".join(command_parts)
         print(f"Running lua script: {export_command}")
         try:
-            result = subprocess.run(export_command)
+            result = subprocess.run(
+                export_command, stdout=subprocess.PIPE, stderr=subprocess.PIPE
+            )
             if result.returncode != 0:
                 print(f"ERROR: Lua script command failed. {export_command}")
+                print(result.stderr)
         except FileNotFoundError:
             print(f"ERROR: Aseprite not found at {path_params.aseprite_program_path}")
         except PermissionError as e:
