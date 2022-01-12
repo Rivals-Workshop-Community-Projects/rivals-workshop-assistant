@@ -15,7 +15,7 @@ class Asset(abc.ABC):
     def get_from_text(cls, text) -> Set["Asset"]:
         raise NotImplementedError
 
-    def supply(self, root_dir: Path) -> None:
+    async def supply(self, root_dir: Path) -> None:
         raise NotImplementedError
 
     def __eq__(self, other):
@@ -33,7 +33,7 @@ class Sprite(Asset):
         asset_strings = set(re.findall(pattern=cls._pattern, string=text))
         return set(Sprite(string) for string in asset_strings)
 
-    def supply(self, root_dir: Path):
+    async def supply(self, root_dir: Path):
         file_name = self.asset_string
         if not file_name.endswith(".png"):
             file_name = file_name + ".png"

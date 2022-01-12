@@ -24,7 +24,7 @@ def _get_required_assets_for_script(script: Script) -> Set[Asset]:
     return assets
 
 
-def save_assets(root_dir: Path, assets: Set[Asset]):
+async def save_assets(root_dir: Path, assets: Set[Asset]):
     """Controller"""
     for asset in assets:
-        asset.supply(root_dir)
+        await asset.supply(root_dir)

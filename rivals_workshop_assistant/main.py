@@ -1,3 +1,4 @@
+import asyncio
 from enum import Enum
 from typing import List
 
@@ -58,7 +59,7 @@ class Mode(Enum):
     SCRIPTS = "scripts"
 
 
-def main(
+async def main(
     exe_dir: Path,
     given_dir: Path,
     guarantee_root_dir: bool = False,
@@ -89,7 +90,7 @@ Next time, the assistant will run normally.
     lock = FileLock(root_dir / paths.LOCKFILE_PATH)
     try:
         with lock.acquire(timeout=2):
-            update_files(exe_dir=exe_dir, root_dir=root_dir, mode=mode)
+            await update_files(exe_dir=exe_dir, root_dir=root_dir, mode=mode)
     except TimeoutError:
         print(
             "WARN: Attempted to run assistant while an instance was already running."
@@ -109,7 +110,7 @@ def handle_scripts(
     handle_injection(root_dir=root_dir, scripts=scripts, anims=anims, dotfile=dotfile)
 
 
-def update_files(exe_dir: Path, root_dir: Path, mode: Mode.ALL):
+async def update_files(exe_dir: Path, root_dir: Path, mode: Mode.ALL):
     dotfile = dotfile_mod.read(root_dir)
     assistant_config = assistant_config_mod.read_project_config(root_dir)
     character_config = character_config_mod.read(root_dir)
@@ -145,7 +146,7 @@ def update_files(exe_dir: Path, root_dir: Path, mode: Mode.ALL):
         seen_files += scripts
 
     if mode in (mode.ALL, mode.ANIMS):
-        save_anims(
+        await save_anims(
             path_params=AsepritePathParams(
                 exe_dir=exe_dir,
                 root_dir=root_dir,
@@ -169,7 +170,7 @@ def update_files(exe_dir: Path, root_dir: Path, mode: Mode.ALL):
     )
 
     assets = get_required_assets(scripts)
-    save_assets(root_dir, assets)
+    await save_assets(root_dir, assets)
 
     dotfile_mod.save_dotfile(root_dir, dotfile)
 
@@ -187,6 +188,22 @@ def get_root_dir(given_dir: Path) -> Path:
 Current directory is: {given_dir}
 Files in current directory are: {file_names}"""
         )
+
+
+def run_main(
+    exe_dir: Path,
+    given_dir: Path,
+    guarantee_root_dir: bool = False,
+    mode: Mode = Mode.ALL,
+):
+    asyncio.run(
+        main(
+            exe_dir=exe_dir,
+            given_dir=given_dir,
+            guarantee_root_dir=guarantee_root_dir,
+            mode=mode,
+        )
+    )
 
 
 if __name__ == "__main__":
@@ -210,6 +227,6 @@ if __name__ == "__main__":
     print(f"Mode: {mode.name}")
 
     try:
-        main(exe_dir, root_dir, mode=mode)
+        run_main(exe_dir, root_dir, mode=mode)
     except Exception as e:
         print(e)

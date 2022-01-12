@@ -1,3 +1,4 @@
+import asyncio
 import itertools
 import os
 import subprocess
@@ -98,7 +99,7 @@ class Anim(TagObject):
     def __eq__(self, other):
         return self.name == other.name
 
-    def save(
+    async def save(
         self,
         path_params: AsepritePathParams,
         config_params: AsepriteConfigParams,
@@ -126,33 +127,40 @@ class Anim(TagObject):
         ]
         all_run_params = normal_run_params + splits_run_params
 
+        coroutines = []
+
         for run_params in all_run_params:
             target_layers = _get_layer_indices(run_params.target_layers)
-            self._run_lua_export(
-                path_params=path_params,
-                aseprite_file_path=aseprite_file_path,
-                base_name=run_params.name,
-                script_name=EXPORT_ASEPRITE_LUA_PATH,
-                lua_params={
-                    "scale": scale_param,
-                    "targetLayers": target_layers,
-                },
-            )
-
-            if config_params.hurtboxes_enabled and self._gets_a_hurtbox():
+            coroutines.append(
                 self._run_lua_export(
                     path_params=path_params,
                     aseprite_file_path=aseprite_file_path,
-                    base_name=f"{run_params.name}_hurt",
-                    script_name=CREATE_HURTBOX_LUA_PATH,
+                    base_name=run_params.name,
+                    script_name=EXPORT_ASEPRITE_LUA_PATH,
                     lua_params={
+                        "scale": scale_param,
                         "targetLayers": target_layers,
-                        "hurtboxLayer": self.content.layers.hurtbox,
-                        "hurtmaskLayer": self.content.layers.hurtmask,
                     },
                 )
+            )
 
-    def _run_lua_export(
+            if config_params.hurtboxes_enabled and self._gets_a_hurtbox():
+                coroutines.append(
+                    self._run_lua_export(
+                        path_params=path_params,
+                        aseprite_file_path=aseprite_file_path,
+                        base_name=f"{run_params.name}_hurt",
+                        script_name=CREATE_HURTBOX_LUA_PATH,
+                        lua_params={
+                            "targetLayers": target_layers,
+                            "hurtboxLayer": self.content.layers.hurtbox,
+                            "hurtmaskLayer": self.content.layers.hurtmask,
+                        },
+                    )
+                )
+        await asyncio.gather(*coroutines)
+
+    async def _run_lua_export(
         self,
         path_params: AsepritePathParams,
         aseprite_file_path: Path,
@@ -374,13 +382,17 @@ class Aseprite(File):
     def name(self):
         return self.path.stem
 
-    def save(
+    async def save(
         self,
         path_params: AsepritePathParams,
         config_params: AsepriteConfigParams,
     ):
+        coroutines = []
         for anim in self.content.anims:
-            anim.save(path_params, config_params, aseprite_file_path=self.path)
+            coroutines.append(
+                anim.save(path_params, config_params, aseprite_file_path=self.path)
+            )
+        await asyncio.gather(*coroutines)
 
 
 def read_aseprites(
@@ -418,7 +430,7 @@ def get_anims(aseprites: List[Aseprite]) -> List[Anim]:
     # we could get away with reading fewer files.
 
 
-def save_anims(
+async def save_anims(
     path_params: AsepritePathParams,
     config_params: AsepriteConfigParams,
     aseprites: List[Aseprite],
@@ -430,6 +442,10 @@ def save_anims(
             "process aseprite files."
         )
         return
+    coroutines = []
     for aseprite in aseprites:
         if aseprite.is_fresh:
-            aseprite.save(path_params=path_params, config_params=config_params)
+            coroutines.append(
+                aseprite.save(path_params=path_params, config_params=config_params)
+            )
+    await asyncio.gather(*coroutines)
