@@ -107,7 +107,7 @@ class Anim(TagObject):
         aseprite_file_path: Path,
     ):
         root_name = get_anim_file_name_root(
-            path_params.root_dir, aseprite_file_path, self.name
+            path_params.root_dir, aseprite_file_path, self.name.lower()
         )
         if config_params.has_small_sprites and self._cares_about_small_sprites():
             scale_param = 1
