@@ -1,7 +1,8 @@
 import asyncio
+import hashlib
 import itertools
 import os
-import subprocess
+import pickle
 from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
@@ -112,8 +113,10 @@ class Anim(TagObject):
             scale_param = 1
         else:
             scale_param = 2
+        hurtbox_scale_param = 2
         if config_params.is_ssl:
             scale_param *= 2
+            hurtbox_scale_param *= 2
 
         @dataclass
         class ExportLayerParams:
@@ -152,6 +155,7 @@ class Anim(TagObject):
                         base_name=f"{run_params.name}_hurt",
                         script_name=CREATE_HURTBOX_LUA_PATH,
                         lua_params={
+                            "scale": hurtbox_scale_param,
                             "targetLayers": target_layers,
                             "hurtboxLayer": self.content.layers.hurtbox,
                             "hurtmaskLayer": self.content.layers.hurtmask,
@@ -307,6 +311,13 @@ class AsepriteData:
         )
 
     def get_anims(self, name: str):
+
+        #     def _get_is_fresh(self):
+        # frame_hashes = [ self._get_frame_hash(frame) for frame in ]
+        #
+        # def _get_frame_hash(self, frame):
+        #     return hashlib.md5(pickle.dumps(self.content.file_data.frames[frame])).hexdigest()
+
         tag_anims = [
             self.make_anim(
                 name=tag.name,

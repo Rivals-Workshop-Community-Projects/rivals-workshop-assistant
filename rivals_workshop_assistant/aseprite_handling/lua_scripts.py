@@ -90,6 +90,7 @@ app.command.ExportSpriteSheet {
 #  language=lua
 CREATE_HURTBOX = """\
 local sprite = app.open(app.params["filename"])
+local scale = tonumber(app.params["scale"])
 
 app.command.ChangePixelFormat{ui=false, format="rgb", dithering="none"}
 
@@ -174,7 +175,6 @@ local hurtmaskLayerIndex = tonumber(app.params["hurtmaskLayer"])
 
 local startFrame = tonumber(app.params["startFrame"])
 local endFrame = tonumber(app.params["endFrame"])
-local scale = 2
 
 local NIL_CONSTANT = "nil"
 
