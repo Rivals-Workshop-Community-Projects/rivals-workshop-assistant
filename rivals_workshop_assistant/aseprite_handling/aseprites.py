@@ -119,18 +119,12 @@ class Aseprite(File):
         await asyncio.gather(*coroutines)
 
     def get_anims(self):
-        #     def _get_is_fresh(self):
-        # frame_hashes = [ self._get_frame_hash(frame) for frame in ]
-        #
-        # def _get_frame_hash(self, frame):
-        #     return hashlib.md5(pickle.dumps(self.content.file_data.frames[frame])).hexdigest()
-
         tag_anims = [
             self.make_anim(
                 name=tag.name,
                 start=tag.start,
                 end=tag.end,
-                is_fresh=self.is_fresh,
+                file_is_fresh=self.is_fresh,
                 content=self.content,
             )
             for tag in self.content.tags
@@ -144,7 +138,7 @@ class Aseprite(File):
                     name=self.name,
                     start=0,
                     end=self.content.num_frames - 1,
-                    is_fresh=self.is_fresh,
+                    file_is_fresh=self.is_fresh,
                     content=self.content,
                 )
             ]
@@ -154,7 +148,7 @@ class Aseprite(File):
         name: str,
         start: int,
         end: int,
-        is_fresh: bool,
+        file_is_fresh: bool,
         content: "AsepriteFileContent",
     ):
         return Anim(
@@ -162,7 +156,7 @@ class Aseprite(File):
             start=start,
             end=end,
             windows=self.get_windows_in_frame_range(start=start, end=end),
-            is_fresh=is_fresh,
+            file_is_fresh=file_is_fresh,
             content=content,
         )
 

@@ -1,6 +1,8 @@
 import asyncio
+import hashlib
 import itertools
 import os
+import pickle
 from dataclasses import dataclass
 from pathlib import Path
 from typing import List, TYPE_CHECKING
@@ -46,7 +48,7 @@ class Anim(TagObject):
         end: int,
         content: "AsepriteFileContent",
         windows: List[Window] = None,
-        is_fresh=False,
+        file_is_fresh=False,
     ):
         """A part of an aseprite file representing a single spritesheet.
         An Aseprite file may contain multiple anims.
@@ -56,7 +58,8 @@ class Anim(TagObject):
         if windows is None:
             windows = []
         self.windows = windows
-        self.is_fresh = is_fresh
+        self.file_is_fresh = file_is_fresh
+        self.is_fresh = self._get_is_fresh()
 
     @property
     def num_frames(self):
@@ -201,6 +204,22 @@ class Anim(TagObject):
 
     def _gets_a_hurtbox(self):
         return self.name in ANIMS_WHICH_GET_HURTBOXES
+
+    def _get_is_fresh(self):
+        if not self.file_is_fresh:
+            return False
+
+        current_frame_hash = self._get_frame_hash()
+        last_frame_hash = None  # TODO
+        return current_frame_hash != last_frame_hash
+
+    def _get_frame_hash(self):
+        try:
+            return hashlib.md5(
+                pickle.dumps(self.content.file_data.frames[self.start : self.end + 1])
+            ).hexdigest()
+        except AttributeError:
+            return 0
 
 
 def _get_layer_indices(layers: List[LayerChunk]) -> List[int]:

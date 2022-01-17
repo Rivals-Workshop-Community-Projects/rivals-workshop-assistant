@@ -133,7 +133,12 @@ def test_get_has_small_sprites(init_content, character_config_str, expected):
 
 def make_anim(name, start, end, windows=None, content=None):
     return Anim(
-        name=name, start=start, end=end, windows=windows, content=content, is_fresh=True
+        name=name,
+        start=start,
+        end=end,
+        windows=windows,
+        content=content,
+        file_is_fresh=True,
     )  # todo replace none with fake
 
 

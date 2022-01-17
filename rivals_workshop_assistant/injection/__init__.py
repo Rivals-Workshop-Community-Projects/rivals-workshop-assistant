@@ -29,4 +29,4 @@ def freshen_scripts_with_modified_dependencies(
             )
             for script in scripts:
                 if script.path in clients:
-                    script.is_fresh = True
+                    script.file_is_fresh = True
