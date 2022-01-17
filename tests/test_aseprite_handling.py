@@ -7,12 +7,14 @@ import pytest
 import rivals_workshop_assistant.assistant_config_mod
 import rivals_workshop_assistant.character_config_mod
 from rivals_workshop_assistant.aseprite_handling import (
-    Aseprite,
-    AsepriteData,
     AsepriteTag,
     Anim,
     Window,
     TagColor,
+)
+from rivals_workshop_assistant.aseprite_handling.aseprites import (
+    AsepriteFileContent,
+    Aseprite,
 )
 from tests.testing_helpers import (
     make_script,
@@ -21,7 +23,7 @@ from tests.testing_helpers import (
 from rivals_workshop_assistant import character_config_mod
 
 
-class FakeAsepriteData(AsepriteData):
+class FakeAsepriteData(AsepriteFileContent):
     def __init__(
         self,
         name,

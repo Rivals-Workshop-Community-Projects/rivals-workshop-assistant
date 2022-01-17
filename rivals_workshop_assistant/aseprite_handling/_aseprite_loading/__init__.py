@@ -16,7 +16,7 @@ from .chunks import (
     UserDataChunk,
     SliceChunk,
 )
-import rivals_workshop_assistant.aseprite_handling.types
+from ..tags import AsepriteTag
 
 
 class RawAsepriteFile:
@@ -57,7 +57,7 @@ class RawAsepriteFile:
             assert False
         tag_dicts = tag_chunks[0].tags
         tags = [
-            rivals_workshop_assistant.aseprite_handling.types.AsepriteTag(
+            AsepriteTag(
                 name=tag_dict["name"],
                 start=tag_dict["from"],
                 end=tag_dict["to"],

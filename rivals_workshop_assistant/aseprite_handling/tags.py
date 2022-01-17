@@ -1,7 +1,6 @@
-import typing
+from typing import Union, Tuple
 
-
-TagColor = typing.Union[str, typing.Tuple[int, int, int]]
+TagColor = Union[str, Tuple[int, int, int]]
 
 
 class AsepriteTag:

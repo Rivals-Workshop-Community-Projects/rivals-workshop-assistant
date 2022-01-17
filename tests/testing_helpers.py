@@ -10,7 +10,7 @@ from testfixtures import TempDirectory
 import rivals_workshop_assistant.updating
 from rivals_workshop_assistant import assistant_config_mod
 from rivals_workshop_assistant.script_mod import Script
-from rivals_workshop_assistant.aseprite_handling import Aseprite
+from rivals_workshop_assistant.aseprite_handling.aseprites import Aseprite
 
 PATH_A = Path("a")
 

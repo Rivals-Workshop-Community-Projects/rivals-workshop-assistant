@@ -6,10 +6,10 @@ from testfixtures import TempDirectory
 
 from rivals_workshop_assistant import paths
 from rivals_workshop_assistant.aseprite_handling import (
-    read_aseprite,
     AsepritePathParams,
     AsepriteConfigParams,
 )
+from rivals_workshop_assistant.aseprite_handling.aseprites import read_aseprite
 from rivals_workshop_assistant.assistant_config_mod import ANIM_TAG_COLOR_FIELD
 from tests.testing_helpers import (
     get_aseprite_path,

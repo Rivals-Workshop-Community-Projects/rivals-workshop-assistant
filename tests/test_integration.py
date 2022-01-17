@@ -9,6 +9,8 @@ import pytest
 from testfixtures import TempDirectory
 
 import rivals_workshop_assistant.aseprite_handling
+import rivals_workshop_assistant.aseprite_handling.anims
+import rivals_workshop_assistant.aseprite_handling.aseprites
 import rivals_workshop_assistant.assistant_config_mod
 import rivals_workshop_assistant.file_handling
 import rivals_workshop_assistant.script_mod
@@ -263,7 +265,7 @@ def test__read_aseprites():
     with TempDirectoryWithSpace() as tmp:
         supply_aseprites(tmp, TEST_ANIM_NAME)
 
-        result = rivals_workshop_assistant.aseprite_handling.read_aseprites(
+        result = rivals_workshop_assistant.aseprite_handling.aseprites.read_aseprites(
             root_dir=Path(tmp.path), dotfile={}, assistant_config={}
         )
         assert len(result) == 1
@@ -300,7 +302,7 @@ async def test__save_aseprites(has_small_sprites):
         root_dir = Path(tmp_root_dir.path)
         aseprites = [supply_aseprites(tmp_root_dir)]
 
-        await rivals_workshop_assistant.aseprite_handling.save_anims(
+        await rivals_workshop_assistant.aseprite_handling.anims.save_anims(
             path_params=AsepritePathParams(
                 exe_dir=Path(exe_dir.path),
                 root_dir=root_dir,
@@ -331,7 +333,7 @@ async def test__save_aseprites__multiple_tag_colors():
             )
         ]
 
-        await rivals_workshop_assistant.aseprite_handling.save_anims(
+        await rivals_workshop_assistant.aseprite_handling.anims.save_anims(
             path_params=AsepritePathParams(
                 exe_dir=Path(exe_dir.path),
                 root_dir=root_dir,
@@ -368,7 +370,7 @@ async def test__save_aseprites__uses_subfolder_name():
             supply_aseprites(tmp_root_dir, relative_dest=Path("anims") / subfolder_name)
         ]
 
-        await rivals_workshop_assistant.aseprite_handling.save_anims(
+        await rivals_workshop_assistant.aseprite_handling.anims.save_anims(
             path_params=AsepritePathParams(
                 exe_dir=Path(exe_dir.path),
                 root_dir=root_dir,
@@ -400,7 +402,7 @@ async def test__save_aseprites__removes_old_spritesheet():
         other_filename = root_dir / paths.SPRITES_FOLDER / f"unrelated_strip2.png"
         make_empty_file(other_filename)
 
-        await rivals_workshop_assistant.aseprite_handling.save_anims(
+        await rivals_workshop_assistant.aseprite_handling.anims.save_anims(
             path_params=AsepritePathParams(
                 exe_dir=Path(exe_dir.path),
                 root_dir=root_dir,
@@ -436,7 +438,7 @@ async def test__save_aseprites__removes_old_spritesheet__with_subfolder():
         )
         make_empty_file(other_filename)
 
-        await rivals_workshop_assistant.aseprite_handling.save_anims(
+        await rivals_workshop_assistant.aseprite_handling.anims.save_anims(
             path_params=AsepritePathParams(
                 exe_dir=Path(exe_dir.path),
                 root_dir=root_dir,
@@ -463,7 +465,7 @@ async def test__save_aseprites__multiple_aseprites():
             )
         ]
 
-        await rivals_workshop_assistant.aseprite_handling.save_anims(
+        await rivals_workshop_assistant.aseprite_handling.anims.save_anims(
             path_params=AsepritePathParams(
                 exe_dir=Path(exe_dir.path),
                 root_dir=root_dir,

@@ -1,7 +1,9 @@
 from collections import defaultdict
 from typing import List
 
-from rivals_workshop_assistant.aseprite_handling import RawAsepriteFile
+from rivals_workshop_assistant.aseprite_handling._aseprite_loading import (
+    RawAsepriteFile,
+)
 
 SPLIT = "SPLIT"
 HURTBOX = "HURTBOX"

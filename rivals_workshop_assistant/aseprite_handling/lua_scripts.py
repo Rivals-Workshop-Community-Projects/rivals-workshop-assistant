@@ -1,6 +1,7 @@
 from pathlib import Path
 
 from rivals_workshop_assistant import paths
+from rivals_workshop_assistant.file_handling import create_file
 
 #  language=lua
 EXPORT_ASEPRITE = """\
@@ -329,3 +330,13 @@ def delete_lua_scripts(exe_dir: Path):
     lua_glob = (exe_dir / paths.ASEPRITE_LUA_SCRIPTS_FOLDER).glob("*.lua")
     for path in lua_glob:
         path.unlink()
+
+
+def supply_lua_script(path: Path):
+    script_name = path.stem
+    script_content = LUA_SCRIPTS[script_name]
+    create_file(path=path, content=script_content, overwrite=False)
+
+
+EXPORT_ASEPRITE_LUA_PATH = "export_aseprite.lua"
+CREATE_HURTBOX_LUA_PATH = "create_hurtbox.lua"
