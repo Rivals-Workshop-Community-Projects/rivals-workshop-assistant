@@ -25,10 +25,8 @@ if TYPE_CHECKING:
 class AsepriteFileContent:
     """Data class for the contents of an aseprite file."""
 
-    # TODO remove functions from this and put them on `class Aseprite`
     def __init__(
         self,
-        name: str,
         anim_tag_colors: List["TagColor"],
         window_tag_colors: List["TagColor"],
         file_data: "RawAsepriteFile",
@@ -43,8 +41,6 @@ class AsepriteFileContent:
         if layers is None and file_data is not None:
             self.layers = AsepriteLayers.from_file(self.file_data)
 
-        self.anims = self.get_anims(name)
-
     @property
     def num_frames(self):
         return self.file_data.get_num_frames()
@@ -56,7 +52,6 @@ class AsepriteFileContent:
     @classmethod
     def from_path(
         cls,
-        name: str,
         path: Path,
         anim_tag_colors: List["TagColor"],
         window_tag_colors: List["TagColor"],
@@ -66,14 +61,64 @@ class AsepriteFileContent:
             contents = f.read()
             raw_aseprite_file = RawAsepriteFile(contents)
         return cls(
-            name=name,
             file_data=raw_aseprite_file,
             anim_tag_colors=anim_tag_colors,
             window_tag_colors=window_tag_colors,
             is_fresh=is_fresh,
         )
 
-    def get_anims(self, name):
+
+class Aseprite(File):
+    def __init__(
+        self,
+        path: Path,
+        anim_tag_colors: List["TagColor"],
+        window_tag_colors: List["TagColor"],
+        modified_time: datetime = None,
+        processed_time: datetime = None,
+        content=None,
+        anims: Anim = None,
+    ):
+        super().__init__(path, modified_time, processed_time)
+        self.anim_tag_colors = anim_tag_colors
+        self.window_tag_colors = window_tag_colors
+        self._content = content
+        self._anims = anims
+
+    @property
+    def content(self) -> AsepriteFileContent:
+        if self._content is None:
+            self._content = AsepriteFileContent.from_path(
+                path=self.path,
+                anim_tag_colors=self.anim_tag_colors,
+                window_tag_colors=self.window_tag_colors,
+                is_fresh=self.is_fresh,
+            )
+        return self._content
+
+    @property
+    def name(self):
+        return self.path.stem
+
+    @property
+    def anims(self):
+        if self._anims is None:
+            self._anims = self.get_anims()
+        return self._anims
+
+    async def save(
+        self,
+        path_params: "AsepritePathParams",
+        config_params: "AsepriteConfigParams",
+    ):
+        coroutines = []
+        for anim in self.anims:
+            coroutines.append(
+                anim.save(path_params, config_params, aseprite_file_path=self.path)
+            )
+        await asyncio.gather(*coroutines)
+
+    def get_anims(self):
         #     def _get_is_fresh(self):
         # frame_hashes = [ self._get_frame_hash(frame) for frame in ]
         #
@@ -86,9 +131,9 @@ class AsepriteFileContent:
                 start=tag.start,
                 end=tag.end,
                 is_fresh=self.is_fresh,
-                content=self,
+                content=self.content,
             )
-            for tag in self.tags
+            for tag in self.content.tags
             if tag.color in self.anim_tag_colors
         ]
         if tag_anims:
@@ -96,11 +141,11 @@ class AsepriteFileContent:
         else:
             return [
                 self.make_anim(
-                    name=name,
+                    name=self.name,
                     start=0,
-                    end=self.num_frames - 1,
+                    end=self.content.num_frames - 1,
                     is_fresh=self.is_fresh,
-                    content=self,
+                    content=self.content,
                 )
             ]
 
@@ -124,7 +169,7 @@ class AsepriteFileContent:
     def get_windows_in_frame_range(self, start: int, end: int):
         tags_in_frame_range = [
             window
-            for window in self.tags
+            for window in self.content.tags
             if window.color in self.window_tag_colors
             and start <= window.start <= end
             and start <= window.end <= end
@@ -134,58 +179,6 @@ class AsepriteFileContent:
             for tag in tags_in_frame_range
         ]
         return windows
-
-
-class Aseprite(File):
-    def __init__(
-        self,
-        path: Path,
-        anim_tag_colors: List["TagColor"],
-        window_tag_colors: List["TagColor"],
-        modified_time: datetime = None,
-        processed_time: datetime = None,
-        content=None,
-        # anims: Anim = None,
-    ):
-        super().__init__(path, modified_time, processed_time)
-        self.anim_tag_colors = anim_tag_colors
-        self.window_tag_colors = window_tag_colors
-        self._content = content
-        # self._anims = anims
-
-    @property
-    def content(self) -> AsepriteFileContent:
-        if self._content is None:
-            self._content = AsepriteFileContent.from_path(
-                name=self.name,
-                path=self.path,
-                anim_tag_colors=self.anim_tag_colors,
-                window_tag_colors=self.window_tag_colors,
-                is_fresh=self.is_fresh,
-            )
-        return self._content
-
-    @property
-    def name(self):
-        return self.path.stem
-
-    # @property
-    # def anims(self):
-    #     if self._anims is None:
-    #         self._anims = self.get_anims()
-    #     return self._anims
-
-    async def save(
-        self,
-        path_params: "AsepritePathParams",
-        config_params: "AsepriteConfigParams",
-    ):
-        coroutines = []
-        for anim in self.content.anims:
-            coroutines.append(
-                anim.save(path_params, config_params, aseprite_file_path=self.path)
-            )
-        await asyncio.gather(*coroutines)
 
 
 def read_aseprites(

@@ -17,3 +17,14 @@ class Window(TagObject):
 #macro {self.name.upper()}_FRAME_START {self.start - 1}
 #define _get_{self.name}_frame_start()
     return {self.name.upper()}_FRAME_START"""
+
+    def __get_keys(self):
+        return self.name, self.start, self.end, self.gml
+
+    def __eq__(self, other):
+        if not isinstance(other, Window):
+            return NotImplemented
+        return self.__get_keys() == other.__get_keys()
+
+    def __hash__(self):
+        return hash(self.__get_keys())

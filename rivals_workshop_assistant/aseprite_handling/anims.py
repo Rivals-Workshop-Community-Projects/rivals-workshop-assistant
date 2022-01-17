@@ -62,8 +62,16 @@ class Anim(TagObject):
     def num_frames(self):
         return self.end - self.start + 1
 
+    def __get_keys(self):
+        return self.name, self.start, self.end, self.windows, self.is_fresh
+
     def __eq__(self, other):
-        return self.name == other.name
+        if not isinstance(other, Anim):
+            return NotImplemented
+        return self.__get_keys() == other.__get_keys()
+
+    def __hash__(self):
+        return hash(self.__get_keys())
 
     async def save(
         self,
@@ -229,7 +237,7 @@ def get_anim_file_name_root(root_dir: Path, aseprite_file_path: Path, name: str)
 
 
 def get_anims(aseprites: List["Aseprite"]) -> List["Anim"]:
-    return list(itertools.chain(*[aseprite.content.anims for aseprite in aseprites]))
+    return list(itertools.chain(*[aseprite.anims for aseprite in aseprites]))
     # Unfortunately this involves reading every aseprite file...
     # If we demand that multi-anim files have a name prefix,
     # we could get away with reading fewer files.

@@ -26,7 +26,6 @@ from rivals_workshop_assistant import character_config_mod
 class FakeAsepriteData(AsepriteFileContent):
     def __init__(
         self,
-        name,
         num_frames,
         tags,
         anim_tag_colors: List[TagColor],
@@ -37,7 +36,6 @@ class FakeAsepriteData(AsepriteFileContent):
         self._tags = tags
         # noinspection PyTypeChecker
         super().__init__(
-            name,
             anim_tag_colors,
             window_tag_colors,
             file_data=None,
@@ -68,7 +66,6 @@ def make_fake_aseprite(
         window_tag_color = ["orange"]
 
     aseprite_data = FakeAsepriteData(
-        name=name,
         num_frames=num_frames,
         tags=tags,
         anim_tag_colors=anim_tag_color,
@@ -136,14 +133,14 @@ def test_get_has_small_sprites(init_content, character_config_str, expected):
 
 def make_anim(name, start, end, windows=None, content=None):
     return Anim(
-        name=name, start=start, end=end, windows=windows, content=content
+        name=name, start=start, end=end, windows=windows, content=content, is_fresh=True
     )  # todo replace none with fake
 
 
 @pytest.mark.parametrize(
     "tags, expected",
     [
-        pytest.param([], [make_anim(name="name", start=1, end=1)]),
+        pytest.param([], [make_anim(name="a", start=0, end=0)]),
         pytest.param(
             [AsepriteTag(name="name", start=1, end=2, color="red")],
             [make_anim(name="name", start=1, end=2)],
@@ -156,8 +153,8 @@ def make_anim(name, start, end, windows=None, content=None):
             [
                 make_anim(
                     name="anim_name",
-                    start=1,
-                    end=1,
+                    start=2,
+                    end=3,
                     windows=[Window(name="window_name", start=1, end=1)],
                 )
             ],
@@ -169,4 +166,4 @@ def test_aseprite_anims(tags, expected):
         tags=tags, anim_tag_color=["red"], window_tag_color=["orange"]
     )
 
-    assert sut.content.anims == expected
+    assert sut.anims == expected
