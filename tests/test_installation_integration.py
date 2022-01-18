@@ -70,7 +70,8 @@ def test__download_and_unzip_release():
         assert_test_release_scripts_installed(tmp)
 
 
-def test__install_release():
+@pytest.mark.asyncio
+async def test__install_release():
     with TempDirectory() as root_dir, TempDirectory() as exe_dir:
         create_script(
             root_dir,
@@ -99,7 +100,7 @@ def test__install_release():
         )
         create_script(root_dir, existing_user_inject)
 
-        rivals_workshop_assistant.updating.update(
+        await rivals_workshop_assistant.updating.update(
             exe_dir=exe_dir, root_dir=Path(root_dir.path), dotfile={}, config={}
         )
         assert_test_release_scripts_installed(root_dir)

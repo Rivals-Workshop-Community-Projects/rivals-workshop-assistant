@@ -1,4 +1,5 @@
 import abc
+import asyncio
 import dataclasses
 import datetime
 import io
@@ -79,21 +80,25 @@ class Release:
             return None
 
 
-def update(exe_dir: Path, root_dir: Path, dotfile: dict, config: dict):
+async def update(exe_dir: Path, root_dir: Path, dotfile: dict, config: dict):
     """Runs all self-updates.
     Controller"""
     if should_update(dotfile):
-        update_backup(root_dir)
+        update_backup_task = asyncio.create_task(update_backup(root_dir))
 
         assistant_updater = AssistantUpdater(
             exe_dir=exe_dir, root_dir=root_dir, dotfile=dotfile, config=config
         )
-        new_assistant_version = assistant_updater.update()
+        update_assistant = asyncio.create_task(assistant_updater.update())
 
         library_updater = LibraryUpdater(
             exe_dir=exe_dir, root_dir=root_dir, dotfile=dotfile, config=config
         )
-        new_library_version = library_updater.update()
+        update_library = asyncio.create_task(library_updater.update())
+
+        await update_backup_task
+        new_assistant_version = await update_assistant
+        new_library_version = await update_library
 
         update_dotfile_after_update(
             assistant_version=new_assistant_version,
@@ -119,7 +124,7 @@ def _get_should_update_from_dotfile_and_date(
     return days_passed > 0
 
 
-def update_backup(root_dir: Path):
+async def update_backup(root_dir: Path):
     backup_path = root_dir / paths.BACKUP_FOLDER
     shutil.rmtree(backup_path, ignore_errors=True)
 
@@ -149,7 +154,7 @@ class Updater(abc.ABC):
         self.config = config
         self.current_version = self._get_current_version()
 
-    def update(self) -> Version:
+    async def update(self) -> Version:
         release_to_install = self._get_release_to_install()
 
         if (
@@ -196,7 +201,7 @@ class AssistantUpdater(Updater):
     def __init__(self, exe_dir: Path, root_dir: Path, dotfile: dict, config: dict):
         super().__init__(exe_dir, root_dir, dotfile, config)
 
-    def update(
+    async def update(
         self,
     ) -> typing.Optional[Version]:
         if not assistant_config_mod.get_assistant_self_update(self.config):

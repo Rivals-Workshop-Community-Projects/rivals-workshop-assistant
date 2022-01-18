@@ -130,7 +130,7 @@ async def update_files(exe_dir: Path, root_dir: Path, mode: Mode.ALL):
     # todo refactor this
     dotfile, assistant_config, character_config = await read_core_files(root_dir)
 
-    updating.update(
+    await updating.update(
         exe_dir=exe_dir, root_dir=root_dir, dotfile=dotfile, config=assistant_config
     )
 
