@@ -81,6 +81,8 @@ def _get_anim_data_gmls_needed_in_gml(anim: Anim):
 
 
 def _get_anim_for_script(script: "Script", anims: List[Anim]) -> typing.Optional[Anim]:
+    # TODO If we have access to the dotfile here, we can look up in the anim hashes which aseprite an anim belongs to
+    #   and then we can only load that aseprite's anims
     if script.path.parent.name != "attacks":
         return None
     anim = next((anim for anim in anims if anim.name == script.path.stem), None)

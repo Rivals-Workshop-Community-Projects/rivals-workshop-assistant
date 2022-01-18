@@ -1,3 +1,4 @@
+import asyncio
 from pathlib import Path
 
 from rivals_workshop_assistant.script_mod import Script
@@ -26,5 +27,4 @@ def _get_required_assets_for_script(script: Script) -> Set[Asset]:
 
 async def save_assets(root_dir: Path, assets: Set[Asset]):
     """Controller"""
-    for asset in assets:
-        await asset.supply(root_dir)
+    await asyncio.gather(*[asset.supply(root_dir) for asset in assets])
