@@ -130,8 +130,8 @@ def parse_data(data):
                 frame.chunks.append(UserDataChunk(data, data_offset))
             elif chunk.chunk_type == 0x2022:
                 frame.chunks.append(SliceChunk(data, data_offset))
-            else:
-                print("Skipped 0x{:04x}".format(chunk.chunk_type))
+            # else:
+            #     print("Skipped 0x{:04x}".format(chunk.chunk_type))
 
             data_offset += chunk.chunk_size
 
