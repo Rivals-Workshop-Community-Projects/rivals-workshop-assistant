@@ -2,10 +2,10 @@ import asyncio
 import itertools
 from datetime import datetime
 from pathlib import Path
-from typing import List, TYPE_CHECKING
+from typing import List, TYPE_CHECKING, Iterable
 
 from rivals_workshop_assistant import assistant_config_mod
-from rivals_workshop_assistant.aseprite_handling.anims import Anim
+from rivals_workshop_assistant.aseprite_handling.anims import Anim, AnimHashes
 from rivals_workshop_assistant.aseprite_handling.windows import Window
 from rivals_workshop_assistant.dotfile_mod import get_processed_time
 from rivals_workshop_assistant.file_handling import File, _get_modified_time
@@ -78,10 +78,12 @@ class Aseprite(File):
         processed_time: datetime = None,
         content=None,
         anims: Anim = None,
+        anim_hashes: dict[str, dict[str, str]] = None,  # None for testing only
     ):
         super().__init__(path, modified_time, processed_time)
         self.anim_tag_colors = anim_tag_colors
         self.window_tag_colors = window_tag_colors
+        self.anim_hashes = anim_hashes
         self._content = content
         self._anims = anims
 
@@ -113,9 +115,10 @@ class Aseprite(File):
     ):
         coroutines = []
         for anim in self.anims:
-            coroutines.append(
-                anim.save(path_params, config_params, aseprite_file_path=self.path)
-            )
+            if anim.is_fresh:
+                coroutines.append(
+                    anim.save(path_params, config_params, aseprite_file_path=self.path)
+                )
         await asyncio.gather(*coroutines)
 
     def get_anims(self):
@@ -126,6 +129,7 @@ class Aseprite(File):
                 end=tag.end,
                 file_is_fresh=self.is_fresh,
                 content=self.content,
+                anim_hashes=self.anim_hashes,
             )
             for tag in self.content.tags
             if tag.color in self.anim_tag_colors
@@ -140,6 +144,7 @@ class Aseprite(File):
                     end=self.content.num_frames - 1,
                     file_is_fresh=self.is_fresh,
                     content=self.content,
+                    anim_hashes=self.anim_hashes,
                 )
             ]
 
@@ -150,6 +155,7 @@ class Aseprite(File):
         end: int,
         file_is_fresh: bool,
         content: "AsepriteFileContent",
+        anim_hashes: dict[str, str],
     ):
         return Anim(
             name=name,
@@ -158,6 +164,7 @@ class Aseprite(File):
             windows=self.get_windows_in_frame_range(start=start, end=end),
             file_is_fresh=file_is_fresh,
             content=content,
+            anim_hashes=anim_hashes,
         )
 
     def get_windows_in_frame_range(self, start: int, end: int):
@@ -178,7 +185,7 @@ class Aseprite(File):
 def read_aseprites(
     root_dir: Path, dotfile: dict, assistant_config: dict
 ) -> List[Aseprite]:
-    ase_paths = itertools.chain(
+    ase_paths: Iterable[Path] = itertools.chain(
         *[
             list((root_dir / "anims").rglob(f"*.{filetype}"))
             for filetype in ("ase", "aseprite")
@@ -187,17 +194,26 @@ def read_aseprites(
 
     aseprites = []
     for path in ase_paths:
-        aseprite = read_aseprite(path, dotfile, assistant_config)
+        aseprite = read_aseprite(
+            path=path,
+            dotfile=dotfile,
+            assistant_config=assistant_config,
+        )
         aseprites.append(aseprite)
     return aseprites
 
 
-def read_aseprite(path: Path, dotfile: dict, assistant_config: dict) -> Aseprite:
+def read_aseprite(
+    path: Path,
+    dotfile: dict,
+    assistant_config: dict,
+) -> Aseprite:
     aseprite = Aseprite(
         path=path,
         modified_time=_get_modified_time(path),
         processed_time=get_processed_time(dotfile=dotfile, path=path),
         anim_tag_colors=assistant_config_mod.get_anim_tag_color(assistant_config),
         window_tag_colors=assistant_config_mod.get_window_tag_color(assistant_config),
+        anim_hashes=dotfile.setdefault("anim_hashes", {}).setdefault(path.stem, {}),
     )
     return aseprite

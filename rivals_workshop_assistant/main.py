@@ -30,7 +30,11 @@ from rivals_workshop_assistant.aseprite_handling import (
     AsepritePathParams,
 )
 from rivals_workshop_assistant.aseprite_handling.aseprites import read_aseprites
-from rivals_workshop_assistant.aseprite_handling.anims import get_anims, save_anims
+from rivals_workshop_assistant.aseprite_handling.anims import (
+    get_anims,
+    save_anims,
+    AnimHashes,
+)
 from rivals_workshop_assistant.file_handling import save_scripts
 from rivals_workshop_assistant.assistant_config_mod import (
     get_aseprite_program_path,
@@ -110,6 +114,7 @@ def handle_scripts(
 
 
 async def update_files(exe_dir: Path, root_dir: Path, mode: Mode.ALL):
+    # todo do these asynchronously #todo refactor this # asyncio.create_task
     dotfile = dotfile_mod.read(root_dir)
     assistant_config = assistant_config_mod.read_project_config(root_dir)
     character_config = character_config_mod.read(root_dir)
@@ -129,7 +134,11 @@ async def update_files(exe_dir: Path, root_dir: Path, mode: Mode.ALL):
         inject_scripts=user_inject_scripts + lib_inject_scripts,
     )
 
-    aseprites = read_aseprites(root_dir, dotfile, assistant_config=assistant_config)
+    aseprites = read_aseprites(
+        root_dir=root_dir,
+        dotfile=dotfile,
+        assistant_config=assistant_config,
+    )
     anims = get_anims(aseprites)
 
     seen_files = []

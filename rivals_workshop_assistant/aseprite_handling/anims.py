@@ -40,6 +40,11 @@ if TYPE_CHECKING:
     )
 
 
+class AnimHashes:
+    def __init__(self, dotfile: dict):
+        self.dict = dotfile.get("anim_hashes", {})
+
+
 class Anim(TagObject):
     def __init__(
         self,
@@ -49,6 +54,7 @@ class Anim(TagObject):
         content: "AsepriteFileContent",
         windows: List[Window] = None,
         file_is_fresh=False,
+        anim_hashes: dict[str, str] = None,
     ):
         """A part of an aseprite file representing a single spritesheet.
         An Aseprite file may contain multiple anims.
@@ -57,9 +63,15 @@ class Anim(TagObject):
         self.content = content
         if windows is None:
             windows = []
+        if anim_hashes is None:
+            anim_hashes = {}
         self.windows = windows
+        self.anim_hashes = anim_hashes
         self.file_is_fresh = file_is_fresh
+
+        self._frame_hash = self._get_frame_hash()
         self.is_fresh = self._get_is_fresh()
+        self._save_hash()
 
     @property
     def num_frames(self):
@@ -209,9 +221,8 @@ class Anim(TagObject):
         if not self.file_is_fresh:
             return False
 
-        current_frame_hash = self._get_frame_hash()
-        last_frame_hash = None  # TODO
-        return current_frame_hash != last_frame_hash
+        last_frame_hash = self.anim_hashes.get(self.name, None)
+        return self._frame_hash != last_frame_hash
 
     def _get_frame_hash(self):
         try:
@@ -220,6 +231,9 @@ class Anim(TagObject):
             ).hexdigest()
         except AttributeError:
             return 0
+
+    def _save_hash(self):
+        self.anim_hashes[self.name] = self._frame_hash
 
 
 def _get_layer_indices(layers: List[LayerChunk]) -> List[int]:
