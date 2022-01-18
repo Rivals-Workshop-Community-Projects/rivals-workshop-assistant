@@ -34,7 +34,7 @@ SEEN_FILES_FIELD = "seen_files"
 INJECT_CLIENTS_FIELD = "injection_clients"
 
 
-def read(root_dir: Path) -> dict:
+async def read(root_dir: Path) -> dict:
     """Controller"""
     return info_files.read(root_dir / PATH)
 

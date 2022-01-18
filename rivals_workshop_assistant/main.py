@@ -113,11 +113,22 @@ def handle_scripts(
     handle_injection(root_dir=root_dir, scripts=scripts, anims=anims, dotfile=dotfile)
 
 
+async def read_core_files(root_dir: Path) -> list[dict, dict, dict]:
+    """Return dotfile, assistant_config, character_config"""
+    tasks = [
+        asyncio.create_task(coro)
+        for coro in [
+            dotfile_mod.read(root_dir),
+            assistant_config_mod.read_project_config(root_dir),
+            character_config_mod.read(root_dir),
+        ]
+    ]
+    return [await task for task in tasks]
+
+
 async def update_files(exe_dir: Path, root_dir: Path, mode: Mode.ALL):
-    # todo do these asynchronously #todo refactor this # asyncio.create_task
-    dotfile = dotfile_mod.read(root_dir)
-    assistant_config = assistant_config_mod.read_project_config(root_dir)
-    character_config = character_config_mod.read(root_dir)
+    # todo refactor this
+    dotfile, assistant_config, character_config = await read_core_files(root_dir)
 
     updating.update(
         exe_dir=exe_dir, root_dir=root_dir, dotfile=dotfile, config=assistant_config

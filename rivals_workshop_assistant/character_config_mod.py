@@ -13,7 +13,7 @@ PATH = FILENAME
 SMALL_SPRITES_FIELD = "small_sprites"
 
 
-def read(root_dir: Path) -> ConfigParser:
+async def read(root_dir: Path) -> dict:
     """Controller"""
     config = ConfigParser()
     config.read(root_dir / PATH)

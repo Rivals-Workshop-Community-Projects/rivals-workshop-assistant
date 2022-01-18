@@ -14,7 +14,7 @@ PATH = ASSISTANT_FOLDER / FILENAME
 ASEPRITE_PATH_FIELD = "aseprite_path"
 
 
-def read_project_config(root_dir: Path) -> dict:
+async def read_project_config(root_dir: Path) -> dict:
     """Controller"""
     return info_files.read(root_dir / PATH)
 
