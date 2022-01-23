@@ -52,7 +52,7 @@ from rivals_workshop_assistant.injection import (
 from rivals_workshop_assistant.code_generation import handle_codegen
 from rivals_workshop_assistant.warning_handling import handle_warning
 
-__version__ = "1.2.9"
+__version__ = "1.2.10"
 
 
 class Mode(Enum):
@@ -112,7 +112,7 @@ def handle_scripts(
     handle_injection(root_dir=root_dir, scripts=scripts, anims=anims, dotfile=dotfile)
 
 
-async def read_core_files(root_dir: Path) -> list[dict, dict, dict]:
+async def read_core_files(root_dir: Path) -> List[dict, dict, dict]:
     """Return dotfile, assistant_config, character_config"""
     tasks = [
         asyncio.create_task(coro)
