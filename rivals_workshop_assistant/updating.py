@@ -215,7 +215,7 @@ class AssistantUpdater(Updater):
             )
             return
 
-        new_version = super(AssistantUpdater, self).update()
+        new_version = await super(AssistantUpdater, self).update()
         if new_version != self.current_version:
             lua_scripts.delete_lua_scripts(self.exe_dir)
 
