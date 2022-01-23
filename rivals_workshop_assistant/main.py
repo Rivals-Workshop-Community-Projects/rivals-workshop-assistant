@@ -60,6 +60,7 @@ class Mode(Enum):
     ANIMS = "anims"
     SCRIPTS = "scripts"
 
+
 def do_first_run():
     print(
         """\
