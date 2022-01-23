@@ -6,10 +6,9 @@ import io
 import os
 import shutil
 import tempfile
-import typing
 import zipfile
 from pathlib import Path
-from typing import List
+from typing import List, Optional
 import requests
 
 import rivals_workshop_assistant.paths
@@ -66,7 +65,7 @@ class Release:
     def __lt__(self, other: "Release"):
         return self.version < other.version
 
-    def get_asset_url(self, asset_name: str) -> typing.Optional[str]:
+    def get_asset_url(self, asset_name: str) -> Optional[str]:
         assets = self.release_dict["assets"]
         assets_with_name = [asset for asset in assets if asset["name"] == asset_name]
         if len(assets_with_name) >= 1:
@@ -182,13 +181,13 @@ class Updater(abc.ABC):
         ]
         return releases
 
-    def _get_current_version(self) -> typing.Optional[Version]:
+    def _get_current_version(self) -> Optional[Version]:
         version_string = self._get_current_version_string()
         if version_string is None or version_string.lower() == "none":
             return None
         return get_version_from_version_string(version_string)
 
-    def _get_current_version_string(self) -> typing.Optional[str]:
+    def _get_current_version_string(self) -> Optional[str]:
         raise NotImplementedError
 
     def install_release(self, release: Release):
@@ -203,7 +202,7 @@ class AssistantUpdater(Updater):
 
     async def update(
         self,
-    ) -> typing.Optional[Version]:
+    ) -> Optional[Version]:
         if not assistant_config_mod.get_assistant_self_update(self.config):
             return
 
@@ -226,7 +225,7 @@ class AssistantUpdater(Updater):
         assistant_releases = self.get_releases()
         return max(assistant_releases)
 
-    def _get_current_version_string(self) -> typing.Optional[str]:
+    def _get_current_version_string(self) -> Optional[str]:
         return get_assistant_version_string(self.dotfile)
 
     def install_release(self, release: Release):
@@ -272,7 +271,7 @@ class LibraryUpdater(Updater):
         )
         return release_to_install
 
-    def _get_current_version_string(self) -> typing.Optional[str]:
+    def _get_current_version_string(self) -> Optional[str]:
         return get_library_version_string(self.dotfile)
 
     def install_release(self, release: Release):
@@ -283,8 +282,8 @@ class LibraryUpdater(Updater):
 def _get_legal_library_release_to_install(
     update_level: UpdateLevel,
     releases: List[Release],
-    current_version: typing.Optional[Version],
-) -> typing.Optional[Release]:
+    current_version: Optional[Version],
+) -> Optional[Release]:
     if current_version is None:
         candidates = releases.copy()
     else:
