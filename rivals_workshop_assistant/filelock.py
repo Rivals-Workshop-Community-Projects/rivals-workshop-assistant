@@ -95,12 +95,9 @@ class Timeout(TimeoutError):
         """ """
         #: The path of the file lock.
         self.lock_file = lock_file
-        return None
 
     def __str__(self):
         temp = "The file lock '{}' could not be acquired.".format(self.lock_file)
-        return temp
-
 
 # Classes
 # ------------------------------------------------
@@ -116,14 +113,12 @@ class Timeout(TimeoutError):
 class _Acquire_ReturnProxy(object):
     def __init__(self, lock):
         self.lock = lock
-        return None
 
     def __enter__(self):
         return self.lock
 
     def __exit__(self, exc_type, exc_value, traceback):
         self.lock.release()
-        return None
 
 
 class BaseFileLock(object):
@@ -152,7 +147,6 @@ class BaseFileLock(object):
         # mechanism. Whenever the lock is acquired, the counter is increased and
         # the lock is only released, when this value is 0 again.
         self._lock_counter = 0
-        return None
 
     @property
     def lock_file(self):
@@ -323,19 +317,15 @@ class BaseFileLock(object):
                     self._lock_counter = 0
                     logger().info("Lock %s released on %s", lock_id, lock_filename)
 
-        return None
-
     def __enter__(self):
         self.acquire()
         return self
 
     def __exit__(self, exc_type, exc_value, traceback):
         self.release()
-        return None
 
     def __del__(self):
         self.release(force=True)
-        return None
 
 
 # Windows locking mechanism
@@ -362,7 +352,6 @@ class WindowsFileLock(BaseFileLock):
                 os.close(fd)
             else:
                 self._lock_file_fd = fd
-        return None
 
     def _release(self):
         fd = self._lock_file_fd
@@ -376,7 +365,6 @@ class WindowsFileLock(BaseFileLock):
         # that acquired the file lock.
         except OSError:
             pass
-        return None
 
 
 # Unix locking mechanism
@@ -398,7 +386,6 @@ class UnixFileLock(BaseFileLock):
             os.close(fd)
         else:
             self._lock_file_fd = fd
-        return None
 
     def _release(self):
         # Do not remove the lockfile:
@@ -409,7 +396,6 @@ class UnixFileLock(BaseFileLock):
         self._lock_file_fd = None
         fcntl.flock(fd, fcntl.LOCK_UN)
         os.close(fd)
-        return None
 
 
 # Soft lock
@@ -429,7 +415,6 @@ class SoftFileLock(BaseFileLock):
             pass
         else:
             self._lock_file_fd = fd
-        return None
 
     def _release(self):
         os.close(self._lock_file_fd)
@@ -440,7 +425,6 @@ class SoftFileLock(BaseFileLock):
         # The file is already deleted and that's what we want.
         except OSError:
             pass
-        return None
 
 
 # Platform filelock
