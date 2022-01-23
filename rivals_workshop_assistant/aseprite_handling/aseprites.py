@@ -5,7 +5,7 @@ from pathlib import Path
 from typing import List, TYPE_CHECKING, Iterable, Dict
 
 from rivals_workshop_assistant import assistant_config_mod
-from rivals_workshop_assistant.aseprite_handling.anims import Anim, AnimHashes
+from rivals_workshop_assistant.aseprite_handling.anims import Anim
 from rivals_workshop_assistant.aseprite_handling.windows import Window
 from rivals_workshop_assistant.dotfile_mod import get_processed_time
 from rivals_workshop_assistant.file_handling import File, _get_modified_time
@@ -78,7 +78,7 @@ class Aseprite(File):
         processed_time: datetime = None,
         content=None,
         anims: Anim = None,
-        anim_hashes: Dict[str, Dict[str, str]] = None,  # None for testing only
+        anim_hashes: Dict[str, str] = None,  # None for testing only
     ):
         super().__init__(path, modified_time, processed_time)
         self.anim_tag_colors = anim_tag_colors
