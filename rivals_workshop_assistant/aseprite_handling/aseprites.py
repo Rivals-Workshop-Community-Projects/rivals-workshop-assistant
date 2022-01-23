@@ -155,7 +155,7 @@ class Aseprite(File):
         end: int,
         file_is_fresh: bool,
         content: "AsepriteFileContent",
-        anim_hashes: dict[str, str],
+        anim_hashes: Dict[str, str],
     ):
         return Anim(
             name=name,
