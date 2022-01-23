@@ -203,6 +203,8 @@ class AssistantUpdater(Updater):
     async def update(
         self,
     ) -> Optional[Version]:
+        lua_scripts.delete_lua_scripts(self.exe_dir)
+
         if not assistant_config_mod.get_assistant_self_update(self.config):
             return
 
@@ -216,9 +218,6 @@ class AssistantUpdater(Updater):
             return
 
         new_version = await super(AssistantUpdater, self).update()
-        if new_version != self.current_version:
-            lua_scripts.delete_lua_scripts(self.exe_dir)
-
         return new_version
 
     def _get_release_to_install(self):
