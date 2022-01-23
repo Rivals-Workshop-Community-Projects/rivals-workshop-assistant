@@ -60,6 +60,16 @@ class Mode(Enum):
     ANIMS = "anims"
     SCRIPTS = "scripts"
 
+def do_first_run():
+    print(
+        """\
+FIRST TIME SETUP
+An `assistant` folder should have been created for you.
+Stopping now so you have a chance to edit `assistant/assistant_config.yaml`.
+Next time, the assistant will run normally. 
+"""
+    )
+
 
 async def main(
     exe_dir: Path,
@@ -79,14 +89,7 @@ async def main(
     is_first_run = not get_assistant_folder_exists(root_dir)
     make_basic_folder_structure(exe_dir, root_dir)
     if is_first_run:
-        print(
-            """\
-FIRST TIME SETUP
-An `assistant` folder should have been created for you.
-Stopping now so you have a chance to edit `assistant/assistant_config.yaml`.
-Next time, the assistant will run normally. 
-"""
-        )
+        do_first_run()
         return
 
     lock = FileLock(root_dir / paths.LOCKFILE_PATH)
