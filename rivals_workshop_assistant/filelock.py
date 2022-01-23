@@ -180,10 +180,7 @@ class BaseFileLock(object):
 
     @timeout.setter
     def timeout(self, value):
-        """
-        """
         self._timeout = float(value)
-        return None
 
     # Platform dependent locking
     # --------------------------------------------
