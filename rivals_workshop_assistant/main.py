@@ -33,7 +33,6 @@ from rivals_workshop_assistant.aseprite_handling.aseprites import read_aseprites
 from rivals_workshop_assistant.aseprite_handling.anims import (
     get_anims,
     save_anims,
-    AnimHashes,
 )
 from rivals_workshop_assistant.file_handling import save_scripts
 from rivals_workshop_assistant.assistant_config_mod import (
@@ -53,7 +52,7 @@ from rivals_workshop_assistant.injection import (
 from rivals_workshop_assistant.code_generation import handle_codegen
 from rivals_workshop_assistant.warning_handling import handle_warning
 
-__version__ = "1.2.7"
+__version__ = "1.2.8"
 
 
 class Mode(Enum):

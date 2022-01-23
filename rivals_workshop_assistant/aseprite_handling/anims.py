@@ -5,7 +5,7 @@ import os
 import pickle
 from dataclasses import dataclass
 from pathlib import Path
-from typing import List, TYPE_CHECKING
+from typing import List, TYPE_CHECKING, Dict
 
 from rivals_workshop_assistant import paths
 
@@ -54,7 +54,7 @@ class Anim(TagObject):
         content: "AsepriteFileContent",
         windows: List[Window] = None,
         file_is_fresh=False,
-        anim_hashes: dict[str, str] = None,
+        anim_hashes: Dict[str, str] = None,
     ):
         """A part of an aseprite file representing a single spritesheet.
         An Aseprite file may contain multiple anims.
