@@ -112,7 +112,7 @@ def handle_scripts(
     handle_injection(root_dir=root_dir, scripts=scripts, anims=anims, dotfile=dotfile)
 
 
-async def read_core_files(root_dir: Path) -> List[dict, dict, dict]:
+async def read_core_files(root_dir: Path) -> List[dict]:
     """Return dotfile, assistant_config, character_config"""
     tasks = [
         asyncio.create_task(coro)
