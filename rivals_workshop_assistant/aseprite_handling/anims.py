@@ -113,14 +113,14 @@ class Anim(TagObject):
 
         normal_run_params = [ExportLayerParams(root_name, self.content.layers.normals)]
         splits_run_params = [
-            ExportLayerParams(f"{root_name}_{split_name}", layers)
-            for split_name, layers in self.content.layers.splits.items()
+            ExportLayerParams(f"{root_name}_{split_name}", split_layers)
+            for split_name, split_layers in self.content.layers.splits.items()
         ]
         opts_run_params = [
             ExportLayerParams(
-                f"{root_name}_{opt_name}", self.content.layers.normals + layers
+                f"{root_name}_{opt_name}", self.content.layers.normals + opt_layers
             )
-            for opt_name, layers in self.content.layers.opts.items()
+            for opt_name, opt_layers in self.content.layers.opts.items()
         ]
         all_run_params = normal_run_params + splits_run_params + opts_run_params
 

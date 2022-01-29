@@ -59,7 +59,7 @@ class AsepriteLayers:
             if name.startswith(f"{SPLIT}("):
                 split_name = name.split(f"{SPLIT}(")[1].split(")")[0]
                 splits[split_name].append(layer)
-            if name.startswith(f"{OPT}("):
+            elif name.startswith(f"{OPT}("):
                 opt_name = name.split(f"{OPT}(")[1].split(")")[0]
                 opts[opt_name].append(layer)
             elif name == HURTBOX:
