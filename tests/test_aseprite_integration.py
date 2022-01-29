@@ -26,7 +26,6 @@ def load_test_image(name: str):
         return img
 
 
-@pytest.mark.asyncio
 async def assert_aseprite_saves_right_anims(
     aseprite_file_name: str,
     save_file_names: list[str],
@@ -119,8 +118,9 @@ async def assert_aseprite_saves_right_anims(
     ],
 )
 @pytest.mark.aseprite
-def test_aseprite_save(aseprite_file_name, save_file_names, expected_file_names):
-    assert_aseprite_saves_right_anims(
+@pytest.mark.asyncio
+async def test_aseprite_save(aseprite_file_name, save_file_names, expected_file_names):
+    await assert_aseprite_saves_right_anims(
         aseprite_file_name=aseprite_file_name,
         save_file_names=save_file_names,
         expected_file_names=expected_file_names,
@@ -139,10 +139,11 @@ def test_aseprite_save(aseprite_file_name, save_file_names, expected_file_names)
     ],
 )
 @pytest.mark.aseprite
-def test_aseprite_save__red_anim_tags(
+@pytest.mark.asyncio
+async def test_aseprite_save__red_anim_tags(
     aseprite_file_name, save_file_names, expected_file_names
 ):
-    assert_aseprite_saves_right_anims(
+    await assert_aseprite_saves_right_anims(
         aseprite_file_name=aseprite_file_name,
         save_file_names=save_file_names,
         expected_file_names=expected_file_names,
@@ -162,10 +163,11 @@ def test_aseprite_save__red_anim_tags(
     ],
 )
 @pytest.mark.aseprite
-def test_aseprite_save__small_sprites(
+@pytest.mark.asyncio
+async def test_aseprite_save__small_sprites(
     aseprite_file_name, save_file_names, expected_file_names
 ):
-    assert_aseprite_saves_right_anims(
+    await assert_aseprite_saves_right_anims(
         aseprite_file_name=aseprite_file_name,
         save_file_names=save_file_names,
         expected_file_names=expected_file_names,
@@ -180,13 +182,14 @@ def test_aseprite_save__small_sprites(
     ],
 )
 @pytest.mark.aseprite
-def test_aseprite_save__no_hurtbox(
+@pytest.mark.asyncio
+async def test_aseprite_save__no_hurtbox(
     aseprite_file_name,
     save_file_names,
     expected_file_names,
     expected_missing_file_names,
 ):
-    assert_aseprite_saves_right_anims(
+    await assert_aseprite_saves_right_anims(
         aseprite_file_name=aseprite_file_name,
         save_file_names=save_file_names,
         expected_file_names=expected_file_names,
@@ -211,13 +214,14 @@ def test_aseprite_save__no_hurtbox(
     ],
 )
 @pytest.mark.aseprite
-def test_aseprite_save_hurtbox(
+@pytest.mark.asyncio
+async def test_aseprite_save_hurtbox(
     aseprite_file_name,
     save_file_names,
     expected_file_names,
     expected_missing_file_names,
 ):
-    assert_aseprite_saves_right_anims(
+    await assert_aseprite_saves_right_anims(
         aseprite_file_name=aseprite_file_name,
         save_file_names=save_file_names,
         expected_file_names=expected_file_names,
@@ -246,13 +250,14 @@ def test_aseprite_save_hurtbox(
     ],
 )
 @pytest.mark.aseprite
-def test_aseprite_save_hurtbox__with_hurtmask(
+@pytest.mark.asyncio
+async def test_aseprite_save_hurtbox__with_hurtmask(
     aseprite_file_name,
     save_file_names,
     expected_file_names,
     expected_missing_file_names,
 ):
-    assert_aseprite_saves_right_anims(
+    await assert_aseprite_saves_right_anims(
         aseprite_file_name=aseprite_file_name,
         save_file_names=save_file_names,
         expected_file_names=expected_file_names,
@@ -279,13 +284,14 @@ def test_aseprite_save_hurtbox__with_hurtmask(
     ],
 )
 @pytest.mark.aseprite
-def test_aseprite_save_hurtbox__with_hurtbox_layer(
+@pytest.mark.asyncio
+async def test_aseprite_save_hurtbox__with_hurtbox_layer(
     aseprite_file_name,
     save_file_names,
     expected_file_names,
     expected_missing_file_names,
 ):
-    assert_aseprite_saves_right_anims(
+    await assert_aseprite_saves_right_anims(
         aseprite_file_name=aseprite_file_name,
         save_file_names=save_file_names,
         expected_file_names=expected_file_names,
@@ -309,13 +315,14 @@ def test_aseprite_save_hurtbox__with_hurtbox_layer(
     ],
 )
 @pytest.mark.aseprite
-def test_aseprite_save_hurtbox__with_nohurt_layers(
+@pytest.mark.asyncio
+async def test_aseprite_save_hurtbox__with_nohurt_layers(
     aseprite_file_name,
     save_file_names,
     expected_file_names,
     expected_missing_file_names,
 ):
-    assert_aseprite_saves_right_anims(
+    await assert_aseprite_saves_right_anims(
         aseprite_file_name=aseprite_file_name,
         save_file_names=save_file_names,
         expected_file_names=expected_file_names,
@@ -371,14 +378,47 @@ def test_aseprite_save_hurtbox__with_nohurt_layers(
     ],
 )
 @pytest.mark.aseprite
-def test_aseprite_export__with_splits(
+@pytest.mark.asyncio
+async def test_aseprite_export__with_splits(
     aseprite_file_name,
     save_file_names,
     expected_file_names,
     expected_missing_file_names,
 ):
 
-    assert_aseprite_saves_right_anims(
+    await assert_aseprite_saves_right_anims(
+        aseprite_file_name=aseprite_file_name,
+        save_file_names=save_file_names,
+        expected_file_names=expected_file_names,
+        expected_missing_file_names=expected_missing_file_names,
+        hurtboxes_enabled=True,
+    )
+
+
+@pytest.mark.parametrize(
+    "aseprite_file_name, "
+    "save_file_names, "
+    "expected_file_names, "
+    "expected_missing_file_names",
+    [
+        pytest.param(
+            "opt_hat",
+            ["opt_hat_strip1", "opt_hat_hat_strip1"],
+            ["opt_hat", "opt_hat_hat"],
+            [],
+        ),
+    ],
+)
+@pytest.mark.aseprite
+@pytest.mark.asyncio
+async def test_aseprite_export__with_opts(
+    aseprite_file_name,
+    save_file_names,
+    expected_file_names,
+    expected_missing_file_names,
+):
+
+    await assert_aseprite_saves_right_anims(
         aseprite_file_name=aseprite_file_name,
         save_file_names=save_file_names,
         expected_file_names=expected_file_names,

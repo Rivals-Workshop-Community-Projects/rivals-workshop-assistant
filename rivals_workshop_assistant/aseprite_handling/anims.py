@@ -116,7 +116,13 @@ class Anim(TagObject):
             ExportLayerParams(f"{root_name}_{split_name}", layers)
             for split_name, layers in self.content.layers.splits.items()
         ]
-        all_run_params = normal_run_params + splits_run_params
+        opts_run_params = [
+            ExportLayerParams(
+                f"{root_name}_{opt_name}", self.content.layers.normals + layers
+            )
+            for opt_name, layers in self.content.layers.opts.items()
+        ]
+        all_run_params = normal_run_params + splits_run_params + opts_run_params
 
         coroutines = []
 
