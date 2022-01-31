@@ -23,12 +23,15 @@ warning_names_to_types = {
 
 
 def get_warning_types(assistant_config: dict) -> Set[WarningType]:
-    return set(
-        itertools.chain(
-            *(
-                types
-                for key, types in warning_names_to_types.items()
-                if key in assistant_config.get(config_mod.WARNINGS_FIELD, [])
+    try:
+        return set(
+            itertools.chain(
+                *(
+                    types
+                    for key, types in warning_names_to_types.items()
+                    if key in assistant_config.get(config_mod.WARNINGS_FIELD, [])
+                )
             )
         )
-    )
+    except (KeyError, TypeError):
+        return set()
