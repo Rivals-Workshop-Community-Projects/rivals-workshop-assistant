@@ -251,4 +251,7 @@ if __name__ == "__main__":
     try:
         run_main(exe_dir, root_dir, mode=mode)
     except Exception as e:
+        import traceback
+
         print(e)
+        print("".join(traceback.format_tb(e.__traceback__)))
