@@ -24,6 +24,12 @@ jobs:
         python-version: 3.9
     - run: pip install -r requirements.txt pyinstaller
     - run: pyinstaller --noconfirm --onefile --console --name rivals_workshop_assistant "rivals_workshop_assistant/main.py"  
+    - run: ls rivals_workshop_assistant
+    - run: ls rivals_workshop_assistant/dist
+    - run: ls rivals_workshop_assistant/rivals_workshop_assistant
+    - run: ls rivals_workshop_assistant/rivals_workshop_assistant/dist
+    - run: ls rivals-workshop-assistant/rivals-workshop-assistant/dist/rivals_workshop_assistant    
+    - run: tree -a
    
     - name: Release
       uses: softprops/action-gh-release@v1
