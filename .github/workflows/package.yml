@@ -19,9 +19,7 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
-
-    - name: PyInstaller
-      uses: actions/setup-python@v2
+    - uses: actions/setup-python@v2
       with:
         python-version: 3.9
     - run: pip install -r requirements.txt pyinstaller
@@ -38,7 +36,7 @@ jobs:
     - uses: actions/upload-artifact@v2
       with:
         name: exe
-        path: rivals_workshop_assistant/windows
+        path: rivals_workshop_assistant/dist
 
     - name: VSCode Dispatch
       uses: peter-evans/repository-dispatch@v1
