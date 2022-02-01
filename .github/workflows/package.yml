@@ -9,11 +9,7 @@ on:
         
 jobs:
   build:
-    runs-on: ${{ matrix.os }}
-    strategy:
-      fail-fast: false
-      matrix:
-        os: ['windows-latest', 'ubuntu-latest', 'macos-latest']
+    runs-on: windows-latest
 
     steps:
     - uses: actions/checkout@v2
@@ -24,8 +20,8 @@ jobs:
     - run: pyinstaller --noconfirm --onefile --console --name rivals_workshop_assistant "rivals_workshop_assistant/main.py"  
     - uses: actions/upload-artifact@v2
       with:
-        path: dist/*
-
+        name: exe
+        path: dist/rivals_workshop_assistant.exe
 
   release:
     needs: build
