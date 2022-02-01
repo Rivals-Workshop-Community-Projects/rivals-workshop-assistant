@@ -9,18 +9,23 @@ on:
         
 jobs:
   build:
-
     runs-on: ubuntu-latest
+#     runs-on: ${{ matrix.os }}
+#     strategy:
+#       fail-fast: false
+#       matrix:
+#         os: ['windows-latest', 'ubuntu-latest, 'macos-latest']
+
 
     steps:
     - uses: actions/checkout@v2
 
-    - name: PyInstaller Windows
-      uses: JackMcKew/pyinstaller-action-windows@main
+    - name: PyInstaller
+      uses: actions/setup-python@v2
       with:
-          path: rivals_workshop_assistant
-          spec: rivals_workshop_assistant.spec
-          requirements: requirements.txt
+        python-version: 3.9
+    - run: pip install -r requirements.txt pyinstaller
+    - run: pyinstaller --noconfirm --onefile --console --name rivals_workshop_assistant "rivals_workshop_assistant/main.py"  
    
     - name: Release
       uses: softprops/action-gh-release@v1
