@@ -9,13 +9,11 @@ on:
         
 jobs:
   build:
-    runs-on: ubuntu-latest
-#     runs-on: ${{ matrix.os }}
-#     strategy:
-#       fail-fast: false
-#       matrix:
-#         os: ['windows-latest', 'ubuntu-latest, 'macos-latest']
-
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: ['windows-latest', 'ubuntu-latest', 'macos-latest']
 
     steps:
     - uses: actions/checkout@v2
@@ -24,40 +22,36 @@ jobs:
         python-version: 3.9
     - run: pip install -r requirements.txt pyinstaller
     - run: pyinstaller --noconfirm --onefile --console --name rivals_workshop_assistant "rivals_workshop_assistant/main.py"  
-#     - run: ls 
-#     - run: ls rivals_workshop_assistant
-#     - run: ls dist
-#     - run: ls rivals_workshop_assistant/dist
-#     - run: ls rivals_workshop_assistant/rivals_workshop_assistant
-#     - run: ls rivals_workshop_assistant/rivals_workshop_assistant/dist
-#     - run: ls rivals-workshop-assistant/rivals-workshop-assistant/dist/rivals_workshop_assistant    
-#     - run: tree -a
-   
-    - name: Release
-      uses: softprops/action-gh-release@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        files: "rivals_workshop_assistant/dist/**"
-        tag_name: ${{ github.event.inputs.tag }}
-
     - uses: actions/upload-artifact@v2
       with:
-        name: exe
-        path: dist/rivals_workshop_assistant
+        path: dist/*
 
-    - name: VSCode Dispatch
-      uses: peter-evans/repository-dispatch@v1
-      with:
-        token: ${{ secrets.REPO_ACCESS_TOKEN }}
-        repository: Rivals-Workshop-Community-Projects/rivals-workshop-assistant-vscode
-        event-type: exe-push
-        client-payload: '{"tag": "${{ github.event.inputs.tag }}"}'
 
-    - name: GMEdit Dispatch
-      uses: peter-evans/repository-dispatch@v1
-      with:
-        token: ${{ secrets.REPO_ACCESS_TOKEN }}
-        repository: Rivals-Workshop-Community-Projects/rivals-workshop-assistant-gmedit
-        event-type: exe-push
-        client-payload: '{"tag": "${{ github.event.inputs.tag }}"}'
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Release
+        uses: softprops/action-gh-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          files: "dist/**"
+          tag_name: ${{ github.event.inputs.tag }}
+          
+          
+      - name: VSCode Dispatch
+        uses: peter-evans/repository-dispatch@v1
+        with:
+          token: ${{ secrets.REPO_ACCESS_TOKEN }}
+          repository: Rivals-Workshop-Community-Projects/rivals-workshop-assistant-vscode
+          event-type: exe-push
+          client-payload: '{"tag": "${{ github.event.inputs.tag }}"}'
+
+      - name: GMEdit Dispatch
+        uses: peter-evans/repository-dispatch@v1
+        with:
+          token: ${{ secrets.REPO_ACCESS_TOKEN }}
+          repository: Rivals-Workshop-Community-Projects/rivals-workshop-assistant-gmedit
+          event-type: exe-push
+          client-payload: '{"tag": "${{ github.event.inputs.tag }}"}'
