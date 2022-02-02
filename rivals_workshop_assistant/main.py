@@ -52,7 +52,7 @@ from rivals_workshop_assistant.injection import (
 from rivals_workshop_assistant.code_generation import handle_codegen
 from rivals_workshop_assistant.warning_handling import handle_warning
 
-__version__ = "1.2.11"
+__version__ = "1.2.13"
 
 
 class Mode(Enum):
@@ -132,6 +132,7 @@ async def read_core_files(root_dir: Path) -> List[dict]:
 async def update_files(exe_dir: Path, root_dir: Path, mode: Mode.ALL):
     # todo refactor this
     dotfile, assistant_config, character_config = await read_core_files(root_dir)
+    print("DOTFILE", dotfile)
 
     await updating.update(
         exe_dir=exe_dir, root_dir=root_dir, dotfile=dotfile, config=assistant_config
@@ -214,14 +215,18 @@ Files in current directory are: {file_names}"""
 
 def run_main(
     exe_dir: Path,
-    given_dir: Path,
+    project_dir: Path,
     guarantee_root_dir: bool = False,
     mode: Mode = Mode.ALL,
 ):
+    print(f"Exe dir: {exe_dir}")
+    print(f"Project dir: {project_dir}")
+    print(f"Mode: {mode.name}")
+
     asyncio.run(
         main(
             exe_dir=exe_dir,
-            given_dir=given_dir,
+            given_dir=project_dir,
             guarantee_root_dir=guarantee_root_dir,
             mode=mode,
         )
@@ -230,7 +235,7 @@ def run_main(
 
 if __name__ == "__main__":
     exe_dir = Path(sys.argv[0]).parent.absolute()
-    root_dir = Path(sys.argv[1]).absolute()
+    project_dir = Path(sys.argv[1]).absolute()
     try:
         mode_value = sys.argv[2]
         try:
@@ -244,12 +249,8 @@ if __name__ == "__main__":
     except IndexError:
         mode = Mode.ALL
 
-    print(f"Exe dir: {exe_dir}")
-    print(f"Project dir: {root_dir}")
-    print(f"Mode: {mode.name}")
-
     try:
-        run_main(exe_dir, root_dir, mode=mode)
+        run_main(exe_dir=exe_dir, project_dir=project_dir, mode=mode)
     except Exception as e:
         import traceback
 

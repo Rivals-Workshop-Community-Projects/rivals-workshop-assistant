@@ -28,8 +28,8 @@ def build_exe():
     build_script = (
         "pyinstaller --noconfirm --onefile --console --name "
         f'"{exe_name}" '
-        '"D:/Users/User/PycharmProjects/rivals-workshop-assistant'
-        '/rivals_workshop_assistant/main.py"'
+        # '"D:/Users/User/PycharmProjects/rivals-workshop-assistant'
+        '"rivals_workshop_assistant/main.py"'
     )
     subprocess.run(build_script)
 
