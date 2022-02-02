@@ -173,6 +173,14 @@ def get_px_alpha(px):
 
 
 def are_pixels_equal(px1, px2):
+    if isinstance(px1, int):
+        if isinstance(px2, int):
+            return px1 == px2
+            # Technically I think this is incomplete.
+            # It tests that the index for the color palette is the same, but not necessarily that the color is correct.
+        else:
+            return False
+
     alphas = [get_px_alpha(px) for px in (px1, px2)]
     if alphas[0] != alphas[1]:
         return False
