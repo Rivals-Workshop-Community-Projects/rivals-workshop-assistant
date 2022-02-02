@@ -43,10 +43,12 @@ def handle_codegen_for_line(line: str) -> str:
         # temporarily disabled because of false alarms when $ is used as a color indicator.
 
 
-def handle_codegen_for_seed(seed: str) -> str:
-    new_line = handle_foreach_codegen(seed)
-
-    return new_line
+def handle_codegen_for_seed(seed: str) -> typing.Optional[str]:
+    for handle_codegen in (handle_foreach_codegen, handle_safe_with_codegen):
+        new_line = handle_codegen(seed)
+        if new_line:
+            return new_line
+    return None
 
 
 def handle_foreach_codegen(seed) -> typing.Optional[str]:
@@ -61,6 +63,22 @@ def handle_foreach_codegen(seed) -> typing.Optional[str]:
     code = f"""\
 for (var {iterator_name}=0; {iterator_name}<array_length({collection_name}); {iterator_name}++) {{
     var {item_name} = {collection_name}[{iterator_name}]
+}}"""
+    return code
+
+
+def handle_safe_with_codegen(seed) -> typing.Optional[str]:
+    """$safewith(obj)$ --> for(var i = 0; i < instance_number(obj);i++) with instance_find(obj,i)"""
+    try:
+        obj = parse.parse("safewith {obj}", seed)["obj"]
+    except TypeError:
+        return None
+
+    code = f"""\
+for (var obj_i=0; obj_i<instance_number({obj}); obj_i++) {{
+    with instance_find(obj, obj_i) {{
+    
+    }}
 }}"""
     return code
 
