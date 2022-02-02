@@ -22,20 +22,18 @@ jobs:
       with:
         name: exe
         path: dist/rivals_workshop_assistant.exe
+    - name: Upload
+      uses: softprops/action-gh-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        files: "dist/rivals_workshop_assistant.exe"
+        tag_name: ${{ github.event.inputs.tag }}
 
-  release:
+  dispatch:
     needs: build
     runs-on: ubuntu-latest
     steps:
-      - name: Release
-        uses: softprops/action-gh-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          files: "dist/**"
-          tag_name: ${{ github.event.inputs.tag }}
-          
-          
       - name: VSCode Dispatch
         uses: peter-evans/repository-dispatch@v1
         with:
