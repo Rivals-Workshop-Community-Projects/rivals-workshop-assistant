@@ -9,44 +9,43 @@ on:
         
 jobs:
   build:
-
-    runs-on: ubuntu-latest
+    runs-on: windows-latest
 
     steps:
     - uses: actions/checkout@v2
-
-    - name: PyInstaller Windows
-      uses: JackMcKew/pyinstaller-action-windows@main
+    - uses: actions/setup-python@v2
       with:
-          path: rivals_workshop_assistant
-          spec: rivals_workshop_assistant.spec
-          requirements: requirements.txt
-   
-    - name: Release
+        python-version: 3.9
+    - run: pip install -r requirements.txt pyinstaller
+    - run: pyinstaller --noconfirm --onefile --console --name rivals_workshop_assistant "rivals_workshop_assistant/main.py"  
+    - uses: actions/upload-artifact@v2
+      with:
+        name: exe
+        path: dist/rivals_workshop_assistant.exe
+    - name: Upload
       uses: softprops/action-gh-release@v1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        files: "rivals_workshop_assistant/dist/**"
+        files: "dist/rivals_workshop_assistant.exe"
         tag_name: ${{ github.event.inputs.tag }}
 
-    - uses: actions/upload-artifact@v2
-      with:
-        name: exe
-        path: rivals_workshop_assistant/dist/windows
+  dispatch:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: VSCode Dispatch
+        uses: peter-evans/repository-dispatch@v1
+        with:
+          token: ${{ secrets.REPO_ACCESS_TOKEN }}
+          repository: Rivals-Workshop-Community-Projects/rivals-workshop-assistant-vscode
+          event-type: exe-push
+          client-payload: '{"tag": "${{ github.event.inputs.tag }}"}'
 
-    - name: VSCode Dispatch
-      uses: peter-evans/repository-dispatch@v1
-      with:
-        token: ${{ secrets.REPO_ACCESS_TOKEN }}
-        repository: Rivals-Workshop-Community-Projects/rivals-workshop-assistant-vscode
-        event-type: exe-push
-        client-payload: '{"tag": "${{ github.event.inputs.tag }}"}'
-
-    - name: GMEdit Dispatch
-      uses: peter-evans/repository-dispatch@v1
-      with:
-        token: ${{ secrets.REPO_ACCESS_TOKEN }}
-        repository: Rivals-Workshop-Community-Projects/rivals-workshop-assistant-gmedit
-        event-type: exe-push
-        client-payload: '{"tag": "${{ github.event.inputs.tag }}"}'
+      - name: GMEdit Dispatch
+        uses: peter-evans/repository-dispatch@v1
+        with:
+          token: ${{ secrets.REPO_ACCESS_TOKEN }}
+          repository: Rivals-Workshop-Community-Projects/rivals-workshop-assistant-gmedit
+          event-type: exe-push
+          client-payload: '{"tag": "${{ github.event.inputs.tag }}"}'
