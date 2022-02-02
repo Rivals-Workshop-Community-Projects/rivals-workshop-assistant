@@ -101,7 +101,10 @@ async def test__install_release():
         create_script(root_dir, existing_user_inject)
 
         await rivals_workshop_assistant.updating.update(
-            exe_dir=exe_dir, root_dir=Path(root_dir.path), dotfile={}, config={}
+            exe_dir=Path(exe_dir.path),
+            root_dir=Path(root_dir.path),
+            dotfile={},
+            config={},
         )
         assert_test_release_scripts_installed(root_dir)
         assert_script_with_path(root_dir, existing_user_inject)
