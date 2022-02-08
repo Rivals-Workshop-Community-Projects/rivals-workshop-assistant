@@ -102,6 +102,7 @@ async def main(
             "WARN: Attempted to run assistant while an instance was already running."
             "\n\tConsider deleting assistant/.lock if you believe this is in error."
         )
+    print("Complete")
 
 
 def handle_scripts(
