@@ -1,12 +1,13 @@
 import asyncio
 from enum import Enum
 from typing import List
-
-from rivals_workshop_assistant.filelock import FileLock
 import datetime
 import sys
 from pathlib import Path
 
+from loguru import logger
+
+from rivals_workshop_assistant.filelock import FileLock
 from rivals_workshop_assistant import (
     updating,
     assistant_config_mod,
@@ -18,6 +19,7 @@ from rivals_workshop_assistant.character_config_mod import get_has_small_sprites
 from rivals_workshop_assistant.dotfile_mod import (
     update_dotfile_after_saving,
 )
+from rivals_workshop_assistant.paths import LOGS_FOLDER, ASSISTANT_FOLDER
 from rivals_workshop_assistant.script_mod import (
     read_scripts,
     Script,
@@ -41,6 +43,7 @@ from rivals_workshop_assistant.assistant_config_mod import (
     get_is_ssl,
 )
 from rivals_workshop_assistant.asset_handling import get_required_assets, save_assets
+from rivals_workshop_assistant.secrets import webhook
 from rivals_workshop_assistant.setup import (
     make_basic_folder_structure,
     get_assistant_folder_exists,
@@ -51,6 +54,8 @@ from rivals_workshop_assistant.injection import (
 )
 from rivals_workshop_assistant.code_generation import handle_codegen
 from rivals_workshop_assistant.warning_handling import handle_warning
+from notifiers.logging import NotificationHandler
+
 
 __version__ = "1.2.13"
 
@@ -80,8 +85,6 @@ async def main(
 ):
     """Runs all processes on scripts in the root_dir
     If guarantee_root_dir is true, it won't backtrack to find the root directory."""
-    print(f"Assistant Version: {__version__}")
-
     if guarantee_root_dir:
         root_dir = given_dir
     else:
@@ -93,16 +96,19 @@ async def main(
         do_first_run()
         return
 
+    setup_logger(root_dir=root_dir)
+    logger.info(f"Assistant Version: {__version__}")
+
     lock = FileLock(root_dir / paths.LOCKFILE_PATH)
     try:
         with lock.acquire(timeout=2):
             await update_files(exe_dir=exe_dir, root_dir=root_dir, mode=mode)
     except TimeoutError:
-        print(
-            "WARN: Attempted to run assistant while an instance was already running."
+        logger.warning(
+            "Attempted to run assistant while an instance was already running."
             "\n\tConsider deleting assistant/.lock if you believe this is in error."
         )
-    print("Complete")
+    logger.info("Complete")
 
 
 def handle_scripts(
@@ -133,7 +139,7 @@ async def read_core_files(root_dir: Path) -> List[dict]:
 async def update_files(exe_dir: Path, root_dir: Path, mode: Mode.ALL):
     # todo refactor this
     dotfile, assistant_config, character_config = await read_core_files(root_dir)
-    print("DOTFILE", dotfile)
+    logger.info(f"Dotfile is {dotfile}")
 
     await updating.update(
         exe_dir=exe_dir, root_dir=root_dir, dotfile=dotfile, config=assistant_config
@@ -214,15 +220,27 @@ Files in current directory are: {file_names}"""
         )
 
 
+def setup_logger(root_dir: Path):
+    handler = NotificationHandler("slack", defaults={"webhook_url": webhook})
+    logger.add(handler, level="ERROR")
+    logger.add(
+        root_dir / ASSISTANT_FOLDER / LOGS_FOLDER / f"assistant_{{time}}.log",
+        retention="2 days",
+        backtrace=True,
+        diagnose=True,
+    )
+
+
+@logger.catch
 def run_main(
     exe_dir: Path,
     project_dir: Path,
     guarantee_root_dir: bool = False,
     mode: Mode = Mode.ALL,
 ):
-    print(f"Exe dir: {exe_dir}")
-    print(f"Project dir: {project_dir}")
-    print(f"Mode: {mode.name}")
+    logger.info(f"Exe dir: {exe_dir}")
+    logger.info(f"Project dir: {project_dir}")
+    logger.info(f"Mode: {mode.name}")
 
     asyncio.run(
         main(
@@ -242,8 +260,8 @@ if __name__ == "__main__":
         try:
             mode = Mode(mode_value)
         except ValueError:
-            print(
-                f"WARNING: Invalid mode argument. f{mode_value}"
+            logger.error(
+                f"Invalid mode argument. f{mode_value}"
                 f"Valid modes are {[mode.name for mode in Mode]}"
             )
             mode = Mode.ALL
@@ -253,6 +271,7 @@ if __name__ == "__main__":
     try:
         run_main(exe_dir=exe_dir, project_dir=project_dir, mode=mode)
     except Exception as e:
+        # This may be no longer needed because of @logger.catch
         import traceback
 
         print(e)

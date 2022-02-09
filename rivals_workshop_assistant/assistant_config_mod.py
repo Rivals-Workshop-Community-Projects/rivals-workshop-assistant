@@ -2,6 +2,8 @@ import enum
 from typing import List, TYPE_CHECKING, Optional
 from pathlib import Path
 
+from loguru import logger
+
 import rivals_workshop_assistant.info_files as info_files
 from rivals_workshop_assistant.paths import ASSISTANT_FOLDER
 
@@ -184,12 +186,12 @@ def get_aseprite_program_path(assistant_config: dict) -> Optional[Path]:
     if path_string:
         path = Path(path_string)
         if not path.exists():
-            print(
+            logger.error(
                 f"ERROR: {ASEPRITE_PATH_FIELD} in your assistant config "
                 f"doesn't point to an existing file."
             )
         if path.is_dir():
-            print(
+            logger.error(
                 f"ERROR: {ASEPRITE_PATH_FIELD} in your assistant config "
                 f"is a directory. It should be the full path of the aseprite.exe."
             )

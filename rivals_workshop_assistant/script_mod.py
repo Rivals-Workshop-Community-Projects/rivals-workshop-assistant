@@ -3,6 +3,8 @@ from pathlib import Path
 from datetime import datetime
 from typing import List
 
+from loguru import logger
+
 from rivals_workshop_assistant.file_handling import (
     File,
     _get_modified_time,
@@ -51,7 +53,7 @@ class Script(File):
 
     def save(self, root_dir: Path):
         if self.working_content == "":
-            print(f"WARN: Trying to save an empty file {self.path}")
+            logger.warning(f"Trying to save an empty file {self.path}")
             return
         if self.working_content != self.original_content:
             with open(

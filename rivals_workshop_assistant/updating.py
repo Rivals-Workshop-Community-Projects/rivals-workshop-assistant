@@ -10,6 +10,7 @@ import zipfile
 from pathlib import Path
 from typing import List, Optional
 import requests
+from loguru import logger
 
 import rivals_workshop_assistant.paths
 from rivals_workshop_assistant import paths as paths, assistant_config_mod
@@ -70,8 +71,8 @@ class Release:
         assets_with_name = [asset for asset in assets if asset["name"] == asset_name]
         if len(assets_with_name) >= 1:
             if len(assets_with_name) > 1:
-                print(
-                    f"WARN: Multiple assets with name {asset_name} "
+                logger.warning(
+                    f"Multiple assets with name {asset_name} "
                     f"for release {self.release_dict['url']}"
                 )
             return assets_with_name[0]["browser_download_url"]
@@ -135,9 +136,9 @@ async def update_backup(root_dir: Path):
             except FileNotFoundError:
                 pass
     except Exception as e:
-        print(
+        logger.error(
             f"""\
-WARN: Error encountered when creating backup.\n
+Error encountered when creating backup.\n
 Error log is:
  {e}"""
         )
@@ -210,8 +211,8 @@ class AssistantUpdater(Updater):
 
         current_exe_path = paths.get_exe_path()
         if current_exe_path.name != paths.ASSISTANT_EXE_NAME:
-            print(
-                f"WARN: assistant exe at {current_exe_path} "
+            logger.warning(
+                f"assistant exe at {current_exe_path} "
                 f"should be named {paths.ASSISTANT_EXE_NAME}.\n"
                 f"\tExe will not update."
             )
@@ -228,7 +229,7 @@ class AssistantUpdater(Updater):
         return get_assistant_version_string(self.dotfile)
 
     def install_release(self, release: Release):
-        print(f"Updating assistant to version: {release.version}")
+        logger.info(f"Updating assistant to version: {release.version}")
 
         with tempfile.TemporaryDirectory() as tmp:
             request = release.get_asset_url(paths.ASSISTANT_EXE_NAME)
@@ -238,7 +239,7 @@ class AssistantUpdater(Updater):
                 exe_file.write(response.content)
 
             if not os.access(tmp_exe_path, os.X_OK):
-                print("WARN: Downloaded assistant exe looks malformed. Not updating.")
+                logger.error("Downloaded assistant exe looks malformed. Not updating.")
                 return
 
             # Rename current exe to .bak

@@ -2,6 +2,8 @@ from datetime import datetime
 from pathlib import Path
 from typing import List, TYPE_CHECKING
 
+from loguru import logger
+
 if TYPE_CHECKING:
     from rivals_workshop_assistant.script_mod import Script
 
@@ -13,7 +15,7 @@ def create_file(path: Path, content: str, overwrite=False):
         return
 
     with open(path, "w+", newline="\n") as f:
-        print(f"Creating new file: {path}")
+        logger.info(f"Creating new file: {path}")
         f.write(content)
 
 

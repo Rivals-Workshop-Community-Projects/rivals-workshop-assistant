@@ -16,6 +16,7 @@ SPRITES_FOLDER = Path("sprites")
 SCRIPTS_FOLDER = Path("scripts")
 ATTACKS_FOLDER = SCRIPTS_FOLDER / Path("attacks")
 ANIMS_FOLDER = Path("anims")
+LOGS_FOLDER = Path("logs")
 
 REPO_OWNER = "Rivals-Workshop-Community-Projects"
 ASSISTANT_REPO_NAME = "rivals-workshop-assistant"

@@ -6,6 +6,7 @@ from pathlib import Path
 
 from PIL import Image
 import pytest
+from loguru import logger
 from testfixtures import TempDirectory
 
 import rivals_workshop_assistant.aseprite_handling
@@ -412,6 +413,7 @@ async def test__save_aseprites__removes_old_spritesheet():
             aseprites=aseprites,
         )
 
+        logger.stop()
         assert not old_filename.exists()
         assert other_filename.exists()
 
@@ -448,6 +450,7 @@ async def test__save_aseprites__removes_old_spritesheet__with_subfolder():
             aseprites=aseprites,
         )
 
+        logger.stop()
         assert not old_filename.exists()
         assert other_filename.exists()
 
@@ -475,6 +478,7 @@ async def test__save_aseprites__multiple_aseprites():
             aseprites=aseprites,
         )
 
+        logger.stop()
         assert_anim_matches_test_anim(
             root_dir,
             filename=f"anim1_strip1.png",
@@ -505,6 +509,7 @@ async def test__aseprites_set_window_data():
 
         await src.main(exe_dir=root_dir, given_dir=root_dir, guarantee_root_dir=True)
 
+        logger.stop()
         assert_anim_matches_test_anim(
             root_dir,
             filename=f"anim1_strip1.png",
@@ -518,7 +523,6 @@ async def test__aseprites_set_window_data():
             has_small_sprites=False,
             num_frames=2,
         )
-
         assert (
             tmp.read(bair.path.as_posix(), encoding="utf8")
             == f"""\
@@ -560,6 +564,8 @@ async def test__backup_made():
         )
 
         await src.main(exe_dir=root_dir, given_dir=root_dir, guarantee_root_dir=True)
+
+        logger.stop()
         assert_anim_matches_test_anim(
             root_dir,
             filename=f"anim1_strip1.png",
@@ -590,6 +596,7 @@ async def test__empty_project_just_inits():
 
         await src.main(exe_dir=tmp_exe_dir, given_dir=root_dir, guarantee_root_dir=True)
 
+        logger.stop()
         assert {path.name for path in root_dir.glob("*")} == {
             "anims",
             "assistant",

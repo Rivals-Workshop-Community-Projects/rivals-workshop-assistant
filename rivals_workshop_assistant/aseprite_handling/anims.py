@@ -7,6 +7,8 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import List, TYPE_CHECKING, Dict
 
+from loguru import logger
+
 from rivals_workshop_assistant import paths
 
 from rivals_workshop_assistant.aseprite_handling.windows import (
@@ -200,7 +202,7 @@ class Anim(TagObject):
             ]
         )
         export_command = " ".join(command_parts)
-        print(f"Running lua script: {export_command}")
+        logger.info(f"Running lua script: {export_command}")
         try:
             proc = await asyncio.create_subprocess_shell(
                 export_command,
@@ -209,13 +211,13 @@ class Anim(TagObject):
             )
             stdout, stderr = await proc.communicate()
             if proc.returncode != 0:
-                print(f"ERROR: Lua script command failed. {export_command}")
+                logger.error(f"ERROR: Lua script command failed. {export_command}")
                 if stderr:
-                    print(f"[stderr]\n{stderr.decode()}")
+                    logger.error(f"[stderr]\n{stderr.decode()}")
         except FileNotFoundError:
-            print(f"ERROR: Aseprite not found at {path_params.aseprite_program_path}")
+            logger.error(f"Aseprite not found at {path_params.aseprite_program_path}")
         except PermissionError as e:
-            print(repr(e))
+            logger.error(repr(e))
 
     def _cares_about_small_sprites(self):
         return self.name in ANIMS_WHICH_CARE_ABOUT_SMALL_SPRITES
@@ -288,8 +290,8 @@ async def save_anims(
     aseprites: List["Aseprite"],
 ):
     if not path_params.aseprite_program_path:
-        print(
-            "WARN: Not saving anims, because no aseprite path has been supplied.\n"
+        logger.warning(
+            "Not saving anims, because no aseprite path has been supplied.\n"
             "Add a path to your aseprite.exe in assistant/assistant_config.yaml to "
             "process aseprite files."
         )
