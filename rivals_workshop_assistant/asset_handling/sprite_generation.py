@@ -33,7 +33,9 @@ def generate_sprite_for_file_name(file_name: str) -> ImageDraw:
         _draw_sprite(sprite, name, width, height, color)
         return sprite
     except ValueError:
-        return None  # This try is too large. Figure out what could throw and shrink.
+        return None
+        # This try needs to be this large.
+        # Everything from the unpacking to _draw_sprite can throw value errors.
 
 
 def _get_color(color_items: list) -> typing.Optional[str]:
