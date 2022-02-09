@@ -15,7 +15,7 @@ def create_file(path: Path, content: str, overwrite=False):
         return
 
     with open(path, "w+", newline="\n") as f:
-        logger.info(f"Creating new file: {path}")
+        logger.debug(f"Creating new file: {path}")
         f.write(content)
 
 

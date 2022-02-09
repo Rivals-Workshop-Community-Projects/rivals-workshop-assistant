@@ -39,7 +39,7 @@ def get_has_small_sprites(scripts: List["Script"], character_config: ConfigParse
             for script in scripts
             if script.path.name == "init.gml"
         ][0]
-    except IndexError:
+    except IndexError:  # There is no init.gml
         init_gml = ""
     match = re.search(pattern=r"small_sprites\s*=\s*(1|true)", string=init_gml)
 

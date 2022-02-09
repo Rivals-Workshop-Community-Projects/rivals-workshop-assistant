@@ -13,15 +13,14 @@ def generate_sprite_for_file_name(file_name: str) -> ImageDraw:
     "rect_34_36"
     "orange_rect_3_5"
     """
-    file_name_parts = file_name.rstrip('.png').split('_')
+    file_name_parts = file_name.rstrip(".png").split("_")
 
     try:
         possible_name_locations = file_name_parts[:2]
-        if 'circle' in possible_name_locations:
+        if "circle" in possible_name_locations:
             *color, name, diameter = file_name_parts
             width, height = diameter, diameter
-        elif ('ellipse' in possible_name_locations
-              or 'rect' in possible_name_locations):
+        elif "ellipse" in possible_name_locations or "rect" in possible_name_locations:
             *color, name, width, height = file_name_parts
         else:
             return None
@@ -34,7 +33,7 @@ def generate_sprite_for_file_name(file_name: str) -> ImageDraw:
         _draw_sprite(sprite, name, width, height, color)
         return sprite
     except ValueError:
-        return None
+        return None  # This try is too large. Figure out what could throw and shrink.
 
 
 def _get_color(color_items: list) -> typing.Optional[str]:
@@ -46,16 +45,15 @@ def _get_color(color_items: list) -> typing.Optional[str]:
         raise ValueError
 
 
-def _draw_sprite(
-        sprite: Image, name: str, width: int, height: int, color: str = None):
+def _draw_sprite(sprite: Image, name: str, width: int, height: int, color: str = None):
     drawable = ImageDraw.Draw(sprite)
-    if name == 'rect':
-        draw_method = drawable.__getattribute__('rectangle')
+    if name == "rect":
+        draw_method = drawable.__getattribute__("rectangle")
 
     else:
-        draw_method = drawable.__getattribute__('ellipse')
+        draw_method = drawable.__getattribute__("ellipse")
     draw_method((0, 0, width - 1, height - 1), fill=color, outline="black")
 
 
 def make_canvas(width, height):
-    return Image.new('RGBA', (width, height))
+    return Image.new("RGBA", (width, height))

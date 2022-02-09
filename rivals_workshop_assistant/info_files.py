@@ -1,5 +1,5 @@
 """This file powers reading yaml files. Backend stuff."""
-
+from loguru import logger
 from ruamel.yaml import StringIO, YAML
 from pathlib import Path
 from rivals_workshop_assistant.file_handling import create_file
@@ -12,6 +12,7 @@ def read(path: Path) -> dict:
     try:
         content = path.read_text()
     except FileNotFoundError:
+        logger.info(f"File not found, and being treated as empty: {path}")
         content = ""
 
     return _yaml_load(content)

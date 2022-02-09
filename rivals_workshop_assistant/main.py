@@ -105,8 +105,8 @@ async def main(
             await update_files(exe_dir=exe_dir, root_dir=root_dir, mode=mode)
     except TimeoutError:
         logger.warning(
-            "Attempted to run assistant while an instance was already running."
-            "\n\tConsider deleting assistant/.lock if you believe this is in error."
+            "Attempted to run assistant while an instance was already running. "
+            "Consider deleting assistant/.lock if you believe this is in error."
         )
     logger.info("Complete")
 
@@ -229,6 +229,7 @@ def setup_logger(root_dir: Path):
         backtrace=True,
         diagnose=True,
     )
+    logger.add(sys.stdout, level="WARNING")
 
 
 @logger.catch
@@ -266,6 +267,7 @@ if __name__ == "__main__":
             )
             mode = Mode.ALL
     except IndexError:
+        # Argument not passed. Use default.
         mode = Mode.ALL
 
     try:

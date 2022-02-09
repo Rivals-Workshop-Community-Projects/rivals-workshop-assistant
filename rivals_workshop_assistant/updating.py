@@ -9,6 +9,7 @@ import tempfile
 import zipfile
 from pathlib import Path
 from typing import List, Optional
+
 import requests
 from loguru import logger
 
@@ -134,14 +135,9 @@ async def update_backup(root_dir: Path):
             try:
                 shutil.copytree(src=root_dir / path, dst=backup_path / path)
             except FileNotFoundError:
-                pass
+                pass  # Missing paths are fine, they just don't need backing up.
     except Exception as e:
-        logger.error(
-            f"""\
-Error encountered when creating backup.\n
-Error log is:
- {e}"""
-        )
+        logger.error(f"Error encountered when creating backup. Error log is: {e}")
 
 
 class Updater(abc.ABC):
@@ -250,7 +246,7 @@ class AssistantUpdater(Updater):
             try:
                 os.remove(path=current_exe_path_as_bak)
             except FileNotFoundError:
-                pass
+                pass  # Missing .bak is fine and expected first run.
             os.rename(src=current_exe_path, dst=current_exe_path_as_bak)
 
             # Move new exe in as .exe
@@ -331,6 +327,9 @@ def get_version_from_version_string(version_string: str):
     try:
         major, minor, patch = (int(val) for val in version_string.split("."))
     except (ValueError, IndexError):
+        logger.error(
+            f"Cannot read version string {version_string}. Should be formatted x.y.z"
+        )
         major, minor, patch = (0, 0, 0)
     return Version(major=major, minor=minor, patch=patch)
 

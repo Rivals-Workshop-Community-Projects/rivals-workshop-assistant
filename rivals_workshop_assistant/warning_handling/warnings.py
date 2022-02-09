@@ -1,6 +1,8 @@
 import itertools
 from typing import Set
 
+from loguru import logger
+
 from rivals_workshop_assistant import assistant_config_mod as config_mod
 from rivals_workshop_assistant.warning_handling.base import WarningType
 from rivals_workshop_assistant.warning_handling import desync, set_attack
@@ -34,4 +36,9 @@ def get_warning_types(assistant_config: dict) -> Set[WarningType]:
             )
         )
     except (KeyError, TypeError):
+        logger.warning(
+            f"assistant config's {config_mod.WARNINGS_FIELD} value is invalid. "
+            f"Should be a list. "
+            f"Got: {assistant_config.get(config_mod.WARNINGS_FIELD, [])}"
+        )
         return set()

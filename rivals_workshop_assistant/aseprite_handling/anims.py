@@ -10,11 +10,9 @@ from typing import List, TYPE_CHECKING, Dict
 from loguru import logger
 
 from rivals_workshop_assistant import paths
-
 from rivals_workshop_assistant.aseprite_handling.windows import (
     Window,
 )
-
 from rivals_workshop_assistant.aseprite_handling._aseprite_loading.chunks import (
     LayerChunk,
 )
@@ -28,7 +26,6 @@ from rivals_workshop_assistant.aseprite_handling.constants import (
     ANIMS_WHICH_GET_HURTBOXES,
 )
 from rivals_workshop_assistant.aseprite_handling.tag_objects import TagObject
-
 from rivals_workshop_assistant.paths import ASEPRITE_LUA_SCRIPTS_FOLDER
 
 if TYPE_CHECKING:
@@ -202,7 +199,7 @@ class Anim(TagObject):
             ]
         )
         export_command = " ".join(command_parts)
-        logger.info(f"Running lua script: {export_command}")
+        logger.debug(f"Running lua script: {export_command}")
         try:
             proc = await asyncio.create_subprocess_shell(
                 export_command,
@@ -210,10 +207,12 @@ class Anim(TagObject):
                 stderr=asyncio.subprocess.PIPE,
             )
             stdout, stderr = await proc.communicate()
+            if stdout:
+                logger.debug(f"[stdout] {stdout}")
             if proc.returncode != 0:
-                logger.error(f"ERROR: Lua script command failed. {export_command}")
+                logger.error(f"Lua script command failed.")
                 if stderr:
-                    logger.error(f"[stderr]\n{stderr.decode()}")
+                    logger.error(f"[stderr] {stderr.decode()}")
         except FileNotFoundError:
             logger.error(f"Aseprite not found at {path_params.aseprite_program_path}")
         except PermissionError as e:
@@ -238,6 +237,9 @@ class Anim(TagObject):
                 pickle.dumps(self.content.file_data.frames[self.start : self.end + 1])
             ).hexdigest()
         except AttributeError:
+            logger.error(
+                f"Could not make checksum for {dict({'name': self.name, 'start': self.start, 'end': self.end})}"
+            )
             return 0
 
     def _save_hash(self):
@@ -270,6 +272,10 @@ def get_anim_file_name_root(root_dir: Path, aseprite_file_path: Path, name: str)
         relative_path = aseprite_file_path.relative_to(root_dir / paths.ANIMS_FOLDER)
     except ValueError:
         # The aseprite file path isn't in the root dir, maybe because testing.
+        logger.error(
+            f"Aseprite file path, isn't in the root dir. This is okay when testing, not in production. "
+            f"{dict({'root_dir':root_dir, 'aseprite_file_path': aseprite_file_path})}"
+        )
         return name
     subfolders = list(relative_path.parents)[:-1]
     path_parts = [path.name for path in reversed(subfolders)] + [name]

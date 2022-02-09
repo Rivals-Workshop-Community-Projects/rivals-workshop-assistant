@@ -68,7 +68,9 @@ for (var {iterator_name}=0; {iterator_name}<array_length({collection_name}); {it
 
 
 def handle_safe_with_codegen(seed) -> typing.Optional[str]:
-    """$safewith(obj)$ --> for(var i = 0; i < instance_number(obj);i++) with instance_find(obj,i)"""
+    """
+    $safewith(obj)$ --> for(var i = 0; i < instance_number(obj);i++) with instance_find(obj,i)
+    """
     try:
         obj = parse.parse("safewith {obj}", seed)["obj"]
     except TypeError:
