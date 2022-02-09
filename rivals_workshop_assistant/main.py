@@ -57,7 +57,7 @@ from rivals_workshop_assistant.warning_handling import handle_warning
 from notifiers.logging import NotificationHandler
 
 
-__version__ = "1.2.13"
+__version__ = "1.2.14"
 
 
 class Mode(Enum):
