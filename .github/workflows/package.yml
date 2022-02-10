@@ -17,11 +17,12 @@ jobs:
       with:
         python-version: 3.9
     - run: pip install -r requirements.txt pyinstaller
-    - name: Create File
+    - name: Create dot_env file
       uses: du5rte/create-secrets-file@v1
       with:
         secrets: |
           SLACK_WEBHOOK=${{ secrets.SLACK_WEBHOOK }}
+        path: rivals_workshop_assistant
     - run: pyinstaller --noconfirm --onefile --console --name rivals_workshop_assistant "rivals_workshop_assistant/main.py"  
     - uses: actions/upload-artifact@v2
       with:
