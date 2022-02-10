@@ -60,7 +60,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-__version__ = "1.2.14"
+__version__ = "1.2.15"
 
 
 class Mode(Enum):
