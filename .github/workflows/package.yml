@@ -22,7 +22,8 @@ jobs:
       with:
         secrets: |
           SLACK_WEBHOOK=${{ secrets.SLACK_WEBHOOK }}
-        path: rivals_workshop_assistant
+    - run: ls
+    - run: move "D:\a\.env" "/rivals_workshop_assistant"
     - run: pyinstaller --noconfirm --onefile --console --name rivals_workshop_assistant "rivals_workshop_assistant/main.py"  
     - uses: actions/upload-artifact@v2
       with:
