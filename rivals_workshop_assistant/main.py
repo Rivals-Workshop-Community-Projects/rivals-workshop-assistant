@@ -58,9 +58,17 @@ from notifiers.logging import NotificationHandler
 
 from dotenv import load_dotenv
 
-load_dotenv()
+__version__ = "1.2.18"
 
-__version__ = "1.2.17"
+
+def load_dotenv_safely():
+    source_directory = os.getcwd()
+    if getattr(sys, "frozen", False):
+        source_directory = sys._MEIPASS
+    load_dotenv(dotenv_path=os.path.join(source_directory, ".env"))
+
+
+load_dotenv_safely()
 
 
 class Mode(Enum):
