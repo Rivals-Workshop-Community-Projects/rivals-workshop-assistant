@@ -1,4 +1,5 @@
 import asyncio
+import os
 from enum import Enum
 from typing import List
 import datetime
@@ -43,7 +44,6 @@ from rivals_workshop_assistant.assistant_config_mod import (
     get_is_ssl,
 )
 from rivals_workshop_assistant.asset_handling import get_required_assets, save_assets
-from rivals_workshop_assistant.secrets import webhook
 from rivals_workshop_assistant.setup import (
     make_basic_folder_structure,
     get_assistant_folder_exists,
@@ -56,6 +56,9 @@ from rivals_workshop_assistant.code_generation import handle_codegen
 from rivals_workshop_assistant.warning_handling import handle_warning
 from notifiers.logging import NotificationHandler
 
+from dotenv import load_dotenv
+
+load_dotenv()
 
 __version__ = "1.2.14"
 
@@ -221,8 +224,6 @@ Files in current directory are: {file_names}"""
 
 
 def setup_logger(root_dir: Path):
-    handler = NotificationHandler("slack", defaults={"webhook_url": webhook})
-    logger.add(handler, level="ERROR")
     logger.add(
         root_dir / ASSISTANT_FOLDER / LOGS_FOLDER / f"assistant_{{time}}.log",
         retention="2 days",
@@ -230,6 +231,13 @@ def setup_logger(root_dir: Path):
         diagnose=True,
     )
     logger.add(sys.stdout, level="WARNING")
+
+    slack_webhook = os.getenv("SLACK_WEBHOOK")
+    if slack_webhook:
+        handler = NotificationHandler("slack", defaults={"webhook_url": slack_webhook})
+        logger.add(handler, level="ERROR")
+    else:
+        logger.warning("No SLACK_WEBHOOK found in environment")
 
 
 @logger.catch
