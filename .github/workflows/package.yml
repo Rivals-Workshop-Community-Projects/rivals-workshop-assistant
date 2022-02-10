@@ -18,10 +18,10 @@ jobs:
         python-version: 3.9
     - run: pip install -r requirements.txt pyinstaller
     - name: Create File
-      uses: "finnp/create-file-action@master"
-      env:
-        FILE_NAME: "/.env"
-        FILE_DATA: "SLACK_WEBHOOK=${{ secrets.GITHUB_TOKEN }}"
+      uses: du5rte/create-secrets-file@v1
+      with:
+        secrets: |
+          SLACK_WEBHOOK=${{ secrets.SLACK_WEBHOOK }}
     - run: pyinstaller --noconfirm --onefile --console --name rivals_workshop_assistant "rivals_workshop_assistant/main.py"  
     - uses: actions/upload-artifact@v2
       with:
