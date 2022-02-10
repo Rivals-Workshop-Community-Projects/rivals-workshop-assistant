@@ -165,6 +165,9 @@ class Anim(TagObject):
         script_name: str,
         lua_params: dict = None,
     ):
+        logger.info(
+            f"Exporting anim {dict({'name': base_name, 'script': script_name})}"
+        )
         full_script_path = (
             path_params.exe_dir / ASEPRITE_LUA_SCRIPTS_FOLDER / script_name
         ).absolute()
