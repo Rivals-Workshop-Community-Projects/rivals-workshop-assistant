@@ -9,3 +9,4 @@ parse
 pytest
 loguru
 notifiers
+python-dotenv
