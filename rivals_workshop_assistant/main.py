@@ -7,6 +7,7 @@ import sys
 from pathlib import Path
 
 from loguru import logger
+from notifiers.logging import NotificationHandler
 
 from rivals_workshop_assistant.filelock import FileLock
 from rivals_workshop_assistant import (
@@ -54,21 +55,8 @@ from rivals_workshop_assistant.injection import (
 )
 from rivals_workshop_assistant.code_generation import handle_codegen
 from rivals_workshop_assistant.warning_handling import handle_warning
-from notifiers.logging import NotificationHandler
-
-from dotenv import load_dotenv
 
 __version__ = "1.2.18"
-
-
-def load_dotenv_safely():
-    source_directory = os.getcwd()
-    if getattr(sys, "frozen", False):
-        source_directory = sys._MEIPASS
-    load_dotenv(dotenv_path=os.path.join(source_directory, ".env"))
-
-
-load_dotenv_safely()
 
 
 class Mode(Enum):
@@ -240,12 +228,13 @@ def setup_logger(root_dir: Path):
     )
     logger.add(sys.stdout, level="WARNING")
 
-    slack_webhook = os.getenv("SLACK_WEBHOOK")
-    if slack_webhook:
-        handler = NotificationHandler("slack", defaults={"webhook_url": slack_webhook})
+    try:
+        from rivals_workshop_assistant.secrets import SLACK_WEBHOOK
+
+        handler = NotificationHandler("slack", defaults={"webhook_url": SLACK_WEBHOOK})
         logger.add(handler, level="ERROR")
-    else:
-        logger.warning("No SLACK_WEBHOOK found in environment")
+    except ImportError:
+        logger.warning("Secrets file not present")
 
 
 @logger.catch
