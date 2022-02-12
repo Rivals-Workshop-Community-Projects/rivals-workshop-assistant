@@ -17,8 +17,8 @@ jobs:
       with:
         python-version: 3.9
     - run: pip install -r requirements.txt pyinstaller
-    - name: Create secrets.py
-      run: echo SLACK_WEBHOOK = "${{ secrets.SLACK_WEBHOOK }}" > rivals_workshop_assistant/secrets.py
+    - run: echo SLACK_WEBHOOK = "${{ secrets.SLACK_WEBHOOK }}" > rivals_workshop_assistant/secrets.py
+    - run: dir rivals_workshop_assistant
     - run: pyinstaller --noconfirm --onefile --console --name rivals_workshop_assistant "rivals_workshop_assistant/main.py"  
     - uses: actions/upload-artifact@v2
       with:
