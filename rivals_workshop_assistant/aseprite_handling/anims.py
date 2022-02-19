@@ -216,6 +216,11 @@ class Anim(TagObject):
                 logger.error(f"Lua script command failed.")
                 if stderr:
                     logger.error(f"[stderr] {stderr.decode()}")
+            elif not aseprite_file_path.exists():
+                logger.error(
+                    f"Exported aseprite file {aseprite_file_path} not found, "
+                    f"although no error from aseprite."
+                )
         except FileNotFoundError:
             logger.error(f"Aseprite not found at {path_params.aseprite_program_path}")
         except PermissionError as e:
