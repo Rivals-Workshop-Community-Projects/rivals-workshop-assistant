@@ -131,7 +131,15 @@ def test_get_has_small_sprites(init_content, character_config_str, expected):
     assert result == expected
 
 
-def make_anim(name, start, end, windows=None, content=None):
+def make_anim(
+    name="name",
+    start=1,
+    end=2,
+    windows=None,
+    content=None,
+    anim_hashes=None,
+    frame_hash=None,
+):
     return Anim(
         name=name,
         start=start,
@@ -139,6 +147,8 @@ def make_anim(name, start, end, windows=None, content=None):
         windows=windows,
         content=content,
         file_is_fresh=True,
+        anim_hashes=anim_hashes,
+        frame_hash=frame_hash,
     )  # todo replace none with fake
 
 
@@ -172,3 +182,25 @@ def test_aseprite_anims(tags, expected):
     )
 
     assert sut.anims == expected
+
+
+MY_HASH = "my hash"
+
+
+def test_anim_with_no_previous_hash_is_fresh():
+    anim = make_anim(
+        name="name", anim_hashes={"something_else": MY_HASH}, frame_hash=MY_HASH
+    )
+    assert anim.is_fresh
+
+
+def test_anim_with_different_previous_hash_is_fresh():
+    anim = make_anim(
+        name="name", anim_hashes={"name": "something else"}, frame_hash=MY_HASH
+    )
+    assert anim.is_fresh
+
+
+def test_anim_with_matching_previous_hash_is_not_fresh():
+    anim = make_anim(name="name", anim_hashes={"name": MY_HASH}, frame_hash=MY_HASH)
+    assert not anim.is_fresh

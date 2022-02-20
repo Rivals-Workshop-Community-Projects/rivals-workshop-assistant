@@ -54,6 +54,7 @@ class Anim(TagObject):
         windows: List[Window] = None,
         file_is_fresh=False,
         anim_hashes: Dict[str, str] = None,
+        frame_hash=None,  # for testing overrides
     ):
         """A part of an aseprite file representing a single spritesheet.
         An Aseprite file may contain multiple anims.
@@ -68,7 +69,9 @@ class Anim(TagObject):
         self.anim_hashes = anim_hashes
         self.file_is_fresh = file_is_fresh
 
-        self._frame_hash = self._get_frame_hash()
+        self._frame_hash = frame_hash
+        if self._frame_hash is None:
+            self._frame_hash = self._get_frame_hash()
         self.is_fresh = self._get_is_fresh()
         self._save_hash()
 
@@ -236,8 +239,8 @@ class Anim(TagObject):
         if not self.file_is_fresh:
             return False
 
-        last_frame_hash = self.anim_hashes.get(self.name, None)
-        return self._frame_hash != last_frame_hash
+        anim_hash_from_previous_run = self.anim_hashes.get(self.name, None)
+        return self._frame_hash != anim_hash_from_previous_run
 
     def _get_frame_hash(self):
         try:
@@ -246,7 +249,8 @@ class Anim(TagObject):
             ).hexdigest()
         except AttributeError:
             logger.error(
-                f"Could not make checksum for {dict({'name': self.name, 'start': self.start, 'end': self.end})}"
+                f"Could not make checksum for "
+                f"{dict({'name': self.name, 'start': self.start, 'end': self.end})}"
             )
             return 0
 
