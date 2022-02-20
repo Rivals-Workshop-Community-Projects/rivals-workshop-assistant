@@ -56,6 +56,7 @@ TEST_DATE_STRING = "2019-12-04"
 ROOT_PATH = Path("C:/a/file/path/the_root/")
 PATH_ABSOLUTE = Path("C:/a/file/path/the_root/scripts/script_1.gml")
 PATH_RELATIVE = Path("scripts/script_1.gml")
+TEST_EARLIER_DATETIME_STRING = "2019-12-03*09:34:22"
 TEST_DATETIME_STRING = "2019-12-04*09:34:22"
 TEST_LATER_DATETIME_STRING = "2019-12-05*10:31:20"
 
