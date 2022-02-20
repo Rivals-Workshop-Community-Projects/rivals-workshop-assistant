@@ -1,6 +1,7 @@
 from pathlib import Path
 
-from rivals_workshop_assistant.main import Mode, run_main
+from rivals_workshop_assistant.main import run_main
+from rivals_workshop_assistant.modes import Mode
 
 root_dir = Path(r"C:\Users\User\AppData\Local\rivalsofaether\workshop\gurren")
 exe_dir = Path(

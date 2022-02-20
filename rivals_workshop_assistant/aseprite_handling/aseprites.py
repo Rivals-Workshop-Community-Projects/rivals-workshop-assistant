@@ -7,7 +7,7 @@ from typing import List, TYPE_CHECKING, Iterable, Dict
 from rivals_workshop_assistant import assistant_config_mod
 from rivals_workshop_assistant.aseprite_handling.anims import Anim
 from rivals_workshop_assistant.aseprite_handling.windows import Window
-from rivals_workshop_assistant.dotfile_mod import get_processed_time
+from rivals_workshop_assistant.dotfile_mod import get_script_processed_time
 from rivals_workshop_assistant.file_handling import File, _get_modified_time
 from rivals_workshop_assistant.aseprite_handling._aseprite_loading import (
     RawAsepriteFile,
@@ -191,27 +191,29 @@ def read_aseprites(
             for filetype in ("ase", "aseprite")
         ]
     )
-
+    processed_time = get_script_processed_time(dotfile=dotfile)
     aseprites = []
     for path in ase_paths:
         aseprite = read_aseprite(
             path=path,
             dotfile=dotfile,
             assistant_config=assistant_config,
+            processed_time=processed_time,
         )
         aseprites.append(aseprite)
     return aseprites
 
 
 def read_aseprite(
-    path: Path,
-    dotfile: dict,
-    assistant_config: dict,
+    path: Path, dotfile: dict, assistant_config: dict, processed_time: datetime = None
 ) -> Aseprite:
+    if processed_time is None:
+        processed_time = get_script_processed_time(dotfile=dotfile)
+
     aseprite = Aseprite(
         path=path,
         modified_time=_get_modified_time(path),
-        processed_time=get_processed_time(dotfile=dotfile, path=path),
+        processed_time=processed_time,
         anim_tag_colors=assistant_config_mod.get_anim_tag_color(assistant_config),
         window_tag_colors=assistant_config_mod.get_window_tag_color(assistant_config),
         anim_hashes=dotfile.setdefault("anim_hashes", {}).setdefault(path.stem, {}),

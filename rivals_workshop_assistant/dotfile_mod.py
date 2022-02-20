@@ -3,7 +3,7 @@ from datetime import datetime
 from pathlib import Path
 
 import rivals_workshop_assistant.info_files as info_files
-from rivals_workshop_assistant.file_handling import File
+from rivals_workshop_assistant.modes import Mode
 from rivals_workshop_assistant.paths import ASSISTANT_FOLDER
 
 if typing.TYPE_CHECKING:
@@ -29,8 +29,8 @@ def get_assistant_version_string(dotfile: dict) -> typing.Optional[str]:
 
 
 LAST_UPDATED_FIELD = "last_updated"
-PROCESSED_TIME_FIELD = "processed_time"
-SEEN_FILES_FIELD = "seen_files"
+SCRIPT_PROCESSED_TIME_FIELD = "script_processed_time"
+ANIM_PROCESSED_TIME_FIELD = "anim_processed_time"
 INJECT_CLIENTS_FIELD = "injection_clients"
 
 
@@ -44,11 +44,11 @@ def save_dotfile(root_dir: Path, content: dict):
     info_files.save(path=root_dir / PATH, content=content)
 
 
-def update_dotfile_after_saving(
-    dotfile: dict, now: datetime, seen_files: typing.List[File]
-):
-    dotfile[PROCESSED_TIME_FIELD] = now
-    dotfile[SEEN_FILES_FIELD] = [file.path.as_posix() for file in seen_files]
+def update_dotfile_after_saving(dotfile: dict, now: datetime, mode: Mode):
+    if mode in (Mode.ALL, Mode.SCRIPTS):
+        dotfile[SCRIPT_PROCESSED_TIME_FIELD] = now
+    if mode in (Mode.ALL, Mode.ANIMS):
+        dotfile[ANIM_PROCESSED_TIME_FIELD] = now
 
 
 def update_all_dotfile_injection_clients(
@@ -95,11 +95,9 @@ def get_clients_for_injection(
     return clients
 
 
-def get_processed_time(dotfile: dict, path: Path) -> typing.Optional[datetime]:
-    seen_files = dotfile.get(SEEN_FILES_FIELD, [])
-    if seen_files is None:
-        seen_files = []
-    if path.as_posix() in seen_files:
-        return dotfile.get(PROCESSED_TIME_FIELD, None)
-    else:
-        return None
+def get_script_processed_time(dotfile: dict) -> typing.Optional[datetime]:
+    return dotfile.get(SCRIPT_PROCESSED_TIME_FIELD, None)
+
+
+def get_anim_processed_time(dotfile: dict) -> typing.Optional[datetime]:
+    return dotfile.get(ANIM_PROCESSED_TIME_FIELD, None)

@@ -1,6 +1,4 @@
 import asyncio
-import os
-from enum import Enum
 from typing import List
 import datetime
 import sys
@@ -21,6 +19,7 @@ from rivals_workshop_assistant.character_config_mod import get_has_small_sprites
 from rivals_workshop_assistant.dotfile_mod import (
     update_dotfile_after_saving,
 )
+from rivals_workshop_assistant.modes import Mode
 from rivals_workshop_assistant.paths import LOGS_FOLDER, ASSISTANT_FOLDER
 from rivals_workshop_assistant.script_mod import (
     read_scripts,
@@ -57,12 +56,6 @@ from rivals_workshop_assistant.code_generation import handle_codegen
 from rivals_workshop_assistant.warning_handling import handle_warning
 
 __version__ = "1.2.20"
-
-
-class Mode(Enum):
-    ALL = "all"
-    ANIMS = "anims"
-    SCRIPTS = "scripts"
 
 
 def do_first_run():
@@ -162,7 +155,6 @@ async def update_files(exe_dir: Path, root_dir: Path, mode: Mode.ALL):
     )
     anims = get_anims(aseprites)
 
-    seen_files = []
     if mode in (mode.ALL, mode.SCRIPTS):
         handle_scripts(
             root_dir=root_dir,
@@ -172,7 +164,6 @@ async def update_files(exe_dir: Path, root_dir: Path, mode: Mode.ALL):
             dotfile=dotfile,
         )
         save_scripts(root_dir, scripts)
-        seen_files += scripts
 
     if mode in (mode.ALL, mode.ANIMS):
         await save_anims(
@@ -190,13 +181,8 @@ async def update_files(exe_dir: Path, root_dir: Path, mode: Mode.ALL):
             ),
             aseprites=aseprites,
         )
-        seen_files += aseprites
 
-    update_dotfile_after_saving(
-        now=datetime.datetime.now(),
-        dotfile=dotfile,
-        seen_files=seen_files + user_inject_scripts,
-    )
+    update_dotfile_after_saving(now=datetime.datetime.now(), dotfile=dotfile, mode=mode)
 
     assets = get_required_assets(scripts)
     await save_assets(root_dir, assets)

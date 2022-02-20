@@ -9,7 +9,7 @@ from rivals_workshop_assistant.file_handling import (
     File,
     _get_modified_time,
 )
-from rivals_workshop_assistant.dotfile_mod import get_processed_time
+from rivals_workshop_assistant.dotfile_mod import get_script_processed_time
 
 from rivals_workshop_assistant.paths import (
     SCRIPTS_FOLDER,
@@ -79,13 +79,14 @@ def read_scripts(
 ) -> List[Script]:
     """Returns all Scripts in a given directory (defaults to the scripts folder)."""
     gml_paths = list((root_dir / folder).rglob("*.gml"))
+    processed_time = get_script_processed_time(dotfile=dotfile)
 
     scripts = []
     for path in gml_paths:
         script = Script(
             path=path,
             modified_time=_get_modified_time(path),
-            processed_time=get_processed_time(dotfile=dotfile, path=path),
+            processed_time=processed_time,
         )
         scripts.append(script)
 
