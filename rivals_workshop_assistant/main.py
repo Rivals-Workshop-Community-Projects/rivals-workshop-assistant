@@ -4,8 +4,8 @@ import datetime
 import sys
 from pathlib import Path
 
+import notifiers
 from loguru import logger
-from notifiers.logging import NotificationHandler
 
 from rivals_workshop_assistant.filelock import FileLock
 from rivals_workshop_assistant import (
@@ -56,6 +56,9 @@ from rivals_workshop_assistant.code_generation import handle_codegen
 from rivals_workshop_assistant.warning_handling import handle_warning
 
 __version__ = "1.2.22"
+
+log_lines = []
+has_encountered_error = False
 
 
 def do_first_run():
@@ -207,6 +210,11 @@ Files in current directory are: {file_names}"""
         )
 
 
+def set_encountered_error():
+    global has_encountered_error
+    has_encountered_error = True
+
+
 def setup_logger(root_dir: Path):
     logger.add(
         root_dir / ASSISTANT_FOLDER / LOGS_FOLDER / f"assistant_{{time}}.log",
@@ -215,14 +223,8 @@ def setup_logger(root_dir: Path):
         diagnose=True,
     )
     logger.add(sys.stdout, level="WARNING")
-
-    try:
-        from rivals_workshop_assistant.secrets import SLACK_WEBHOOK
-
-        handler = NotificationHandler("slack", defaults={"webhook_url": SLACK_WEBHOOK})
-        logger.add(handler, level="ERROR")
-    except ImportError:
-        logger.warning("Secrets file not present")
+    logger.add(lambda message: log_lines.append(message))
+    logger.add(lambda _: set_encountered_error(), level="ERROR")
 
 
 @logger.catch
@@ -271,3 +273,13 @@ if __name__ == "__main__":
 
         print(e)
         print("".join(traceback.format_tb(e.__traceback__)))
+    finally:
+        if has_encountered_error:
+            log = "".join(log_lines)
+
+            try:
+                from rivals_workshop_assistant.secrets import SLACK_WEBHOOK
+
+                notifiers.notify("slack", webhook_url=SLACK_WEBHOOK, message=log)
+            except ImportError:
+                logger.warning("Secrets file not present or malformed")
