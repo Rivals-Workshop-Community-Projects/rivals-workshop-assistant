@@ -16,7 +16,7 @@ jobs:
     - uses: actions/setup-python@v2
       with:
         python-version: 3.9
-    - run: echo SLACK_WEBHOOK = "${{ secrets.SLACK_WEBHOOK }}" > rivals_workshop_assistant/secrets.py
+    - run: echo "SLACK_WEBHOOK = '${{ secrets.SLACK_WEBHOOK }}'" > rivals_workshop_assistant/secrets.py
     - run: dir rivals_workshop_assistant
     - run: pip install -r requirements.txt pyinstaller
     - run: pyinstaller --noconfirm --onefile --console --debug=imports --name rivals_workshop_assistant "rivals_workshop_assistant/main.py"  

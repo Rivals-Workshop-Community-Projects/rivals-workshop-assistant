@@ -55,10 +55,7 @@ from rivals_workshop_assistant.injection import (
 from rivals_workshop_assistant.code_generation import handle_codegen
 from rivals_workshop_assistant.warning_handling import handle_warning
 
-__version__ = "1.2.22"
-
-log_lines = []
-has_encountered_error = False
+__version__ = "1.2.24"
 
 
 def do_first_run():
