@@ -1,6 +1,7 @@
 from collections import defaultdict
 from typing import List
 
+from rivals_workshop_assistant.aseprite_handling import LayerChunk
 from rivals_workshop_assistant.aseprite_handling._aseprite_loading import (
     RawAsepriteFile,
 )
@@ -12,6 +13,12 @@ HURTMASK = "HURTMASK"
 
 NORMAL_LAYER_TYPE = 0
 GROUP_LAYER_TYPE = 1
+
+
+def aseprite_layer_is_visible(layer: LayerChunk) -> bool:
+    #  See visibility flag
+    #  https://github.com/aseprite/aseprite/blob/main/docs/ase-file-specs.md#layer-chunk-0x2004
+    return layer.flags % 2 == 1
 
 
 class AsepriteLayers:
@@ -42,10 +49,11 @@ class AsepriteLayers:
         splits = defaultdict(list)
         opts = defaultdict(list)
 
-        # TODO ONLY USE VISIBLE LAYERS
-
         layers = [
-            layer for layer in file_data.layers if layer.layer_type == NORMAL_LAYER_TYPE
+            layer
+            for layer in file_data.layers
+            if layer.layer_type == NORMAL_LAYER_TYPE
+            and aseprite_layer_is_visible(layer)
         ]
         for (i, layer) in enumerate(layers):
             layer.layer_index = i  # remove the layer groups from the ordering.

@@ -211,6 +211,7 @@ async def test_aseprite_save__no_hurtbox(
         pytest.param(
             "wrong_color_type", ["fair_hurt_strip1"], ["wrong_color_type"], []
         ),
+        pytest.param("with_hidden_layer", ["bair_hurt_strip1"], ["bair_hurt"], []),
     ],
 )
 @pytest.mark.aseprite
