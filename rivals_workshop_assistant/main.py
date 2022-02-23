@@ -89,7 +89,9 @@ async def main(
         return
 
     setup_logger(root_dir=root_dir)
-    logger.info(f"Assistant Version: {__version__}")
+    version_message = f"Assistant Version: {__version__}"
+    logger.info(version_message)
+    print(version_message)
 
     lock = FileLock(root_dir / paths.LOCKFILE_PATH)
     try:
