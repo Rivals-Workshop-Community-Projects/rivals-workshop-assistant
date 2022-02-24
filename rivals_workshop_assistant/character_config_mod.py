@@ -34,6 +34,9 @@ def get_has_small_sprites(scripts: List["Script"], character_config: ConfigParse
     )
 
     try:
+        # This is gross.
+        # When doing aseprites, this reads every script to find init
+        # just in case they wrote small_scripts in there.
         init_gml = [
             script.working_content
             for script in scripts

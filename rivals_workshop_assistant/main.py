@@ -134,6 +134,53 @@ async def read_core_files(root_dir: Path) -> List[dict]:
     return [await task for task in tasks]
 
 
+def update_scripts(root_dir: Path, scripts, assistant_config, dotfile, aseprites):
+    # I don't like that we need to load all anims to update scripts.
+    # Instead, could save the attack timing info to the dotfile when animations run,
+    # and then propagate to scripts. That would require doing animations first each run.
+    anims = get_anims(aseprites)
+    handle_scripts(
+        root_dir=root_dir,
+        scripts=scripts,
+        assistant_config=assistant_config,
+        anims=anims,
+        dotfile=dotfile,
+    )
+    save_scripts(root_dir, scripts)
+
+
+async def update_anims(
+    root_dir: Path,
+    exe_dir: Path,
+    scripts,
+    assistant_config,
+    character_config,
+    aseprites,
+):
+    aseprite_program_path = get_aseprite_program_path(assistant_config)
+    if aseprite_program_path:
+        version = subprocess.check_output(
+            [f"{aseprite_program_path}", "--version"]
+        ).decode("utf8")
+
+        logger.info(f"Aseprite version is: {version}")
+        await save_anims(
+            path_params=AsepritePathParams(
+                exe_dir=exe_dir,
+                root_dir=root_dir,
+                aseprite_program_path=aseprite_program_path,
+            ),
+            config_params=AsepriteConfigParams(
+                has_small_sprites=get_has_small_sprites(
+                    scripts=scripts, character_config=character_config
+                ),
+                hurtboxes_enabled=get_hurtboxes_enabled(config=assistant_config),
+                is_ssl=get_is_ssl(config=assistant_config),
+            ),
+            aseprites=aseprites,
+        )
+
+
 async def update_files(exe_dir: Path, root_dir: Path, mode: Mode.ALL):
     # todo refactor this
     dotfile, assistant_config, character_config = await read_core_files(root_dir)
@@ -159,41 +206,24 @@ async def update_files(exe_dir: Path, root_dir: Path, mode: Mode.ALL):
         dotfile=dotfile,
         assistant_config=assistant_config,
     )
-    anims = get_anims(aseprites)
-
     if mode in (mode.ALL, mode.SCRIPTS):
-        handle_scripts(
+        update_scripts(
             root_dir=root_dir,
             scripts=scripts,
             assistant_config=assistant_config,
-            anims=anims,
             dotfile=dotfile,
+            aseprites=aseprites,
         )
-        save_scripts(root_dir, scripts)
 
     if mode in (mode.ALL, mode.ANIMS):
-        aseprite_program_path = get_aseprite_program_path(assistant_config)
-        if aseprite_program_path:
-            version = subprocess.check_output(
-                [f"{aseprite_program_path}", "--version"]
-            ).decode("utf8")
-
-            logger.info(f"Aseprite version is: {version}")
-            await save_anims(
-                path_params=AsepritePathParams(
-                    exe_dir=exe_dir,
-                    root_dir=root_dir,
-                    aseprite_program_path=aseprite_program_path,
-                ),
-                config_params=AsepriteConfigParams(
-                    has_small_sprites=get_has_small_sprites(
-                        scripts=scripts, character_config=character_config
-                    ),
-                    hurtboxes_enabled=get_hurtboxes_enabled(config=assistant_config),
-                    is_ssl=get_is_ssl(config=assistant_config),
-                ),
-                aseprites=aseprites,
-            )
+        await update_anims(
+            root_dir=root_dir,
+            exe_dir=exe_dir,
+            scripts=scripts,
+            assistant_config=assistant_config,
+            character_config=character_config,
+            aseprites=aseprites,
+        )
 
     update_dotfile_after_saving(now=datetime.datetime.now(), dotfile=dotfile, mode=mode)
 
@@ -256,7 +286,7 @@ def run_main(
     )
 
 
-if __name__ == "__main__":
+def run_as_file():
     exe_dir = Path(sys.argv[0]).parent.absolute()
     project_dir = Path(sys.argv[1]).absolute()
     try:
@@ -291,3 +321,7 @@ if __name__ == "__main__":
                 notifiers.notify("slack", webhook_url=SLACK_WEBHOOK, message=log)
             except ImportError:
                 logger.warning("Secrets file not present or malformed")
+
+
+if __name__ == "__main__":
+    run_as_file()
