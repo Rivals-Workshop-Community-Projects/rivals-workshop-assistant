@@ -1,4 +1,5 @@
 import asyncio
+import subprocess
 from typing import List
 import datetime
 import sys
@@ -171,21 +172,28 @@ async def update_files(exe_dir: Path, root_dir: Path, mode: Mode.ALL):
         save_scripts(root_dir, scripts)
 
     if mode in (mode.ALL, mode.ANIMS):
-        await save_anims(
-            path_params=AsepritePathParams(
-                exe_dir=exe_dir,
-                root_dir=root_dir,
-                aseprite_program_path=get_aseprite_program_path(assistant_config),
-            ),
-            config_params=AsepriteConfigParams(
-                has_small_sprites=get_has_small_sprites(
-                    scripts=scripts, character_config=character_config
+        aseprite_program_path = get_aseprite_program_path(assistant_config)
+        if aseprite_program_path:
+            version = subprocess.check_output(
+                [f"{aseprite_program_path}", "--version"]
+            ).decode("utf8")
+
+            logger.info(f"Aseprite version is: {version}")
+            await save_anims(
+                path_params=AsepritePathParams(
+                    exe_dir=exe_dir,
+                    root_dir=root_dir,
+                    aseprite_program_path=aseprite_program_path,
                 ),
-                hurtboxes_enabled=get_hurtboxes_enabled(config=assistant_config),
-                is_ssl=get_is_ssl(config=assistant_config),
-            ),
-            aseprites=aseprites,
-        )
+                config_params=AsepriteConfigParams(
+                    has_small_sprites=get_has_small_sprites(
+                        scripts=scripts, character_config=character_config
+                    ),
+                    hurtboxes_enabled=get_hurtboxes_enabled(config=assistant_config),
+                    is_ssl=get_is_ssl(config=assistant_config),
+                ),
+                aseprites=aseprites,
+            )
 
     update_dotfile_after_saving(now=datetime.datetime.now(), dotfile=dotfile, mode=mode)
 
