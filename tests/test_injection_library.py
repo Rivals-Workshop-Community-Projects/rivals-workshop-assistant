@@ -2,6 +2,9 @@ import pytest
 
 from rivals_workshop_assistant.injection.dependency_handling import Define, Macro
 from rivals_workshop_assistant.injection.library import get_injection_library_from_gml
+from loguru import logger
+
+logger.remove()
 
 
 def test_empty():

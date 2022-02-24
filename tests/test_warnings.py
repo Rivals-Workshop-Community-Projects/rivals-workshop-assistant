@@ -11,6 +11,9 @@ from rivals_workshop_assistant.assistant_config_mod import (
 )
 from rivals_workshop_assistant.warning_handling import remove_warnings, handle_warning
 from tests.testing_helpers import make_script
+from loguru import logger
+
+logger.remove()
 
 
 def test_get_warning_types():

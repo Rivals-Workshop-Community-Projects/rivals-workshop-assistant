@@ -6,7 +6,6 @@ from pathlib import Path
 
 from PIL import Image
 import pytest
-from loguru import logger
 from testfixtures import TempDirectory
 
 import rivals_workshop_assistant.aseprite_handling
@@ -39,6 +38,9 @@ from rivals_workshop_assistant.aseprite_handling import (
     AsepritePathParams,
     AsepriteConfigParams,
 )
+from loguru import logger
+
+logger.remove()
 
 pytestmark = pytest.mark.slow
 

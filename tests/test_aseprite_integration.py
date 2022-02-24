@@ -15,7 +15,9 @@ from tests.testing_helpers import (
     get_aseprite_path,
     assert_images_equal,
 )
+from loguru import logger
 
+logger.remove()
 pytestmark = pytest.mark.slow
 
 TEST_SPRITES_PATH = Path("tests/assets/sprites")

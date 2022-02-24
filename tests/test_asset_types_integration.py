@@ -7,7 +7,9 @@ from PIL import Image, ImageDraw
 import rivals_workshop_assistant.paths as paths
 from rivals_workshop_assistant.asset_handling import asset_types as src
 from tests.testing_helpers import make_canvas, assert_images_equal
+from loguru import logger
 
+logger.remove()
 pytestmark = pytest.mark.slow
 
 

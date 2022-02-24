@@ -6,6 +6,10 @@ import rivals_workshop_assistant.asset_handling as src
 from tests.testing_helpers import make_script, make_time, TEST_LATER_DATETIME_STRING
 from rivals_workshop_assistant.asset_handling.asset_types import Sprite
 
+from loguru import logger
+
+logger.remove()
+
 
 def test_get_required_assets__no_assets():
     result = src.get_required_assets(

@@ -16,7 +16,9 @@ from tests.testing_helpers import (
     make_release,
     assert_script_with_path,
 )
+from loguru import logger
 
+logger.remove()
 pytestmark = pytest.mark.slow
 
 

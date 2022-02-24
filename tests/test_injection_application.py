@@ -13,6 +13,9 @@ from tests.testing_helpers import (
     TEST_LATER_DATETIME_STRING,
     PATH_A,
 )
+from loguru import logger
+
+logger.remove()
 
 
 def test_apply_injection_no_injections():

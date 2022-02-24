@@ -22,6 +22,10 @@ from tests.testing_helpers import (
 )
 from rivals_workshop_assistant import character_config_mod
 
+from loguru import logger
+
+logger.remove()
+
 
 class FakeAsepriteData(AsepriteFileContent):
     def __init__(

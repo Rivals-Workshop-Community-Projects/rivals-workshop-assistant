@@ -5,9 +5,12 @@ from tests.testing_helpers import (
     make_time,
     TEST_LATER_DATETIME_STRING,
     TEST_EARLIER_DATETIME_STRING,
-    make_script,
     PATH_A,
 )
+
+from loguru import logger
+
+logger.remove()
 
 
 def test_get_processed_time__no_register__none():

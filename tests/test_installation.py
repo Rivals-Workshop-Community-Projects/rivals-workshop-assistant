@@ -9,6 +9,9 @@ from rivals_workshop_assistant import dotfile_mod, assistant_config_mod
 import rivals_workshop_assistant.updating as src
 from rivals_workshop_assistant.info_files import _yaml_load
 from tests.testing_helpers import make_version, make_release, TEST_DATE_STRING
+from loguru import logger
+
+logger.remove()
 
 
 def make_library_updater(
