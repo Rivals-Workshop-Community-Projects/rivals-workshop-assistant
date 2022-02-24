@@ -73,6 +73,15 @@ Next time, the assistant will run normally.
     )
 
 
+def log_startup_context(exe_dir: Path, root_dir: Path, mode: Mode):
+    version_message = f"Assistant Version: {__version__}"
+    logger.info(version_message)
+    print(version_message)  # So that it always displays in the editor console.
+    logger.info(f"Exe dir: {exe_dir}")
+    logger.info(f"Project dir: {root_dir}")
+    logger.info(f"Mode: {mode.name}")
+
+
 async def main(
     exe_dir: Path,
     given_dir: Path,
@@ -93,9 +102,7 @@ async def main(
         return
 
     setup_logger(root_dir=root_dir)
-    version_message = f"Assistant Version: {__version__}"
-    logger.info(version_message)
-    print(version_message)
+    log_startup_context(exe_dir=exe_dir, root_dir=root_dir, mode=mode)
 
     lock = FileLock(root_dir / paths.LOCKFILE_PATH)
     try:
@@ -272,10 +279,6 @@ def run_main(
     guarantee_root_dir: bool = False,
     mode: Mode = Mode.ALL,
 ):
-    logger.info(f"Exe dir: {exe_dir}")
-    logger.info(f"Project dir: {project_dir}")
-    logger.info(f"Mode: {mode.name}")
-
     asyncio.run(
         main(
             exe_dir=exe_dir,
