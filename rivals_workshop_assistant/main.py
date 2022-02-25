@@ -56,7 +56,7 @@ from rivals_workshop_assistant.injection import (
 from rivals_workshop_assistant.code_generation import handle_codegen
 from rivals_workshop_assistant.warning_handling import handle_warning
 
-__version__ = "1.2.26"
+__version__ = "1.2.27"
 
 log_lines = []
 has_encountered_error = False
@@ -321,7 +321,12 @@ def run_as_file():
             try:
                 from rivals_workshop_assistant.secrets import SLACK_WEBHOOK
 
-                notifiers.notify("slack", webhook_url=SLACK_WEBHOOK, message=log)
+                notifiers.notify(
+                    "slack",
+                    webhook_url=SLACK_WEBHOOK,
+                    message=__version__,
+                    attachments=[{"title": "log", "text": log, "fallback": log}],
+                )
             except ImportError:
                 logger.warning("Secrets file not present or malformed")
 
