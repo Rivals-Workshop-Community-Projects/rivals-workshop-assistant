@@ -295,7 +295,7 @@ for _, frame in ipairs(sprite.frames) do
     app.activeFrame = frame
     app.range.frames = {frame}
     local selection = selectContent(contentLayer, frame)
-    if selection ~= NIL_CONSTANT then
+    if selection ~= NIL_CONSTANT and selection ~= nil then
         sprite.selection = selection
         -- app.fgColor = Color{ r=0, g=255, b=0, a=255 }
         -- app.command.Fill()
