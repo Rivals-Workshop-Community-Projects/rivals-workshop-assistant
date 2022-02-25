@@ -86,36 +86,44 @@ async def assert_aseprite_saves_right_anims(
 @pytest.mark.parametrize(
     "aseprite_file_name, save_file_names, expected_file_names",
     [
-        pytest.param("1frame", ["1frame_strip1"], ["1frame"]),
-        pytest.param("2frame", ["2frame_strip2"], ["2frame"]),
-        pytest.param("2frame_with_groups", ["2frame_with_groups_strip2"], ["2frame"]),
+        # pytest.param("1frame", ["1frame_strip1"], ["1frame"]),
+        # pytest.param("2frame", ["2frame_strip2"], ["2frame"]),
+        # pytest.param("2frame_with_groups", ["2frame_with_groups_strip2"], ["2frame"]),
+        # pytest.param(
+        #     "1frame_2frame", ["1frame_strip1", "2frame_strip2"], ["1frame", "2frame"]
+        # ),
+        # pytest.param(
+        #     "1frame_2frame_red_tag",
+        #     ["1frame_2frame_red_tag_strip3"],
+        #     ["1frame_2frame"],
+        # ),
+        # pytest.param(
+        #     "1frame_1bair",
+        #     ["1frame_strip1", "bair_strip1"],
+        #     ["1frame", "bair_big"],
+        # ),
+        # pytest.param(
+        #     "1frame_hurtmask",
+        #     ["1frame_hurtmask_strip1"],
+        #     ["1frame"],
+        # ),
+        # pytest.param(
+        #     "1frame_hurtbox_layer",
+        #     ["1frame_hurtbox_layer_strip1"],
+        #     ["1frame"],
+        # ),
+        # pytest.param(
+        #     # Layers called "Flattened" were once problematic because the layer name was
+        #     # used in the lua script
+        #     "1has_flattened",
+        #     ["1has_flattened_strip1"],
+        #     ["1has_flattened"],
+        # ),
+        # pytest.param(
+        #     "1frame_with_hidden_above", ["1frame_with_hidden_above_strip1"], ["1frame"]
+        # ),
         pytest.param(
-            "1frame_2frame", ["1frame_strip1", "2frame_strip2"], ["1frame", "2frame"]
-        ),
-        pytest.param(
-            "1frame_2frame_red_tag",
-            ["1frame_2frame_red_tag_strip3"],
-            ["1frame_2frame"],
-        ),
-        pytest.param(
-            "1frame_1bair",
-            ["1frame_strip1", "bair_strip1"],
-            ["1frame", "bair_big"],
-        ),
-        pytest.param(
-            "1frame_hurtmask",
-            ["1frame_hurtmask_strip1"],
-            ["1frame"],
-        ),
-        pytest.param(
-            "1frame_hurtbox_layer",
-            ["1frame_hurtbox_layer_strip1"],
-            ["1frame"],
-        ),
-        pytest.param(
-            "1has_flattened",
-            ["1has_flattened_strip1"],
-            ["1has_flattened"],
+            "1frame_with_hidden_below", ["1frame_with_hidden_below_strip1"], ["1frame"]
         ),
     ],
 )

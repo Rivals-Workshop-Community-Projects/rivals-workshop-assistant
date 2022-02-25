@@ -56,7 +56,7 @@ from rivals_workshop_assistant.injection import (
 from rivals_workshop_assistant.code_generation import handle_codegen
 from rivals_workshop_assistant.warning_handling import handle_warning
 
-__version__ = "1.2.25"
+__version__ = "1.2.26"
 
 log_lines = []
 has_encountered_error = False

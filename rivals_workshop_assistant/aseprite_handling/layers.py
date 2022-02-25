@@ -50,13 +50,12 @@ class AsepriteLayers:
         opts = defaultdict(list)
 
         layers = [
-            layer
-            for layer in file_data.layers
-            if layer.layer_type == NORMAL_LAYER_TYPE
-            and aseprite_layer_is_visible(layer)
+            layer for layer in file_data.layers if layer.layer_type == NORMAL_LAYER_TYPE
         ]
         for (i, layer) in enumerate(layers):
             layer.layer_index = i  # remove the layer groups from the ordering.
+
+        layers = [layer for layer in layers if aseprite_layer_is_visible(layer)]
 
         # layer_groups = [
         # layer for layer in file_data.layers if layer.layer_type == GROUP_LAYER_TYPE
