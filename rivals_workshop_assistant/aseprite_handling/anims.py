@@ -205,7 +205,6 @@ class Anim(TagObject):
             ]
         )
         export_command = " ".join(command_parts)
-        logger.debug(f"Running lua script: {export_command}")
         try:
             proc = await asyncio.create_subprocess_shell(
                 export_command,
@@ -213,6 +212,7 @@ class Anim(TagObject):
                 stderr=asyncio.subprocess.PIPE,
             )
             stdout, stderr = await proc.communicate()
+            logger.debug(f"Ran lua script: {export_command}")
             if stdout:
                 logger.debug(f"[stdout] {stdout}")
             if proc.returncode != 0:
