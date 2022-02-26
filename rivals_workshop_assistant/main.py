@@ -1,5 +1,6 @@
 import asyncio
 import subprocess
+from dataclasses import dataclass
 from typing import List
 import datetime
 import sys
@@ -80,6 +81,15 @@ def log_startup_context(exe_dir: Path, root_dir: Path, mode: Mode):
     logger.info(f"Exe dir: {exe_dir}")
     logger.info(f"Project dir: {root_dir}")
     logger.info(f"Mode: {mode.name}")
+
+
+@dataclass
+class RunContext:
+    exe_dir: Path
+    root_dir: Path
+    dotfile: dict
+    assistant_config: dict
+    character_config: dict
 
 
 async def main(
@@ -192,6 +202,8 @@ async def update_files(exe_dir: Path, root_dir: Path, mode: Mode.ALL):
     # todo refactor this
     dotfile, assistant_config, character_config = await read_core_files(root_dir)
     logger.info(f"Dotfile is {dotfile}")
+    logger.info(f"assistant config is {assistant_config}")
+    logger.info(f"character config is {character_config}")
 
     await updating.update(
         exe_dir=exe_dir, root_dir=root_dir, dotfile=dotfile, config=assistant_config
