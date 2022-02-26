@@ -16,7 +16,7 @@ def handle_injection(
     apply_injection(scripts, injection_library, anims, dotfile)
 
 
-def freshen_scripts_with_modified_dependencies(
+def freshen_scripts_that_have_modified_dependencies(
     dotfile: dict, scripts, inject_scripts: List[Script]
 ):
     """Sets each script with modified dependencies to be considered freshly changed"""

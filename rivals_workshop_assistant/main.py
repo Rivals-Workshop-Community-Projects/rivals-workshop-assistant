@@ -51,7 +51,7 @@ from rivals_workshop_assistant.setup import (
 )
 from rivals_workshop_assistant.injection import (
     handle_injection,
-    freshen_scripts_with_modified_dependencies,
+    freshen_scripts_that_have_modified_dependencies,
 )
 from rivals_workshop_assistant.code_generation import handle_codegen
 from rivals_workshop_assistant.warning_handling import handle_warning
@@ -202,7 +202,7 @@ async def update_files(exe_dir: Path, root_dir: Path, mode: Mode.ALL):
     user_inject_scripts = read_user_inject(root_dir, dotfile)
     lib_inject_scripts = read_lib_inject(root_dir, dotfile)
 
-    freshen_scripts_with_modified_dependencies(
+    freshen_scripts_that_have_modified_dependencies(
         dotfile,
         scripts=scripts,
         inject_scripts=user_inject_scripts + lib_inject_scripts,
