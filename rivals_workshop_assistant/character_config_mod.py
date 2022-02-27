@@ -1,7 +1,7 @@
 import re
 import typing
 from pathlib import Path
-from configparser import ConfigParser
+from configparser import ConfigParser, NoSectionError, NoOptionError
 from typing import List
 
 if typing.TYPE_CHECKING:
@@ -28,10 +28,11 @@ def get_config_truth_value(config_value) -> bool:
     return bool(config_value)
 
 
-def get_has_small_sprites(scripts: List["Script"], character_config: ConfigParser):
-    in_character_config = character_config.get(
-        "general", SMALL_SPRITES_FIELD, fallback=None
-    )
+def get_has_small_sprites(scripts: List["Script"], character_config: dict):
+    try:
+        in_character_config = character_config.get("general", SMALL_SPRITES_FIELD)
+    except (NoSectionError, NoOptionError):
+        in_character_config = False
 
     try:
         # This is gross.
