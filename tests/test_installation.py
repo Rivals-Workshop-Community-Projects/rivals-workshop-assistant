@@ -8,7 +8,12 @@ import rivals_workshop_assistant.assistant_config_mod
 from rivals_workshop_assistant import dotfile_mod, assistant_config_mod
 import rivals_workshop_assistant.updating as src
 from rivals_workshop_assistant.info_files import _yaml_load
-from tests.testing_helpers import make_version, make_release, TEST_DATE_STRING
+from tests.testing_helpers import (
+    make_version,
+    make_release,
+    TEST_DATE_STRING,
+    make_run_context,
+)
 from loguru import logger
 
 logger.remove()
@@ -21,7 +26,7 @@ def make_library_updater(
         exe_dir=exe_dir,
         root_dir=root_dir,
         dotfile=dotfile,
-        config=config,
+        assistant_config=config,
         type_=src.LibraryUpdater,
     )
 
@@ -33,19 +38,25 @@ def make_assistant_updater(
         exe_dir=exe_dir,
         root_dir=root_dir,
         dotfile=dotfile,
-        config=config,
+        assistant_config=config,
         type_=src.AssistantUpdater,
     )
 
 
 def _make_updater(
-    exe_dir: Path, root_dir: Path, dotfile: dict, config: dict, type_: typing.Type
+    exe_dir: Path,
+    root_dir: Path,
+    dotfile: dict,
+    assistant_config: dict,
+    type_: typing.Type,
 ):
-    if dotfile is None:
-        dotfile = {}
-    if config is None:
-        config = {}
-    return type_(exe_dir=exe_dir, root_dir=root_dir, dotfile=dotfile, config=config)
+    run_context = make_run_context(
+        exe_dir=exe_dir,
+        root_dir=root_dir,
+        dotfile=dotfile,
+        assistant_config=assistant_config,
+    )
+    return type_(run_context)
 
 
 @pytest.mark.parametrize(

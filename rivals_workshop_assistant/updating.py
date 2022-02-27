@@ -88,20 +88,10 @@ async def update(run_context: RunContext):
     if should_update(run_context.dotfile):
         update_backup_task = asyncio.create_task(update_backup(run_context.root_dir))
 
-        assistant_updater = AssistantUpdater(
-            exe_dir=run_context.exe_dir,
-            root_dir=run_context.root_dir,
-            dotfile=run_context.dotfile,
-            config=run_context.assistant_config,
-        )
+        assistant_updater = AssistantUpdater(run_context)
         update_assistant = asyncio.create_task(assistant_updater.update())
 
-        library_updater = LibraryUpdater(
-            exe_dir=run_context.exe_dir,
-            root_dir=run_context.root_dir,
-            dotfile=run_context.dotfile,
-            config=run_context.assistant_config,
-        )
+        library_updater = LibraryUpdater(run_context)
         update_library = asyncio.create_task(library_updater.update())
 
         await update_backup_task
@@ -150,11 +140,11 @@ async def update_backup(root_dir: Path):
 class Updater(abc.ABC):
     REPO_NAME = NotImplemented
 
-    def __init__(self, exe_dir: Path, root_dir: Path, dotfile: dict, config: dict):
-        self.exe_dir = exe_dir
-        self.root_dir = root_dir
-        self.dotfile = dotfile
-        self.config = config
+    def __init__(self, run_context: RunContext):
+        self.exe_dir = run_context.exe_dir
+        self.root_dir = run_context.root_dir
+        self.dotfile = run_context.dotfile
+        self.assistant_config = run_context.assistant_config
         self.current_version = self._get_current_version()
 
     async def update(self) -> Version:
@@ -201,15 +191,15 @@ class Updater(abc.ABC):
 class AssistantUpdater(Updater):
     REPO_NAME = paths.ASSISTANT_REPO_NAME
 
-    def __init__(self, exe_dir: Path, root_dir: Path, dotfile: dict, config: dict):
-        super().__init__(exe_dir, root_dir, dotfile, config)
+    def __init__(self, run_context: RunContext):
+        super().__init__(run_context)
 
     async def update(
         self,
     ) -> Optional[Version]:
         lua_scripts.delete_lua_scripts(self.exe_dir)
 
-        if not assistant_config_mod.get_assistant_self_update(self.config):
+        if not assistant_config_mod.get_assistant_self_update(self.assistant_config):
             return
 
         current_exe_path = paths.get_exe_path()
@@ -263,11 +253,13 @@ class AssistantUpdater(Updater):
 class LibraryUpdater(Updater):
     REPO_NAME = paths.LIBRARY_REPO_NAME
 
-    def __init__(self, exe_dir: Path, root_dir: Path, dotfile: dict, config: dict):
-        super().__init__(exe_dir, root_dir, dotfile, config)
+    def __init__(self, run_context: RunContext):
+        super().__init__(run_context)
 
     def _get_release_to_install(self):
-        update_level = assistant_config_mod.get_library_update_level(self.config)
+        update_level = assistant_config_mod.get_library_update_level(
+            self.assistant_config
+        )
         library_releases = self.get_releases()
         release_to_install = _get_legal_library_release_to_install(
             update_level, library_releases, self.current_version
