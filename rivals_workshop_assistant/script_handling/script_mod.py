@@ -101,3 +101,8 @@ def read_user_inject(run_context: RunContext) -> List[Script]:
 def read_lib_inject(run_context: RunContext) -> List[Script]:
     """Returns all Scripts in the .inject directory."""
     return read_scripts(run_context, folder=INJECT_FOLDER)
+
+
+def save_scripts(root_dir: Path, scripts: List["Script"]):
+    for script in scripts:
+        script.save(root_dir)

@@ -1,8 +1,8 @@
 import re
 from typing import List
 
-from rivals_workshop_assistant.script_mod import Script
-from rivals_workshop_assistant.warning_handling.base import (
+from rivals_workshop_assistant.script_handling.script_mod import Script
+from rivals_workshop_assistant.script_handling.warning_handling.base import (
     WarningType,
     is_line_suppressed,
     is_draw_script,

@@ -2,14 +2,17 @@ from pathlib import Path
 
 import pytest
 
-import rivals_workshop_assistant.warning_handling.desync as desync
-import rivals_workshop_assistant.warning_handling.hitpause as hitpause
-import rivals_workshop_assistant.warning_handling.warnings as warnings
+import rivals_workshop_assistant.script_handling.warning_handling.desync as desync
+import rivals_workshop_assistant.script_handling.warning_handling.hitpause as hitpause
+import rivals_workshop_assistant.script_handling.warning_handling.warnings as warnings
 from rivals_workshop_assistant.assistant_config_mod import (
     WARNINGS_FIELD,
     WARNING_DESYNC_OBJECT_VAR_SET_IN_DRAW_SCRIPT_VALUE,
 )
-from rivals_workshop_assistant.warning_handling import remove_warnings, handle_warning
+from rivals_workshop_assistant.script_handling.warning_handling import (
+    remove_warnings,
+    handle_warning,
+)
 from tests.testing_helpers import make_script
 from loguru import logger
 

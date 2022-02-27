@@ -4,11 +4,11 @@ import typing
 import parse
 from inflector import English
 
-from rivals_workshop_assistant.script_mod import Script
-from typing import List
+if typing.TYPE_CHECKING:
+    from rivals_workshop_assistant.script_handling.script_mod import Script
 
 
-def handle_codegen(scripts: List[Script]):
+def handle_codegen(scripts: list["Script"]):
     for script in scripts:
         if script.is_fresh:
             script.working_content = handle_codegen_for_script(script.working_content)

@@ -3,7 +3,7 @@ from pathlib import Path
 
 import pytest
 
-from rivals_workshop_assistant import code_generation as src
+from rivals_workshop_assistant.script_handling import code_generation as src
 from tests.testing_helpers import make_script, make_time, TEST_LATER_DATETIME_STRING
 from loguru import logger
 

@@ -1,7 +1,7 @@
 import asyncio
 from pathlib import Path
 
-from rivals_workshop_assistant.script_mod import Script
+from rivals_workshop_assistant.script_handling.script_mod import Script
 from .asset_types import Asset, ASSET_TYPES
 from typing import List, Set
 

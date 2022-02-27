@@ -4,9 +4,12 @@ from typing import Set
 from loguru import logger
 
 from rivals_workshop_assistant import assistant_config_mod as config_mod
-from rivals_workshop_assistant.warning_handling.base import WarningType
-from rivals_workshop_assistant.warning_handling import desync, set_attack
-from rivals_workshop_assistant.warning_handling import hitpause
+from rivals_workshop_assistant.script_handling.warning_handling.base import WarningType
+from rivals_workshop_assistant.script_handling.warning_handling import (
+    desync,
+    set_attack,
+)
+from rivals_workshop_assistant.script_handling.warning_handling import hitpause
 
 warning_names_to_types = {
     config_mod.WARNING_DESYNC_OBJECT_VAR_SET_IN_DRAW_SCRIPT_VALUE: [

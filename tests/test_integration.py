@@ -13,7 +13,7 @@ import rivals_workshop_assistant.aseprite_handling.anims
 import rivals_workshop_assistant.aseprite_handling.aseprites
 import rivals_workshop_assistant.assistant_config_mod
 import rivals_workshop_assistant.file_handling
-import rivals_workshop_assistant.script_mod
+from rivals_workshop_assistant.script_handling.script_mod import save_scripts
 import rivals_workshop_assistant.dotfile_mod
 import rivals_workshop_assistant.character_config_mod as character_config
 from tests import testing_helpers
@@ -29,16 +29,20 @@ from tests.testing_helpers import (
     make_test_config,
     make_run_context,
 )
-from rivals_workshop_assistant import paths, injection, info_files
+from rivals_workshop_assistant import paths, info_files
+from rivals_workshop_assistant.script_handling import injection
 from rivals_workshop_assistant.setup import make_basic_folder_structure
-from rivals_workshop_assistant.injection import apply_injection
+from rivals_workshop_assistant.script_handling.injection import apply_injection
 from rivals_workshop_assistant.paths import INJECT_FOLDER, USER_INJECT_FOLDER
-from rivals_workshop_assistant.injection.dependency_handling import Define
+from rivals_workshop_assistant.script_handling.injection.dependency_handling import (
+    Define,
+)
 import rivals_workshop_assistant.main as src
 from rivals_workshop_assistant.aseprite_handling import (
     AsepritePathParams,
     AsepriteConfigParams,
 )
+from rivals_workshop_assistant.script_handling.script_mod import read_scripts
 from loguru import logger
 
 logger.remove()
@@ -127,9 +131,7 @@ def test_read_scripts():
         create_script(tmp, script_1)
         create_script(tmp, script_subfolder)
 
-        result = rivals_workshop_assistant.script_mod.read_scripts(
-            make_run_context(root_dir=Path(tmp.path))
-        )
+        result = read_scripts(make_run_context(root_dir=Path(tmp.path)))
 
         assert result == [
             make_script_from_script_with_path(tmp, script_1),
@@ -154,9 +156,7 @@ async def test_full_injection():
         create_script(tmp, injection_at_root)
         create_script(tmp, injection_in_subfolder)
 
-        scripts = rivals_workshop_assistant.script_mod.read_scripts(
-            make_run_context(root_dir=Path(tmp.path))
-        )
+        scripts = read_scripts(make_run_context(root_dir=Path(tmp.path)))
         library = injection.read_injection_library(Path(tmp.path))
 
         apply_injection(scripts=scripts, injection_library=library, anims=[])
@@ -164,20 +164,20 @@ async def test_full_injection():
         expected_script_1 = f"""\
 {script_1.content}
 
-{injection.application.INJECTION_START_HEADER}
+{rivals_workshop_assistant.script_handling.injection.application.INJECTION_START_HEADER}
 {another_func.gml}
 
 {needs_other.gml}
 
 {other.gml}
-{injection.application.INJECTION_END_HEADER}"""
+{rivals_workshop_assistant.script_handling.injection.application.INJECTION_END_HEADER}"""
 
         expected_subfolder = f"""\
 {script_subfolder.content}
 
-{injection.application.INJECTION_START_HEADER}
+{rivals_workshop_assistant.script_handling.injection.application.INJECTION_START_HEADER}
 {func.gml}
-{injection.application.INJECTION_END_HEADER}"""
+{rivals_workshop_assistant.script_handling.injection.application.INJECTION_END_HEADER}"""
 
         assert scripts == [
             make_script(
@@ -192,9 +192,7 @@ async def test_full_injection():
             ),
         ]
 
-        rivals_workshop_assistant.file_handling.save_scripts(
-            root_dir=Path(tmp.path), scripts=scripts
-        )
+        save_scripts(root_dir=Path(tmp.path), scripts=scripts)
 
         actual_script_1 = tmp.read(script_1.path.as_posix(), encoding="utf8")
         assert actual_script_1 == expected_script_1
@@ -535,7 +533,7 @@ async def test__aseprites_set_window_data():
             == f"""\
 {bair.content}
 
-{injection.application.INJECTION_START_HEADER}
+{rivals_workshop_assistant.script_handling.injection.application.INJECTION_START_HEADER}
 #macro WINDOW1_FRAMES 1
 #define _get_window1_frames()
     return WINDOW1_FRAMES
@@ -549,7 +547,7 @@ async def test__aseprites_set_window_data():
 #macro WINDOW2_FRAME_START 1
 #define _get_window2_frame_start()
     return WINDOW2_FRAME_START
-{injection.application.INJECTION_END_HEADER}"""
+{rivals_workshop_assistant.script_handling.injection.application.INJECTION_END_HEADER}"""
         )
 
 

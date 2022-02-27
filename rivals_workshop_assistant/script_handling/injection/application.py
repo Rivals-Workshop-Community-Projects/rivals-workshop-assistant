@@ -4,10 +4,10 @@ from typing import List
 
 from .dependency_handling import GmlInjection
 from rivals_workshop_assistant.dotfile_mod import update_all_dotfile_injection_clients
-from ..aseprite_handling import Anim
+from rivals_workshop_assistant.aseprite_handling import Anim
 
 if typing.TYPE_CHECKING:
-    from rivals_workshop_assistant.script_mod import Script
+    from rivals_workshop_assistant.script_handling.script_mod import Script
 
 OLD_INJECTION_START_MARKERS = ["// vvv LIBRARY DEFINES AND MACROS vvv\n"]
 INJECTION_START_MARKER = "// #region vvv LIBRARY DEFINES AND MACROS vvv\n"

@@ -1,8 +1,8 @@
 import abc
 import re
 
-from rivals_workshop_assistant.script_mod import Script
-from rivals_workshop_assistant.warning_handling.base import (
+from rivals_workshop_assistant.script_handling.script_mod import Script
+from rivals_workshop_assistant.script_handling.warning_handling.base import (
     is_line_suppressed,
     WarningType,
 )

@@ -2,7 +2,7 @@ import abc
 from pathlib import Path
 from typing import List
 
-from rivals_workshop_assistant.script_mod import Script
+from rivals_workshop_assistant.script_handling.script_mod import Script
 
 WARNING_PREFIX = " // WARN: "
 

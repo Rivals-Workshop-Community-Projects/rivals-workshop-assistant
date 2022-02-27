@@ -1,11 +1,7 @@
 from datetime import datetime
 from pathlib import Path
-from typing import List, TYPE_CHECKING
 
 from loguru import logger
-
-if TYPE_CHECKING:
-    from rivals_workshop_assistant.script_mod import Script
 
 
 def create_file(path: Path, content: str, overwrite=False):
@@ -41,8 +37,3 @@ class File:
 
 def _get_modified_time(path: Path) -> datetime:
     return datetime.fromtimestamp(path.stat().st_mtime)
-
-
-def save_scripts(root_dir: Path, scripts: List["Script"]):
-    for script in scripts:
-        script.save(root_dir)

@@ -5,7 +5,7 @@ from configparser import ConfigParser, NoSectionError, NoOptionError
 from typing import List
 
 if typing.TYPE_CHECKING:
-    from rivals_workshop_assistant.script_mod import Script
+    from rivals_workshop_assistant.script_handling.script_mod import Script
 
 FILENAME = "config.ini"
 PATH = FILENAME

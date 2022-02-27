@@ -3,9 +3,12 @@ from pathlib import Path
 
 import pytest
 
-import rivals_workshop_assistant.injection.application as application
+import rivals_workshop_assistant.script_handling.injection.application as application
 from rivals_workshop_assistant.aseprite_handling import Window
-from rivals_workshop_assistant.injection.dependency_handling import Define, Macro
+from rivals_workshop_assistant.script_handling.injection.dependency_handling import (
+    Define,
+    Macro,
+)
 from tests.test_aseprite_handling import make_anim
 from tests.testing_helpers import (
     make_script,

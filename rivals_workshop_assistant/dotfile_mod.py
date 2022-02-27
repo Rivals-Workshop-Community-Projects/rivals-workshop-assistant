@@ -8,8 +8,8 @@ from rivals_workshop_assistant.paths import ASSISTANT_FOLDER
 from rivals_workshop_assistant.run_context import RunContext
 
 if typing.TYPE_CHECKING:
-    from rivals_workshop_assistant.script_mod import Script
-    from rivals_workshop_assistant.injection.dependency_handling import GmlInjection
+    from rivals_workshop_assistant.script_handling.script_mod import Script
+    from rivals_workshop_assistant.script_handling.injection import GmlInjection
 
 
 FILENAME = ".assistant"

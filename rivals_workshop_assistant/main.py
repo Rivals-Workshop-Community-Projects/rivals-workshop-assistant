@@ -1,6 +1,5 @@
 import asyncio
 import subprocess
-from typing import List
 import datetime
 import sys
 from pathlib import Path
@@ -11,9 +10,7 @@ from loguru import logger
 from rivals_workshop_assistant.filelock import FileLock
 from rivals_workshop_assistant import (
     updating,
-    assistant_config_mod,
     dotfile_mod,
-    character_config_mod,
     paths,
 )
 from rivals_workshop_assistant.character_config_mod import get_has_small_sprites
@@ -22,15 +19,18 @@ from rivals_workshop_assistant.dotfile_mod import (
 )
 from rivals_workshop_assistant.modes import Mode
 from rivals_workshop_assistant.paths import LOGS_FOLDER, ASSISTANT_FOLDER
-from rivals_workshop_assistant.run_context import RunContext
-from rivals_workshop_assistant.script_mod import (
+from rivals_workshop_assistant.run_context import (
+    RunContext,
+    make_run_context_from_paths,
+)
+from rivals_workshop_assistant.script_handling.script_mod import (
     read_scripts,
     Script,
     read_user_inject,
     read_lib_inject,
 )
+from rivals_workshop_assistant.script_handling.script_updating import update_scripts
 from rivals_workshop_assistant.aseprite_handling import (
-    Anim,
     AsepriteConfigParams,
     AsepritePathParams,
 )
@@ -39,10 +39,8 @@ from rivals_workshop_assistant.aseprite_handling.aseprites import (
     Aseprite,
 )
 from rivals_workshop_assistant.aseprite_handling.anims import (
-    get_anims,
     save_anims,
 )
-from rivals_workshop_assistant.file_handling import save_scripts
 from rivals_workshop_assistant.assistant_config_mod import (
     get_aseprite_program_path,
     get_hurtboxes_enabled,
@@ -53,12 +51,9 @@ from rivals_workshop_assistant.setup import (
     make_basic_folder_structure,
     get_assistant_folder_exists,
 )
-from rivals_workshop_assistant.injection import (
-    handle_injection,
+from rivals_workshop_assistant.script_handling.injection import (
     freshen_scripts_that_have_modified_dependencies,
 )
-from rivals_workshop_assistant.code_generation import handle_codegen
-from rivals_workshop_assistant.warning_handling import handle_warning
 
 __version__ = "1.2.27"
 
@@ -66,24 +61,63 @@ log_lines = []
 has_encountered_error = False
 
 
-def do_first_run():
-    print(
-        """\
-FIRST TIME SETUP
-An `assistant` folder should have been created for you.
-Stopping now so you have a chance to edit `assistant/assistant_config.yaml`.
-Next time, the assistant will run normally. 
-"""
+def run_as_file():
+    exe_dir = Path(sys.argv[0]).parent.absolute()
+    project_dir = Path(sys.argv[1]).absolute()
+    try:
+        mode_value = sys.argv[2]
+        try:
+            mode = Mode(mode_value)
+        except ValueError:
+            logger.error(
+                f"Invalid mode argument. f{mode_value}"
+                f"Valid modes are {[mode.name for mode in Mode]}"
+            )
+            mode = Mode.ALL
+    except IndexError:
+        # Argument not passed. Use default.
+        mode = Mode.ALL
+
+    try:
+        run_main_asyncio(exe_dir=exe_dir, project_dir=project_dir, mode=mode)
+    except Exception as e:
+        # This may be no longer needed because of @logger.catch
+        import traceback
+
+        print(e)
+        print("".join(traceback.format_tb(e.__traceback__)))
+    finally:
+        if has_encountered_error:
+            log = "".join(log_lines)
+
+            try:
+                from rivals_workshop_assistant.secrets import SLACK_WEBHOOK
+
+                notifiers.notify(
+                    "slack",
+                    webhook_url=SLACK_WEBHOOK,
+                    message=__version__,
+                    attachments=[{"title": "log", "text": log, "fallback": log}],
+                )
+            except ImportError:
+                logger.warning("Secrets file not present or malformed")
+
+
+@logger.catch
+def run_main_asyncio(
+    exe_dir: Path,
+    project_dir: Path,
+    guarantee_root_dir: bool = False,
+    mode: Mode = Mode.ALL,
+):
+    asyncio.run(
+        main(
+            exe_dir=exe_dir,
+            given_dir=project_dir,
+            guarantee_root_dir=guarantee_root_dir,
+            mode=mode,
+        )
     )
-
-
-def log_startup_context(exe_dir: Path, root_dir: Path, mode: Mode):
-    version_message = f"Assistant Version: {__version__}"
-    logger.info(version_message)
-    print(version_message)  # So that it always displays in the editor console.
-    logger.info(f"Exe dir: {exe_dir}")
-    logger.info(f"Root dir: {root_dir}")
-    logger.info(f"Mode: {mode.name}")
 
 
 async def main(
@@ -120,44 +154,6 @@ async def main(
     logger.info("Complete")
 
 
-def handle_scripts(
-    run_context: RunContext,
-    scripts: List[Script],
-    anims: List[Anim],
-):
-    handle_warning(assistant_config=run_context.assistant_config, scripts=scripts)
-    handle_codegen(scripts)
-    handle_injection(run_context, scripts=scripts, anims=anims)
-
-
-async def read_core_files(root_dir: Path) -> List[dict]:
-    """Return dotfile, assistant_config, character_config"""
-    tasks = [
-        asyncio.create_task(coro)
-        for coro in [
-            dotfile_mod.read(root_dir),
-            assistant_config_mod.read_project_config(root_dir),
-            character_config_mod.read(root_dir),
-        ]
-    ]
-    return [await task for task in tasks]
-
-
-def update_scripts(
-    run_context: RunContext, scripts: list[Script], aseprites: list[Aseprite]
-):
-    # I don't like that we need to load all anims to update scripts.
-    # Instead, could save the attack timing info to the dotfile when animations run,
-    # and then propagate to scripts. That would require doing animations first each run.
-    anims = get_anims(aseprites)
-    handle_scripts(
-        run_context=run_context,
-        scripts=scripts,
-        anims=anims,
-    )
-    save_scripts(run_context.root_dir, scripts)
-
-
 async def update_anims(
     run_context: RunContext,
     scripts: list[Script],
@@ -189,19 +185,24 @@ async def update_anims(
         )
 
 
-async def make_run_context_from_paths(exe_dir: Path, root_dir: Path) -> RunContext:
-    dotfile, assistant_config, character_config = await read_core_files(root_dir)
-    run_context = RunContext(
-        exe_dir=exe_dir,
-        root_dir=root_dir,
-        dotfile=dotfile,
-        assistant_config=assistant_config,
-        character_config=character_config,
+def do_first_run():
+    print(
+        """\
+FIRST TIME SETUP
+An `assistant` folder should have been created for you.
+Stopping now so you have a chance to edit `assistant/assistant_config.yaml`.
+Next time, the assistant will run normally. 
+"""
     )
-    logger.info(f"Dotfile is {dotfile}")
-    logger.info(f"assistant config is {assistant_config}")
-    logger.info(f"character config is {character_config}")
-    return run_context
+
+
+def log_startup_context(exe_dir: Path, root_dir: Path, mode: Mode):
+    version_message = f"Assistant Version: {__version__}"
+    logger.info(version_message)
+    print(version_message)  # So that it always displays in the editor console.
+    logger.info(f"Exe dir: {exe_dir}")
+    logger.info(f"Root dir: {root_dir}")
+    logger.info(f"Mode: {mode.name}")
 
 
 async def update_files(exe_dir: Path, root_dir: Path, mode: Mode.ALL):
@@ -275,65 +276,6 @@ def setup_logger(root_dir: Path):
     logger.add(sys.stdout, level="WARNING")
     logger.add(lambda message: log_lines.append(message))
     logger.add(lambda _: set_encountered_error(), level="ERROR")
-
-
-@logger.catch
-def run_main_asyncio(
-    exe_dir: Path,
-    project_dir: Path,
-    guarantee_root_dir: bool = False,
-    mode: Mode = Mode.ALL,
-):
-    asyncio.run(
-        main(
-            exe_dir=exe_dir,
-            given_dir=project_dir,
-            guarantee_root_dir=guarantee_root_dir,
-            mode=mode,
-        )
-    )
-
-
-def run_as_file():
-    exe_dir = Path(sys.argv[0]).parent.absolute()
-    project_dir = Path(sys.argv[1]).absolute()
-    try:
-        mode_value = sys.argv[2]
-        try:
-            mode = Mode(mode_value)
-        except ValueError:
-            logger.error(
-                f"Invalid mode argument. f{mode_value}"
-                f"Valid modes are {[mode.name for mode in Mode]}"
-            )
-            mode = Mode.ALL
-    except IndexError:
-        # Argument not passed. Use default.
-        mode = Mode.ALL
-
-    try:
-        run_main_asyncio(exe_dir=exe_dir, project_dir=project_dir, mode=mode)
-    except Exception as e:
-        # This may be no longer needed because of @logger.catch
-        import traceback
-
-        print(e)
-        print("".join(traceback.format_tb(e.__traceback__)))
-    finally:
-        if has_encountered_error:
-            log = "".join(log_lines)
-
-            try:
-                from rivals_workshop_assistant.secrets import SLACK_WEBHOOK
-
-                notifiers.notify(
-                    "slack",
-                    webhook_url=SLACK_WEBHOOK,
-                    message=__version__,
-                    attachments=[{"title": "log", "text": log, "fallback": log}],
-                )
-            except ImportError:
-                logger.warning("Secrets file not present or malformed")
 
 
 if __name__ == "__main__":
