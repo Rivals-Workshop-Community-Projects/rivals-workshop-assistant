@@ -242,7 +242,7 @@ async def update_files(exe_dir: Path, root_dir: Path, mode: Mode.ALL):
     assets = get_required_assets(scripts)
     await save_assets(run_context.root_dir, assets)
 
-    dotfile_mod.save_dotfile(run_context.root_dir, run_context.dotfile)
+    dotfile_mod.save_dotfile(run_context)
 
 
 def get_root_dir(given_dir: Path) -> Path:

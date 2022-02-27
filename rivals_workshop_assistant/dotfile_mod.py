@@ -5,6 +5,7 @@ from pathlib import Path
 import rivals_workshop_assistant.info_files as info_files
 from rivals_workshop_assistant.modes import Mode
 from rivals_workshop_assistant.paths import ASSISTANT_FOLDER
+from rivals_workshop_assistant.run_context import RunContext
 
 if typing.TYPE_CHECKING:
     from rivals_workshop_assistant.script_mod import Script
@@ -39,9 +40,9 @@ async def read(root_dir: Path) -> dict:
     return info_files.read(root_dir / PATH)
 
 
-def save_dotfile(root_dir: Path, content: dict):
+def save_dotfile(run_context: RunContext):
     """Controller"""
-    info_files.save(path=root_dir / PATH, content=content)
+    info_files.save(path=run_context.root_dir / PATH, content=run_context.dotfile)
 
 
 def update_dotfile_after_saving(dotfile: dict, now: datetime, mode: Mode):
