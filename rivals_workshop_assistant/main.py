@@ -16,8 +16,13 @@ from rivals_workshop_assistant import (
 from rivals_workshop_assistant.dotfile_mod import (
     update_dotfile_after_saving,
 )
+from rivals_workshop_assistant.logging import (
+    log_lines,
+    has_encountered_error,
+    setup_logger,
+    log_startup_context,
+)
 from rivals_workshop_assistant.modes import Mode
-from rivals_workshop_assistant.paths import LOGS_FOLDER, ASSISTANT_FOLDER
 from rivals_workshop_assistant.run_context import (
     make_run_context_from_paths,
 )
@@ -40,9 +45,6 @@ from rivals_workshop_assistant.script_handling.injection import (
 )
 
 __version__ = "1.2.27"
-
-log_lines = []
-has_encountered_error = False
 
 
 def run_as_file():
@@ -124,7 +126,9 @@ async def main(
         return
 
     setup_logger(root_dir=root_dir)
-    log_startup_context(exe_dir=exe_dir, root_dir=root_dir, mode=mode)
+    log_startup_context(
+        version=__version__, exe_dir=exe_dir, root_dir=root_dir, mode=mode
+    )
 
     lock = FileLock(root_dir / paths.LOCKFILE_PATH)
     try:
@@ -138,6 +142,21 @@ async def main(
     logger.info("Complete")
 
 
+def get_root_dir(given_dir: Path) -> Path:
+    """Return the absolute path to the character's root directory, containing
+    their config file.
+    Currently assumes that that path is passed as the first argument"""
+    if "config.ini" in [path.name for path in given_dir.glob("*")]:
+        return given_dir
+    else:
+        file_names = "\n".join([path.name for path in given_dir.glob("*")])
+        raise FileNotFoundError(
+            f"""Given folder does not contain config.ini.
+Current directory is: {given_dir}
+Files in current directory are: {file_names}"""
+        )
+
+
 def do_first_run():
     print(
         """\
@@ -149,16 +168,9 @@ Next time, the assistant will run normally.
     )
 
 
-def log_startup_context(exe_dir: Path, root_dir: Path, mode: Mode):
-    version_message = f"Assistant Version: {__version__}"
-    logger.info(version_message)
-    print(version_message)  # So that it always displays in the editor console.
-    logger.info(f"Exe dir: {exe_dir}")
-    logger.info(f"Root dir: {root_dir}")
-    logger.info(f"Mode: {mode.name}")
-
-
 async def update_files(exe_dir: Path, root_dir: Path, mode: Mode.ALL):
+    """Perform all the assistant's processing and save the resulting files"""
+
     run_context = await make_run_context_from_paths(exe_dir=exe_dir, root_dir=root_dir)
 
     await updating.update(run_context)
@@ -197,38 +209,6 @@ async def update_files(exe_dir: Path, root_dir: Path, mode: Mode.ALL):
     await save_assets(run_context.root_dir, assets)
 
     dotfile_mod.save_dotfile(run_context)
-
-
-def get_root_dir(given_dir: Path) -> Path:
-    """Return the absolute path to the character's root directory, containing
-    their config file.
-    Currently assumes that that path is passed as the first argument"""
-    if "config.ini" in [path.name for path in given_dir.glob("*")]:
-        return given_dir
-    else:
-        file_names = "\n".join([path.name for path in given_dir.glob("*")])
-        raise FileNotFoundError(
-            f"""Given folder does not contain config.ini.
-Current directory is: {given_dir}
-Files in current directory are: {file_names}"""
-        )
-
-
-def set_encountered_error():
-    global has_encountered_error
-    has_encountered_error = True
-
-
-def setup_logger(root_dir: Path):
-    logger.add(
-        root_dir / ASSISTANT_FOLDER / LOGS_FOLDER / f"assistant_{{time}}.log",
-        retention="2 days",
-        backtrace=True,
-        diagnose=True,
-    )
-    logger.add(sys.stdout, level="WARNING")
-    logger.add(lambda message: log_lines.append(message))
-    logger.add(lambda _: set_encountered_error(), level="ERROR")
 
 
 if __name__ == "__main__":
