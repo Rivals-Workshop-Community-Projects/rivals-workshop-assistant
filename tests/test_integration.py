@@ -27,6 +27,7 @@ from tests.testing_helpers import (
     TEST_ANIM_NAME,
     get_aseprite_path,
     make_test_config,
+    make_run_context,
 )
 from rivals_workshop_assistant import paths, injection, info_files
 from rivals_workshop_assistant.setup import make_basic_folder_structure
@@ -126,7 +127,9 @@ def test_read_scripts():
         create_script(tmp, script_1)
         create_script(tmp, script_subfolder)
 
-        result = rivals_workshop_assistant.script_mod.read_scripts(Path(tmp.path), {})
+        result = rivals_workshop_assistant.script_mod.read_scripts(
+            make_run_context(root_dir=Path(tmp.path))
+        )
 
         assert result == [
             make_script_from_script_with_path(tmp, script_1),
@@ -151,7 +154,9 @@ async def test_full_injection():
         create_script(tmp, injection_at_root)
         create_script(tmp, injection_in_subfolder)
 
-        scripts = rivals_workshop_assistant.script_mod.read_scripts(Path(tmp.path), {})
+        scripts = rivals_workshop_assistant.script_mod.read_scripts(
+            make_run_context(root_dir=Path(tmp.path))
+        )
         library = injection.read_injection_library(Path(tmp.path))
 
         apply_injection(scripts=scripts, injection_library=library, anims=[])

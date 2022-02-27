@@ -209,10 +209,10 @@ async def update_files(exe_dir: Path, root_dir: Path, mode: Mode.ALL):
 
     await updating.update(run_context)
 
-    scripts = read_scripts(run_context.root_dir, run_context.dotfile)
+    scripts = read_scripts(run_context)
 
-    user_inject_scripts = read_user_inject(run_context.root_dir, run_context.dotfile)
-    lib_inject_scripts = read_lib_inject(run_context.root_dir, run_context.dotfile)
+    user_inject_scripts = read_user_inject(run_context)
+    lib_inject_scripts = read_lib_inject(run_context)
 
     freshen_scripts_that_have_modified_dependencies(
         run_context.dotfile,

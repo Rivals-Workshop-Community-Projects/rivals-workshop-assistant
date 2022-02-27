@@ -1,3 +1,4 @@
+# noinspection PyPackageRequirements
 from backports.cached_property import cached_property
 from pathlib import Path
 from datetime import datetime
@@ -16,6 +17,7 @@ from rivals_workshop_assistant.paths import (
     INJECT_FOLDER,
     USER_INJECT_FOLDER,
 )
+from rivals_workshop_assistant.run_context import RunContext
 
 
 class Script(File):
@@ -74,12 +76,10 @@ class Script(File):
         )
 
 
-def read_scripts(
-    root_dir: Path, dotfile: dict, folder: str = SCRIPTS_FOLDER
-) -> List[Script]:
+def read_scripts(run_context: RunContext, folder: str = SCRIPTS_FOLDER) -> List[Script]:
     """Returns all Scripts in a given directory (defaults to the scripts folder)."""
-    gml_paths = list((root_dir / folder).rglob("*.gml"))
-    processed_time = get_script_processed_time(dotfile=dotfile)
+    gml_paths = list((run_context.root_dir / folder).rglob("*.gml"))
+    processed_time = get_script_processed_time(dotfile=run_context.dotfile)
 
     scripts = []
     for path in gml_paths:
@@ -93,11 +93,11 @@ def read_scripts(
     return scripts
 
 
-def read_user_inject(root_dir: Path, dotfile: dict) -> List[Script]:
+def read_user_inject(run_context: RunContext) -> List[Script]:
     """Returns all Scripts in the user_inject directory."""
-    return read_scripts(root_dir=root_dir, dotfile=dotfile, folder=USER_INJECT_FOLDER)
+    return read_scripts(run_context, folder=USER_INJECT_FOLDER)
 
 
-def read_lib_inject(root_dir: Path, dotfile: dict) -> List[Script]:
+def read_lib_inject(run_context: RunContext) -> List[Script]:
     """Returns all Scripts in the .inject directory."""
-    return read_scripts(root_dir=root_dir, dotfile=dotfile, folder=INJECT_FOLDER)
+    return read_scripts(run_context, folder=INJECT_FOLDER)

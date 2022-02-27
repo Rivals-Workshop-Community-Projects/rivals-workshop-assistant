@@ -312,6 +312,7 @@ content
 def test_loads_dependency_gets_docs(content, define):
     actual_library = get_injection_library_from_gml(content)
 
+    # noinspection PyUnresolvedReferences
     assert actual_library[0].docs == define.docs
 
 

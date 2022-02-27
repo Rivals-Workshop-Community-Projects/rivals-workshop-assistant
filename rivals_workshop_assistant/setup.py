@@ -1,7 +1,7 @@
 from pathlib import Path
 
 import rivals_workshop_assistant.assistant_config_mod
-from rivals_workshop_assistant import paths, assistant_config_mod, dotfile_mod
+from rivals_workshop_assistant import paths
 from rivals_workshop_assistant.info_files import _yaml_dumps
 from rivals_workshop_assistant.injection.installation import (
     ANIMS_FOLDER_README,
