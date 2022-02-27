@@ -220,11 +220,7 @@ async def update_files(exe_dir: Path, root_dir: Path, mode: Mode.ALL):
         inject_scripts=user_inject_scripts + lib_inject_scripts,
     )
 
-    aseprites = read_aseprites(
-        root_dir=run_context.root_dir,
-        dotfile=run_context.dotfile,
-        assistant_config=run_context.assistant_config,
-    )
+    aseprites = read_aseprites(run_context)
     if mode in (mode.ALL, mode.SCRIPTS):
         update_scripts(
             root_dir=run_context.root_dir,

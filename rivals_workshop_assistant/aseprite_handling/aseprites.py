@@ -13,6 +13,7 @@ from rivals_workshop_assistant.aseprite_handling._aseprite_loading import (
     RawAsepriteFile,
 )
 from rivals_workshop_assistant.aseprite_handling.layers import AsepriteLayers
+from rivals_workshop_assistant.run_context import RunContext
 
 if TYPE_CHECKING:
     from rivals_workshop_assistant.aseprite_handling.tags import TagColor
@@ -182,22 +183,19 @@ class Aseprite(File):
         return windows
 
 
-def read_aseprites(
-    root_dir: Path, dotfile: dict, assistant_config: dict
-) -> List[Aseprite]:
+def read_aseprites(run_context: RunContext) -> List[Aseprite]:
     ase_paths: Iterable[Path] = itertools.chain(
         *[
-            list((root_dir / "anims").rglob(f"*.{filetype}"))
+            list((run_context.root_dir / "anims").rglob(f"*.{filetype}"))
             for filetype in ("ase", "aseprite")
         ]
     )
-    processed_time = get_script_processed_time(dotfile=dotfile)
+    processed_time = get_script_processed_time(dotfile=run_context.dotfile)
     aseprites = []
     for path in ase_paths:
         aseprite = read_aseprite(
+            run_context=run_context,
             path=path,
-            dotfile=dotfile,
-            assistant_config=assistant_config,
             processed_time=processed_time,
         )
         aseprites.append(aseprite)
@@ -205,17 +203,23 @@ def read_aseprites(
 
 
 def read_aseprite(
-    path: Path, dotfile: dict, assistant_config: dict, processed_time: datetime = None
+    run_context: RunContext, path: Path, processed_time: datetime = None
 ) -> Aseprite:
     if processed_time is None:
-        processed_time = get_script_processed_time(dotfile=dotfile)
+        processed_time = get_script_processed_time(dotfile=run_context.dotfile)
 
     aseprite = Aseprite(
         path=path,
         modified_time=_get_modified_time(path),
         processed_time=processed_time,
-        anim_tag_colors=assistant_config_mod.get_anim_tag_color(assistant_config),
-        window_tag_colors=assistant_config_mod.get_window_tag_color(assistant_config),
-        anim_hashes=dotfile.setdefault("anim_hashes", {}).setdefault(path.stem, {}),
+        anim_tag_colors=assistant_config_mod.get_anim_tag_color(
+            run_context.assistant_config
+        ),
+        window_tag_colors=assistant_config_mod.get_window_tag_color(
+            run_context.assistant_config
+        ),
+        anim_hashes=run_context.dotfile.setdefault("anim_hashes", {}).setdefault(
+            path.stem, {}
+        ),
     )
     return aseprite

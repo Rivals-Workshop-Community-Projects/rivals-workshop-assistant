@@ -274,7 +274,7 @@ def test__read_aseprites():
         supply_aseprites(tmp, TEST_ANIM_NAME)
 
         result = rivals_workshop_assistant.aseprite_handling.aseprites.read_aseprites(
-            root_dir=Path(tmp.path), dotfile={}, assistant_config={}
+            make_run_context(root_dir=Path(tmp.path))
         )
         assert len(result) == 1
         assert result[0].path == Path(tmp.path) / paths.ANIMS_FOLDER / TEST_ANIM_NAME

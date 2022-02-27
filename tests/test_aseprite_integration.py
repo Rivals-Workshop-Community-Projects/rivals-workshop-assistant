@@ -14,6 +14,7 @@ from rivals_workshop_assistant.assistant_config_mod import ANIM_TAG_COLOR_FIELD
 from tests.testing_helpers import (
     get_aseprite_path,
     assert_images_equal,
+    make_run_context,
 )
 from loguru import logger
 
@@ -49,7 +50,10 @@ async def assert_aseprite_saves_right_anims(
 
     path = TEST_SPRITES_PATH / f"{aseprite_file_name}.aseprite"
     aseprite = read_aseprite(
-        path=path, dotfile=dotfile, assistant_config=assistant_config
+        run_context=make_run_context(
+            dotfile=dotfile, assistant_config=assistant_config
+        ),
+        path=path,
     )
     with TempDirectory() as root_dir, TempDirectory() as exe_dir:
         root_dir = Path(root_dir.path)
