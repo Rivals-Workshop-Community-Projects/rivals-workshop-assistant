@@ -189,7 +189,7 @@ async def update_anims(
         )
 
 
-async def make_run_context(exe_dir: Path, root_dir: Path) -> RunContext:
+async def make_run_context_from_paths(exe_dir: Path, root_dir: Path) -> RunContext:
     dotfile, assistant_config, character_config = await read_core_files(root_dir)
     run_context = RunContext(
         exe_dir=exe_dir,
@@ -205,7 +205,7 @@ async def make_run_context(exe_dir: Path, root_dir: Path) -> RunContext:
 
 
 async def update_files(exe_dir: Path, root_dir: Path, mode: Mode.ALL):
-    run_context = await make_run_context(exe_dir=exe_dir, root_dir=root_dir)
+    run_context = await make_run_context_from_paths(exe_dir=exe_dir, root_dir=root_dir)
 
     await updating.update(run_context)
 
