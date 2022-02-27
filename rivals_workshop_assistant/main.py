@@ -1,6 +1,5 @@
 import asyncio
 import subprocess
-from dataclasses import dataclass
 from typing import List
 import datetime
 import sys
@@ -23,6 +22,7 @@ from rivals_workshop_assistant.dotfile_mod import (
 )
 from rivals_workshop_assistant.modes import Mode
 from rivals_workshop_assistant.paths import LOGS_FOLDER, ASSISTANT_FOLDER
+from rivals_workshop_assistant.run_context import RunContext
 from rivals_workshop_assistant.script_mod import (
     read_scripts,
     Script,
@@ -81,15 +81,6 @@ def log_startup_context(exe_dir: Path, root_dir: Path, mode: Mode):
     logger.info(f"Exe dir: {exe_dir}")
     logger.info(f"Project dir: {root_dir}")
     logger.info(f"Mode: {mode.name}")
-
-
-@dataclass
-class RunContext:
-    exe_dir: Path
-    root_dir: Path
-    dotfile: dict
-    assistant_config: dict
-    character_config: dict
 
 
 async def main(
@@ -201,13 +192,18 @@ async def update_anims(
 async def update_files(exe_dir: Path, root_dir: Path, mode: Mode.ALL):
     # todo refactor this
     dotfile, assistant_config, character_config = await read_core_files(root_dir)
+    run_context = RunContext(
+        exe_dir=exe_dir,
+        root_dir=root_dir,
+        dotfile=dotfile,
+        assistant_config=assistant_config,
+        character_config=character_config,
+    )
     logger.info(f"Dotfile is {dotfile}")
     logger.info(f"assistant config is {assistant_config}")
     logger.info(f"character config is {character_config}")
 
-    await updating.update(
-        exe_dir=exe_dir, root_dir=root_dir, dotfile=dotfile, config=assistant_config
-    )
+    await updating.update(run_context)
 
     scripts = read_scripts(root_dir, dotfile)
 

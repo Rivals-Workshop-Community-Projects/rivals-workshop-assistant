@@ -9,6 +9,7 @@ from testfixtures import TempDirectory
 
 import rivals_workshop_assistant.updating
 from rivals_workshop_assistant import assistant_config_mod
+from rivals_workshop_assistant.run_context import RunContext
 from rivals_workshop_assistant.script_mod import Script
 from rivals_workshop_assistant.aseprite_handling.aseprites import Aseprite
 from loguru import logger
@@ -22,6 +23,28 @@ def pytest_configure(config):
     config.addinivalue_line(
         "markers",
         "aseprite: require a path to a working aseprite.exe in dev_config.ini",
+    )
+
+
+def make_run_context(
+    exe_dir: Path = Path("exe_dir"),
+    root_dir: Path = PATH_A,
+    dotfile: dict = None,
+    assistant_config: dict = None,
+    character_config: dict = None,
+):
+    if dotfile is None:
+        dotfile = {}
+    if assistant_config is None:
+        assistant_config = {}
+    if character_config is None:
+        character_config = {}
+    return RunContext(
+        exe_dir=exe_dir,
+        root_dir=root_dir,
+        dotfile=dotfile,
+        assistant_config=assistant_config,
+        character_config=character_config,
     )
 
 

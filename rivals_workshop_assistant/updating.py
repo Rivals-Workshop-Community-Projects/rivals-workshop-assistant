@@ -24,6 +24,7 @@ from rivals_workshop_assistant.dotfile_mod import (
     ASSISTANT_VERSION_FIELD,
     LIBRARY_VERSION_FIELD,
 )
+from rivals_workshop_assistant.run_context import RunContext
 
 
 @dataclasses.dataclass
@@ -81,19 +82,25 @@ class Release:
             return None
 
 
-async def update(exe_dir: Path, root_dir: Path, dotfile: dict, config: dict):
+async def update(run_context: RunContext):
     """Runs all self-updates.
     Controller"""
-    if should_update(dotfile):
-        update_backup_task = asyncio.create_task(update_backup(root_dir))
+    if should_update(run_context.dotfile):
+        update_backup_task = asyncio.create_task(update_backup(run_context.root_dir))
 
         assistant_updater = AssistantUpdater(
-            exe_dir=exe_dir, root_dir=root_dir, dotfile=dotfile, config=config
+            exe_dir=run_context.exe_dir,
+            root_dir=run_context.root_dir,
+            dotfile=run_context.dotfile,
+            config=run_context.assistant_config,
         )
         update_assistant = asyncio.create_task(assistant_updater.update())
 
         library_updater = LibraryUpdater(
-            exe_dir=exe_dir, root_dir=root_dir, dotfile=dotfile, config=config
+            exe_dir=run_context.exe_dir,
+            root_dir=run_context.root_dir,
+            dotfile=run_context.dotfile,
+            config=run_context.assistant_config,
         )
         update_library = asyncio.create_task(library_updater.update())
 
@@ -105,7 +112,7 @@ async def update(exe_dir: Path, root_dir: Path, dotfile: dict, config: dict):
             assistant_version=new_assistant_version,
             library_version=new_library_version,
             last_updated=datetime.date.today(),
-            dotfile=dotfile,
+            dotfile=run_context.dotfile,
         )
 
 
