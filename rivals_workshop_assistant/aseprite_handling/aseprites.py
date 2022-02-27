@@ -124,7 +124,7 @@ class Aseprite(File):
 
     def get_anims(self):
         tag_anims = [
-            self.make_anim(
+            self.make_anim_with_windows_in_range(
                 name=tag.name,
                 start=tag.start,
                 end=tag.end,
@@ -139,7 +139,7 @@ class Aseprite(File):
             return tag_anims
         else:
             return [
-                self.make_anim(
+                self.make_anim_with_windows_in_range(
                     name=self.name,
                     start=0,
                     end=self.content.num_frames - 1,
@@ -149,7 +149,7 @@ class Aseprite(File):
                 )
             ]
 
-    def make_anim(
+    def make_anim_with_windows_in_range(
         self,
         name: str,
         start: int,
