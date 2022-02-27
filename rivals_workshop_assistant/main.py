@@ -34,7 +34,10 @@ from rivals_workshop_assistant.aseprite_handling import (
     AsepriteConfigParams,
     AsepritePathParams,
 )
-from rivals_workshop_assistant.aseprite_handling.aseprites import read_aseprites
+from rivals_workshop_assistant.aseprite_handling.aseprites import (
+    read_aseprites,
+    Aseprite,
+)
 from rivals_workshop_assistant.aseprite_handling.anims import (
     get_anims,
     save_anims,
@@ -118,15 +121,13 @@ async def main(
 
 
 def handle_scripts(
-    root_dir: Path,
+    run_context: RunContext,
     scripts: List[Script],
     anims: List[Anim],
-    assistant_config: dict,
-    dotfile: dict,
 ):
-    handle_warning(assistant_config=assistant_config, scripts=scripts)
+    handle_warning(assistant_config=run_context.assistant_config, scripts=scripts)
     handle_codegen(scripts)
-    handle_injection(root_dir=root_dir, scripts=scripts, anims=anims, dotfile=dotfile)
+    handle_injection(run_context, scripts=scripts, anims=anims)
 
 
 async def read_core_files(root_dir: Path) -> List[dict]:
@@ -142,19 +143,19 @@ async def read_core_files(root_dir: Path) -> List[dict]:
     return [await task for task in tasks]
 
 
-def update_scripts(root_dir: Path, scripts, assistant_config, dotfile, aseprites):
+def update_scripts(
+    run_context: RunContext, scripts: list[Script], aseprites: list[Aseprite]
+):
     # I don't like that we need to load all anims to update scripts.
     # Instead, could save the attack timing info to the dotfile when animations run,
     # and then propagate to scripts. That would require doing animations first each run.
     anims = get_anims(aseprites)
     handle_scripts(
-        root_dir=root_dir,
+        run_context=run_context,
         scripts=scripts,
-        assistant_config=assistant_config,
         anims=anims,
-        dotfile=dotfile,
     )
-    save_scripts(root_dir, scripts)
+    save_scripts(run_context.root_dir, scripts)
 
 
 async def update_anims(
@@ -223,10 +224,8 @@ async def update_files(exe_dir: Path, root_dir: Path, mode: Mode.ALL):
     aseprites = read_aseprites(run_context)
     if mode in (mode.ALL, mode.SCRIPTS):
         update_scripts(
-            root_dir=run_context.root_dir,
+            run_context=run_context,
             scripts=scripts,
-            assistant_config=run_context.assistant_config,
-            dotfile=run_context.dotfile,
             aseprites=aseprites,
         )
 
