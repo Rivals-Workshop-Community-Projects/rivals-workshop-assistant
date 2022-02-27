@@ -159,14 +159,11 @@ def update_scripts(
 
 
 async def update_anims(
-    root_dir: Path,
-    exe_dir: Path,
-    scripts,
-    assistant_config,
-    character_config,
-    aseprites,
+    run_context: RunContext,
+    scripts: list[Script],
+    aseprites: list[Aseprite],
 ):
-    aseprite_program_path = get_aseprite_program_path(assistant_config)
+    aseprite_program_path = get_aseprite_program_path(run_context.assistant_config)
     if aseprite_program_path:
         version = subprocess.check_output(
             [f"{aseprite_program_path}", "--version"]
@@ -175,16 +172,18 @@ async def update_anims(
         logger.info(f"Aseprite version is: {version}")
         await save_anims(
             path_params=AsepritePathParams(
-                exe_dir=exe_dir,
-                root_dir=root_dir,
+                exe_dir=run_context.exe_dir,
+                root_dir=run_context.root_dir,
                 aseprite_program_path=aseprite_program_path,
             ),
             config_params=AsepriteConfigParams(
                 has_small_sprites=get_has_small_sprites(
-                    scripts=scripts, character_config=character_config
+                    scripts=scripts, character_config=run_context.character_config
                 ),
-                hurtboxes_enabled=get_hurtboxes_enabled(config=assistant_config),
-                is_ssl=get_is_ssl(config=assistant_config),
+                hurtboxes_enabled=get_hurtboxes_enabled(
+                    assistant_config=run_context.assistant_config
+                ),
+                is_ssl=get_is_ssl(assistant_config=run_context.assistant_config),
             ),
             aseprites=aseprites,
         )
@@ -231,11 +230,8 @@ async def update_files(exe_dir: Path, root_dir: Path, mode: Mode.ALL):
 
     if mode in (mode.ALL, mode.ANIMS):
         await update_anims(
-            root_dir=run_context.root_dir,
-            exe_dir=run_context.exe_dir,
+            run_context=run_context,
             scripts=scripts,
-            assistant_config=run_context.assistant_config,
-            character_config=run_context.character_config,
             aseprites=aseprites,
         )
 

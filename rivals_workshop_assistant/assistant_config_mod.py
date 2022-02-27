@@ -105,16 +105,16 @@ GENERATE_HURTBOXES_FIELD = "generate_hurtboxes"
 GENERATE_HURTBOXES_DEFAULT = True
 
 
-def get_hurtboxes_enabled(config: dict):
-    return config.get(GENERATE_HURTBOXES_FIELD, GENERATE_HURTBOXES_DEFAULT)
+def get_hurtboxes_enabled(assistant_config: dict):
+    return assistant_config.get(GENERATE_HURTBOXES_FIELD, GENERATE_HURTBOXES_DEFAULT)
 
 
 IS_SSL_FIELD = "is_ssl"
 IS_SSL_DEFAULT = False
 
 
-def get_is_ssl(config: dict):
-    return config.get(IS_SSL_FIELD, IS_SSL_DEFAULT)
+def get_is_ssl(assistant_config: dict):
+    return assistant_config.get(IS_SSL_FIELD, IS_SSL_DEFAULT)
 
 
 DEFAULT_CONFIG = f"""\
