@@ -79,7 +79,7 @@ def log_startup_context(exe_dir: Path, root_dir: Path, mode: Mode):
     logger.info(version_message)
     print(version_message)  # So that it always displays in the editor console.
     logger.info(f"Exe dir: {exe_dir}")
-    logger.info(f"Project dir: {root_dir}")
+    logger.info(f"Root dir: {root_dir}")
     logger.info(f"Mode: {mode.name}")
 
 
@@ -189,8 +189,7 @@ async def update_anims(
         )
 
 
-async def update_files(exe_dir: Path, root_dir: Path, mode: Mode.ALL):
-    # todo refactor this
+async def make_run_context(exe_dir: Path, root_dir: Path) -> RunContext:
     dotfile, assistant_config, character_config = await read_core_files(root_dir)
     run_context = RunContext(
         exe_dir=exe_dir,
@@ -202,50 +201,57 @@ async def update_files(exe_dir: Path, root_dir: Path, mode: Mode.ALL):
     logger.info(f"Dotfile is {dotfile}")
     logger.info(f"assistant config is {assistant_config}")
     logger.info(f"character config is {character_config}")
+    return run_context
+
+
+async def update_files(exe_dir: Path, root_dir: Path, mode: Mode.ALL):
+    run_context = await make_run_context(exe_dir=exe_dir, root_dir=root_dir)
 
     await updating.update(run_context)
 
-    scripts = read_scripts(root_dir, dotfile)
+    scripts = read_scripts(run_context.root_dir, run_context.dotfile)
 
-    user_inject_scripts = read_user_inject(root_dir, dotfile)
-    lib_inject_scripts = read_lib_inject(root_dir, dotfile)
+    user_inject_scripts = read_user_inject(run_context.root_dir, run_context.dotfile)
+    lib_inject_scripts = read_lib_inject(run_context.root_dir, run_context.dotfile)
 
     freshen_scripts_that_have_modified_dependencies(
-        dotfile,
+        run_context.dotfile,
         scripts=scripts,
         inject_scripts=user_inject_scripts + lib_inject_scripts,
     )
 
     aseprites = read_aseprites(
-        root_dir=root_dir,
-        dotfile=dotfile,
-        assistant_config=assistant_config,
+        root_dir=run_context.root_dir,
+        dotfile=run_context.dotfile,
+        assistant_config=run_context.assistant_config,
     )
     if mode in (mode.ALL, mode.SCRIPTS):
         update_scripts(
-            root_dir=root_dir,
+            root_dir=run_context.root_dir,
             scripts=scripts,
-            assistant_config=assistant_config,
-            dotfile=dotfile,
+            assistant_config=run_context.assistant_config,
+            dotfile=run_context.dotfile,
             aseprites=aseprites,
         )
 
     if mode in (mode.ALL, mode.ANIMS):
         await update_anims(
-            root_dir=root_dir,
-            exe_dir=exe_dir,
+            root_dir=run_context.root_dir,
+            exe_dir=run_context.exe_dir,
             scripts=scripts,
-            assistant_config=assistant_config,
-            character_config=character_config,
+            assistant_config=run_context.assistant_config,
+            character_config=run_context.character_config,
             aseprites=aseprites,
         )
 
-    update_dotfile_after_saving(now=datetime.datetime.now(), dotfile=dotfile, mode=mode)
+    update_dotfile_after_saving(
+        now=datetime.datetime.now(), dotfile=run_context.dotfile, mode=mode
+    )
 
     assets = get_required_assets(scripts)
-    await save_assets(root_dir, assets)
+    await save_assets(run_context.root_dir, assets)
 
-    dotfile_mod.save_dotfile(root_dir, dotfile)
+    dotfile_mod.save_dotfile(run_context.root_dir, run_context.dotfile)
 
 
 def get_root_dir(given_dir: Path) -> Path:
