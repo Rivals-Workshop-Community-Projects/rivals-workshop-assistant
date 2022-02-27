@@ -278,7 +278,7 @@ def setup_logger(root_dir: Path):
 
 
 @logger.catch
-def run_main(
+def run_main_asyncio(
     exe_dir: Path,
     project_dir: Path,
     guarantee_root_dir: bool = False,
@@ -312,7 +312,7 @@ def run_as_file():
         mode = Mode.ALL
 
     try:
-        run_main(exe_dir=exe_dir, project_dir=project_dir, mode=mode)
+        run_main_asyncio(exe_dir=exe_dir, project_dir=project_dir, mode=mode)
     except Exception as e:
         # This may be no longer needed because of @logger.catch
         import traceback
