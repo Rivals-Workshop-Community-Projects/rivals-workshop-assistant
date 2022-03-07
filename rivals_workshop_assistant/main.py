@@ -16,7 +16,7 @@ from rivals_workshop_assistant import (
 from rivals_workshop_assistant.dotfile_mod import (
     update_dotfile_after_saving,
 )
-from rivals_workshop_assistant.logging import (
+from rivals_workshop_assistant.custom_logging import (
     log_lines,
     has_encountered_error,
     setup_logger,
