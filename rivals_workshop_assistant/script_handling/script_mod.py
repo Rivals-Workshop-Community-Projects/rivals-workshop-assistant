@@ -75,6 +75,9 @@ class Script(File):
             and self.is_fresh == other.is_fresh
         )
 
+    def __str__(self):
+        return self.path.name
+
 
 def read_scripts(run_context: RunContext, folder: str = SCRIPTS_FOLDER) -> List[Script]:
     """Returns all Scripts in a given directory (defaults to the scripts folder)."""

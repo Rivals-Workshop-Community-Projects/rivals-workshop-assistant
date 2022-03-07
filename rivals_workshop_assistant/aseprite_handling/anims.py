@@ -254,6 +254,9 @@ class Anim(TagObject):
     def _save_hash(self):
         self.anim_hashes[self.name] = self._frame_hash
 
+    def __str__(self):
+        return self.name
+
 
 def _get_layer_indices(layers: List[LayerChunk]) -> List[int]:
     # change to 1-indexing
