@@ -32,7 +32,7 @@ async def make_run_context_from_paths(exe_dir: Path, root_dir: Path) -> RunConte
     )
     logger.info(f"Dotfile is {dotfile}")
     logger.info(f"assistant config is {assistant_config}")
-    logger.info(f"character config is {character_config}")
+    logger.info(f"character config is {dict(character_config)}")
     return run_context
 
 

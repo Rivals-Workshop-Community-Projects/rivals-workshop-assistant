@@ -182,6 +182,9 @@ class Aseprite(File):
         ]
         return windows
 
+    def __str__(self):
+        return self.path.name
+
 
 def read_aseprites(run_context: RunContext) -> List[Aseprite]:
     ase_paths: Iterable[Path] = itertools.chain(
