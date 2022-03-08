@@ -39,11 +39,6 @@ if TYPE_CHECKING:
     )
 
 
-class AnimHashes:
-    def __init__(self, dotfile: dict):
-        self.dict = dotfile.get("anim_hashes", {})
-
-
 class Anim(TagObject):
     def __init__(
         self,
