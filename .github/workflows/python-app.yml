@@ -34,3 +34,6 @@ jobs:
     - name: Test with pytest
       run: |
         pytest -v -m "not aseprite"
+
+    - name: Qodana Scan
+      uses: JetBrains/qodana-action@v4.2.5
