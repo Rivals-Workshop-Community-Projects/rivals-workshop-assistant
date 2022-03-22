@@ -32,7 +32,7 @@ def test_apply_injection_no_injections():
 def test_apply_injection_irrelevant_injection():
     orig_scripts = [make_script(PATH_A, "content")]
     scripts = deepcopy(orig_scripts)
-    define = Define(name="", version=0, docs="", content="")
+    define = Define(name="irrelevant", version=0, docs="", content="")
 
     application.apply_injection(scripts=scripts, injection_library=[define], anims=[])
     assert orig_scripts == scripts
