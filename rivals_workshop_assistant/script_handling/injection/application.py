@@ -129,7 +129,7 @@ def _get_injects_used_in_gml(
 
 def _gml_uses_inject(gml: str, injection: GmlInjection):
     """checks if an injection is being used by the script."""
-    return re.search(pattern=injection.use_pattern, string=gml)
+    return injection.is_used(gml)  # todo remove this wrapper
 
 
 def _gml_supplies_inject(gml: str, inject: GmlInjection):

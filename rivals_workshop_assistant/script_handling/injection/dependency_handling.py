@@ -19,6 +19,9 @@ class GmlInjection(abc.ABC):
         self.give_pattern = give_pattern
         self.filepath = filepath
 
+    def is_used(self, gml):
+        raise NotImplementedError
+
     def __str__(self):
         return self.name
 
@@ -89,6 +92,20 @@ class Define(GmlDeclaration):
             use_pattern=use_pattern,
             filepath=filepath,
         )
+
+    def is_used(self, gml):
+        def preceding_character_is_whitespace_or_nothing(prev_split):
+            return not prev_split or prev_split[-1].isspace()
+
+        use_splits = gml.split(f"{self.name}(")
+        # range len is clearer than enumerate here I think
+        for first_i in range(len(use_splits) - 1):
+            is_usage = (
+                preceding_character_is_whitespace_or_nothing(use_splits[first_i])
+            ) and not use_splits[first_i].endswith("#define ")
+            if is_usage:
+                return True
+        return False
 
     @classmethod
     def from_gml(cls, name: str, content: str, filepath: Path = None):
@@ -245,6 +262,24 @@ class Macro(GmlDeclaration):
             use_pattern=fr"(^|\W){name}($|\W)",
             filepath=filepath,
         )
+
+    def is_used(self, gml):
+        def preceding_character_is_whitespace_or_nothing(split):
+            return not split or split[-1].isspace()
+
+        def next_character_is_whitespace_or_nothing(split):
+            return not split or split[0].isspace()
+
+        use_splits = gml.split(f"{self.name}", maxsplit=1)
+        for first_i in range(len(use_splits) - 1):
+            is_usage = (
+                preceding_character_is_whitespace_or_nothing(use_splits[first_i])
+                and next_character_is_whitespace_or_nothing(use_splits[first_i + 1])
+                and not use_splits[0].endswith("#macro ")  # Isn't a definition
+            )
+            if is_usage:
+                return True
+        return False
 
     @classmethod
     def from_gml(cls, name: str, content: str, filepath: Path = None):
