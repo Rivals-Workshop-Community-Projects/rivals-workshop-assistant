@@ -93,9 +93,7 @@ def _get_injects_needed_in_gml(
     gml: str, injection_library: List[GmlInjection]
 ) -> List[GmlInjection]:
     used_injects = _get_injects_used_in_gml(gml, injection_library)
-    needed_injects = [
-        inject for inject in used_injects if not _gml_supplies_inject(gml, inject)
-    ]
+    needed_injects = [inject for inject in used_injects if not inject.is_given(gml)]
     return needed_injects
 
 
@@ -105,14 +103,12 @@ def _get_injects_used_in_gml(
     existing_injections: List[GmlInjection] = None,
 ) -> List[GmlInjection]:
     if existing_injections is None:
-        injections = []
+        injections = []  # could be set but constant order is nice
     else:
         injections = existing_injections
 
     for injection in injection_library:
-        if injection not in injections and _gml_uses_inject(
-            gml=gml, injection=injection
-        ):
+        if injection not in injections and injection.is_used(gml):
             injections.append(injection)
             recursive_injections = _get_injects_used_in_gml(
                 gml=injection.gml,
@@ -125,16 +121,6 @@ def _get_injects_used_in_gml(
                 if recursive_injection not in injections
             ]
     return injections
-
-
-def _gml_uses_inject(gml: str, injection: GmlInjection):
-    """checks if an injection is being used by the script."""
-    return injection.is_used(gml)  # todo remove this wrapper
-
-
-def _gml_supplies_inject(gml: str, inject: GmlInjection):
-    """checks if a detected injection is already defined in the original script."""
-    return re.search(pattern=inject.give_pattern, string=_get_script_contents(gml))
 
 
 def _add_inject_gmls_in_script(script: str, dependency_gmls: List[str]) -> str:

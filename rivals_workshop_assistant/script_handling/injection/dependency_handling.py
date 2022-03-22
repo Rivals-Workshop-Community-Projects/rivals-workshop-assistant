@@ -22,6 +22,9 @@ class GmlInjection(abc.ABC):
     def is_used(self, gml):
         raise NotImplementedError
 
+    def is_given(self, gml):
+        raise NotImplementedError
+
     def __str__(self):
         return self.name
 
@@ -94,15 +97,20 @@ class Define(GmlDeclaration):
         )
 
     def is_used(self, gml):
-        def preceding_character_is_whitespace_or_nothing(prev_split):
-            return not prev_split or prev_split[-1].isspace()
-
         use_splits = gml.split(f"{self.name}(")
         # range len is clearer than enumerate here I think
         for first_i in range(len(use_splits) - 1):
             is_usage = (
-                preceding_character_is_whitespace_or_nothing(use_splits[first_i])
+                _prev_char_is_whitespace_or_nothing(use_splits[first_i])
             ) and not use_splits[first_i].endswith("#define ")
+            if is_usage:
+                return True
+        return False
+
+    def is_given(self, gml):
+        use_splits = gml.split(f"#define {self.name}")
+        for first_i in range(len(use_splits) - 1):
+            is_usage = _next_char_is_whitespace_or_nothing(use_splits[first_i + 1])
             if is_usage:
                 return True
         return False
@@ -264,19 +272,21 @@ class Macro(GmlDeclaration):
         )
 
     def is_used(self, gml):
-        def preceding_character_is_whitespace_or_nothing(split):
-            return not split or split[-1].isspace()
-
-        def next_character_is_whitespace_or_nothing(split):
-            return not split or split[0].isspace()
-
-        use_splits = gml.split(f"{self.name}", maxsplit=1)
+        use_splits = gml.split(f"{self.name}")
         for first_i in range(len(use_splits) - 1):
             is_usage = (
-                preceding_character_is_whitespace_or_nothing(use_splits[first_i])
-                and next_character_is_whitespace_or_nothing(use_splits[first_i + 1])
+                _prev_char_is_whitespace_or_nothing(use_splits[first_i])
+                and _next_char_is_whitespace_or_nothing(use_splits[first_i + 1])
                 and not use_splits[0].endswith("#macro ")  # Isn't a definition
             )
+            if is_usage:
+                return True
+        return False
+
+    def is_given(self, gml):
+        use_splits = gml.split(f"#macro {self.name}")
+        for first_i in range(len(use_splits) - 1):
+            is_usage = _next_char_is_whitespace_or_nothing(use_splits[first_i + 1])
             if is_usage:
                 return True
         return False
@@ -293,3 +303,11 @@ class Macro(GmlDeclaration):
 
 
 INJECT_TYPES = (Define, Macro)
+
+
+def _prev_char_is_whitespace_or_nothing(split):
+    return not split or split[-1].isspace()
+
+
+def _next_char_is_whitespace_or_nothing(split):
+    return not split or split[0].isspace()
