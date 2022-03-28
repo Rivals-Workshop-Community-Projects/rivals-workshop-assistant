@@ -57,10 +57,6 @@ class AsepriteLayers:
 
         layers = [layer for layer in layers if aseprite_layer_is_visible(layer)]
 
-        # layer_groups = [
-        # layer for layer in file_data.layers if layer.layer_type == GROUP_LAYER_TYPE
-        # ]
-
         for layer in layers:
             name: str = layer.name
             if name.startswith(f"{SPLIT}("):
