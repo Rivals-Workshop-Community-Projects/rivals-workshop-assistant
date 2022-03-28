@@ -1,4 +1,5 @@
 import abc
+import string
 import textwrap
 from typing import List, Tuple, Union
 from pathlib import Path
@@ -101,7 +102,7 @@ class Define(GmlDeclaration):
         # range len is clearer than enumerate here I think
         for first_i in range(len(use_splits) - 1):
             is_usage = (
-                _prev_char_is_whitespace_or_nothing(use_splits[first_i])
+                _prev_char_is_terminator(use_splits[first_i])
             ) and not use_splits[first_i].endswith("#define ")
             if is_usage:
                 return True
@@ -110,7 +111,7 @@ class Define(GmlDeclaration):
     def is_given(self, gml):
         use_splits = gml.split(f"#define {self.name}")
         for first_i in range(len(use_splits) - 1):
-            is_usage = _next_char_is_whitespace_or_nothing(use_splits[first_i + 1])
+            is_usage = _next_char_is_terminator(use_splits[first_i + 1])
             if is_usage:
                 return True
         return False
@@ -275,9 +276,9 @@ class Macro(GmlDeclaration):
         use_splits = gml.split(f"{self.name}")
         for first_i in range(len(use_splits) - 1):
             is_usage = (
-                _prev_char_is_whitespace_or_nothing(use_splits[first_i])
-                and _next_char_is_whitespace_or_nothing(use_splits[first_i + 1])
-                and not use_splits[0].endswith("#macro ")  # Isn't a definition
+                _prev_char_is_terminator(use_splits[first_i])
+                and _next_char_is_terminator(use_splits[first_i + 1])
+                and not use_splits[first_i].endswith("#macro ")  # Isn't a definition
             )
             if is_usage:
                 return True
@@ -286,7 +287,7 @@ class Macro(GmlDeclaration):
     def is_given(self, gml):
         use_splits = gml.split(f"#macro {self.name}")
         for first_i in range(len(use_splits) - 1):
-            is_usage = _next_char_is_whitespace_or_nothing(use_splits[first_i + 1])
+            is_usage = _next_char_is_terminator(use_splits[first_i + 1])
             if is_usage:
                 return True
         return False
@@ -305,9 +306,21 @@ class Macro(GmlDeclaration):
 INJECT_TYPES = (Define, Macro)
 
 
-def _prev_char_is_whitespace_or_nothing(split):
-    return not split or split[-1].isspace()
+def _char_is_token_terminator(char: str):
+    return char.isspace() or (char != "_" and char in string.punctuation)
 
 
-def _next_char_is_whitespace_or_nothing(split):
-    return not split or split[0].isspace()
+def _prev_char_is_terminator(split):
+    if split:
+        prev_char = split[-1]
+        return _char_is_token_terminator(prev_char)
+    else:
+        return True
+
+
+def _next_char_is_terminator(split):
+    if split:
+        prev_char = split[0]
+        return _char_is_token_terminator(prev_char)
+    else:
+        return True

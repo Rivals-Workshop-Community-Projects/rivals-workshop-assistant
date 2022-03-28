@@ -1,5 +1,7 @@
 from copy import deepcopy
 
+import pytest
+
 import rivals_workshop_assistant.script_handling.injection.application as application
 from rivals_workshop_assistant.script_handling.injection.dependency_handling import (
     Define,
@@ -88,3 +90,140 @@ more""",
     indented
 more"""
     )
+
+
+@pytest.mark.parametrize(
+    "content, expected",
+    [
+        (
+            """\
+blah
+thing()
+
+#define thing(){
+}
+""",
+            True,
+        ),
+        (
+            """\
+blah
+
+#define thing(){
+}
+""",
+            False,
+        ),
+        (
+            """\
+blah
+
+""",
+            False,
+        ),
+        (
+            """\
+anotherthing()
+
+#define thing(){
+}
+""",
+            False,
+        ),
+        (
+            """thing()
+
+#define thing(){
+}
+""",
+            True,
+        ),
+        (
+            """\
+#define needs_thing // Version 0
+    thing()""",
+            True,
+        ),
+        (
+            """\
+#define another_thing // Version 0
+    another thing
+    content""",
+            False,
+        ),
+    ],
+)
+def test_define_is_used(content, expected):
+    sut = Define(name="thing", version=0, content="blah")
+    assert sut.is_used(content) == expected
+
+
+@pytest.mark.parametrize(
+    "content, expected",
+    [
+        (
+            """\
+blah = mymacros
+#macro mymacro 4
+""",
+            False,
+        ),
+        (
+            """\
+mymacro;
+""",
+            True,
+        ),
+        (
+            """\
+    mymacro,
+    """,
+            True,
+        ),
+        (
+            """\
+        mymacro)
+        """,
+            True,
+        ),
+        (
+            """\
+        mymacro+
+        """,
+            True,
+        ),
+        (
+            """\
+        mymacro-
+        """,
+            True,
+        ),
+        (
+            """\
+        mymacro/
+        """,
+            True,
+        ),
+        (
+            """\
+        mymacro*
+        """,
+            True,
+        ),
+        (
+            """\
+        mymacro_
+        """,
+            False,
+        ),
+        (
+            """\
+            +mymacro
+            """,
+            True,
+        ),
+    ],
+)
+def test_macro_is_used(content, expected):
+    sut = Macro(name="mymacro", value="blah")
+    assert sut.is_used(content) == expected
