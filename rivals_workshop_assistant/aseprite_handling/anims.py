@@ -23,7 +23,7 @@ from rivals_workshop_assistant.aseprite_handling.lua_scripts import (
 )
 from rivals_workshop_assistant.aseprite_handling.constants import (
     ANIMS_WHICH_CARE_ABOUT_SMALL_SPRITES,
-    ANIMS_WHICH_GET_HURTBOXES,
+    does_anim_get_a_hurtbox,
 )
 from rivals_workshop_assistant.aseprite_handling.tag_objects import TagObject
 from rivals_workshop_assistant.paths import ASEPRITE_LUA_SCRIPTS_FOLDER
@@ -74,6 +74,12 @@ class Anim(TagObject):
     def num_frames(self):
         return self.end - self.start + 1
 
+    @property
+    def save_name(self):
+        # Remove HURTBOX from animation name.
+        # It's just used to indicate the attack gets a hurtbox.
+        return self.name.strip("HURTBOX").strip()
+
     def __get_keys(self):
         return self.name, self.start, self.end, self.windows, self.is_fresh
 
@@ -92,7 +98,7 @@ class Anim(TagObject):
         aseprite_file_path: Path,
     ):
         root_name = get_anim_file_name_root(
-            path_params.root_dir, aseprite_file_path, self.name.lower()
+            path_params.root_dir, aseprite_file_path, self.save_name.lower()
         )
         if config_params.has_small_sprites and self._cares_about_small_sprites():
             scale_param = 1
@@ -138,7 +144,7 @@ class Anim(TagObject):
                 )
             )
 
-            if config_params.hurtboxes_enabled and self._gets_a_hurtbox():
+            if config_params.hurtboxes_enabled and self.gets_a_hurtbox():
                 coroutines.append(
                     self._run_lua_export(
                         path_params=path_params,
@@ -221,11 +227,11 @@ class Anim(TagObject):
         except PermissionError as e:
             logger.error(repr(e))
 
-    def _cares_about_small_sprites(self):
-        return self.name in ANIMS_WHICH_CARE_ABOUT_SMALL_SPRITES
+    def gets_a_hurtbox(self):
+        return does_anim_get_a_hurtbox(self.name)
 
-    def _gets_a_hurtbox(self):
-        return self.name in ANIMS_WHICH_GET_HURTBOXES
+    def _cares_about_small_sprites(self):
+        return self.save_name in ANIMS_WHICH_CARE_ABOUT_SMALL_SPRITES
 
     def _get_is_fresh(self):
         if not self.file_is_fresh:

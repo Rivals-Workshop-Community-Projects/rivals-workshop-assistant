@@ -188,6 +188,41 @@ def test_aseprite_anims(tags, expected):
     assert sut.anims == expected
 
 
+@pytest.mark.parametrize(
+    "attack_name, expected",
+    [
+        pytest.param("notAnAttack", False),
+        pytest.param("bair", True),
+        pytest.param("bair_wrong", False),
+        pytest.param("HURTBOX flurble", True),
+        pytest.param("HURTBOX bair_wrong", True),
+    ],
+)
+def test_aseprite_anim_hurtbox(attack_name, expected):
+    sut = make_fake_aseprite(
+        tags=[AsepriteTag(name=attack_name, start=1, end=2, color="red")],
+        anim_tag_color=["red"],
+        window_tag_color=["orange"],
+    )
+    assert sut.anims[0].gets_a_hurtbox() == expected
+
+
+@pytest.mark.parametrize(
+    "anim_name, expected",
+    [
+        pytest.param("bair", "bair"),
+        pytest.param("HURTBOX fair", "fair"),
+    ],
+)
+def test_aseprite_anim_hurtbox(anim_name, expected):
+    sut = make_fake_aseprite(
+        tags=[AsepriteTag(name=anim_name, start=1, end=2, color="red")],
+        anim_tag_color=["red"],
+        window_tag_color=["orange"],
+    )
+    assert sut.anims[0].save_name == expected
+
+
 MY_HASH = "my hash"
 
 
