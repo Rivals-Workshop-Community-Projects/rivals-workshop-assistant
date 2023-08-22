@@ -262,6 +262,9 @@ async def test_aseprite_save_hurtbox(
             ["uair_hurt"],
             ["blah_hurt_strip1", "blah2_hurt_strip1"],
         ),
+        pytest.param(
+            "2uair_2dair_hurtmask", ["uair_hurt_strip2", "dair_hurt_strip2"], ["uair_hurt", "dair_hurt"], []
+        )
     ],
 )
 @pytest.mark.aseprite

@@ -177,6 +177,22 @@ local hurtmaskLayerIndex = tonumber(app.params["hurtmaskLayer"])
 local startFrame = tonumber(app.params["startFrame"])
 local endFrame = tonumber(app.params["endFrame"])
 
+-- Deletes frames that aren't in the given range.
+local _irrelevantFrames = {}
+local _workingFrames = {}
+for frameIndex, frame in ipairs(sprite.frames) do
+    if startFrame <= frameIndex  and frameIndex <= endFrame then
+        table.insert(_workingFrames, frame)
+    else
+        table.insert(_irrelevantFrames, frame)
+    end
+end
+if #_irrelevantFrames > 0 then
+    app.range.frames = _irrelevantFrames
+    app.command.RemoveFrame()
+end
+
+
 local NIL_CONSTANT = "nil"
 
 local hurtmaskSelections = {}
@@ -199,21 +215,6 @@ for layerIndex, layer in ipairs(getLayers()) do
     end
 end
 
-
--- Deletes frames that aren't in the given range.
-local _irrelevantFrames = {}
-local _workingFrames = {}
-for frameIndex, frame in ipairs(sprite.frames) do
-    if startFrame <= frameIndex  and frameIndex <= endFrame then
-        table.insert(_workingFrames, frame)
-    else
-        table.insert(_irrelevantFrames, frame)
-    end
-end
-if #_irrelevantFrames > 0 then
-    app.range.frames = _irrelevantFrames
-    app.command.RemoveFrame()
-end
 
 app.activeSprite = sprite
 
