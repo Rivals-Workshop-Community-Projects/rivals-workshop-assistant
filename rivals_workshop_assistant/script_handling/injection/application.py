@@ -85,8 +85,11 @@ def _get_anim_for_script(script: "Script", anims: List[Anim]) -> typing.Optional
     #   and then we can only load that aseprite's anims
     if script.path.parent.name != "attacks":
         return None
-    anim = next((anim for anim in anims if anim.name == script.path.stem), None)
-    return anim
+    for anim in anims:
+        cleaned_name = anim.name.replace("HURTBOX", "").strip()
+        if cleaned_name == script.path.stem:
+            return anim
+    return None
 
 
 def _get_injects_needed_in_gml(
@@ -141,6 +144,6 @@ def _add_inject_gmls_in_script(script: str, dependency_gmls: List[str]) -> str:
 def _get_script_contents(script: str):
     """Get the portion of the script above the dependency header."""
     old_markers_pattern = "|".join(marker for marker in OLD_INJECTION_START_MARKERS)
-    pattern = fr"(?:{INJECTION_START_MARKER}|{old_markers_pattern})"
+    pattern = rf"(?:{INJECTION_START_MARKER}|{old_markers_pattern})"
     contents = re.split(pattern=pattern, string=script)[0].rstrip()
     return contents
