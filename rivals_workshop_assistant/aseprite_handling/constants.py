@@ -27,7 +27,7 @@ ANIMS_WHICH_GET_HURTBOXES = {
 
 
 def does_anim_get_a_hurtbox(anim_name: str) -> bool:
-    return anim_name in ANIMS_WHICH_GET_HURTBOXES or anim_name.startswith("HURTBOX")
+    return anim_name in ANIMS_WHICH_GET_HURTBOXES or "HURTBOX" in anim_name
 
 
 ANIMS_WHICH_CARE_ABOUT_SMALL_SPRITES = {

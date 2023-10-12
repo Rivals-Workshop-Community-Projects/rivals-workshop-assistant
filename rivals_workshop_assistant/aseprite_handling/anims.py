@@ -78,7 +78,7 @@ class Anim(TagObject):
     def save_name(self):
         # Remove HURTBOX from animation name.
         # It's just used to indicate the attack gets a hurtbox.
-        return self.name.strip("HURTBOX").strip()
+        return self.name.strip("HURTBOX").strip("SMALL").strip()
 
     def __get_keys(self):
         return self.name, self.start, self.end, self.windows, self.is_fresh
@@ -231,7 +231,7 @@ class Anim(TagObject):
         return does_anim_get_a_hurtbox(self.name)
 
     def _cares_about_small_sprites(self):
-        return self.save_name in ANIMS_WHICH_CARE_ABOUT_SMALL_SPRITES
+        return self.save_name in ANIMS_WHICH_CARE_ABOUT_SMALL_SPRITES or "SMALL" in self.name
 
     def _get_is_fresh(self):
         if not self.file_is_fresh:

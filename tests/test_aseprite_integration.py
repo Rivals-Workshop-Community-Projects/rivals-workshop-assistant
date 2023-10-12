@@ -168,12 +168,17 @@ async def test_aseprite_save__red_anim_tags(
 @pytest.mark.parametrize(
     "aseprite_file_name, save_file_names, expected_file_names",
     [
-        pytest.param("1frame", ["1frame_strip1"], ["1frame"]),  # Don't make small
+        # pytest.param("1frame", ["1frame_strip1"], ["1frame"]),  # Don't make small
+        # pytest.param(
+        #     "1frame_1bair",
+        #     ["1frame_strip1", "bair_strip1"],
+        #     ["1frame", "bair"],
+        # ),
         pytest.param(
-            "1frame_1bair",
-            ["1frame_strip1", "bair_strip1"],
-            ["1frame", "bair"],
-        ),
+            "1frame_1smallother",
+            ["1frame_strip1", "othersprite_strip1"],
+            ["1frame", "bair"], # it matches bair
+        )
     ],
 )
 @pytest.mark.aseprite

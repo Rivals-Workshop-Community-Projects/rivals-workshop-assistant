@@ -44,7 +44,7 @@ from rivals_workshop_assistant.script_handling.injection import (
     freshen_scripts_that_have_modified_dependencies,
 )
 
-__version__ = "1.3.2"
+__version__ = "1.4.0"
 
 
 def run_as_file():
